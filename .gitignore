@@ -37,3 +37,11 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+## Rstudio Project file
+*.Rproj
+
+/data/
+/images/
+/literature/
+

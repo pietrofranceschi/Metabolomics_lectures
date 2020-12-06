@@ -1,0 +1,170 @@
+---
+title: "Variable Distribution"
+author: "Pietro Franceschi"
+date: "12/3/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+  }
+
+```
+
+
+
+
+## Normal Distribution
+
+- The Normal (Gaussian) distribution has a prominent role in statistics
+- Some sort of "normality" is often the prerequisite of many statistical tools
+- The mean is the value with higher likelihood
+
+```{r out.width= "70%", fig.align='center'}
+## Standard normal distribution:
+
+xvalues <- data.frame(x = c(-10, 10))
+
+## add a second normal curve
+normal1 <- function(x){
+  dnorm(x, mean = 0, sd = 3)
+}
+
+
+xvalues %>% ggplot(aes(x = x)) + 
+  stat_function(fun = normal1, lwd = 1, col = "darkblue") + 
+  stat_function(fun = normal1, geom = "area", fill = "steelblue", alpha = 0.5) +
+  theme_void() + 
+  geom_hline(yintercept = 0, lwd = 1)
+
+
+```
+
+## Sampling Distribution
+
+The distribution of the mean of a sample extracted from every type of distribution is always normal
+
+```{r fig.width=7}
+popunif <- runif(10000)
+
+means <- rep(0,500)
+
+for(i in 1:500){
+  means[i] <- mean(sample(popunif,10))
+}
+
+par(mfrow = c(1,2))
+hist(popunif, main = "Arbitrary Population", col = "steelblue")
+hist(means, main = "Means of repeated sampling (20)", col = "Orange")
+
+```
+
+## Sampling Distribution
+
+**Noteworthy**
+
+> 1. The sampling distribution get's narrower as the sample increases 
+> 2. This is the ultime reasons why measuring more samples leads to smaller _p-values_
+
+
+## Formally
+
+- Mean of the sampling distribution: $\mu_{pop}$  
+- Variance of the sampling distribution: $\frac{\sigma}{\sqrt(N)}$  
+
+
+Where $N$ is the size of the sample
+
+
+## ... but
+
+We are often dealing with data non normally distributed
+
+1. Count based technologies (MS!)
+2. Presence of sub-populations
+3. Outliers
+
+Sub populations are typically present in complex experiments
+
+## Subpopulations
+
+```{r}
+subpop <- c(rnorm(100,10,3),rnorm(100,20,3))
+
+hist(subpop, breaks = 30)
+abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
+```
+
+## Lognormal data {.smaller}
+
+Lognormal data are extremely common in metabolomics ...
+
+```{r out.width= "90%", fig.align='center'}
+set.seed(124)
+lndata <- rlnorm(200, meanlog = 0, sdlog = 1)
+
+hist(lndata, breaks = 50, col = "steelblue", main = "Lognormal Data")
+abline(v = mean(lndata), col  ="red", lwd = 2)
+abline(v = median(lndata), col  ="darkgreen", lwd = 2)
+legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd = 1, box.lwd = 0)
+```
+
+- The mean is **not** the most probable value!
+- Statistical machinery focusing on **mean** is not the right tool for the trade
+
+## Solutions
+
+> 1. **Non-parametric** approaches (Kruskall-Wallis, quantile-regression, permutations, bootstrap)
+> 2. Variable **transformations** 
+
+---
+
+
+```{r}
+lndata_t <- log10(lndata)
+
+hist(lndata_t, breaks = 50, col = "steelblue", main = "Log trasformed Lognormal Data")
+abline(v = mean(lndata_t), col  ="red", lwd = 2)
+abline(v = median(lndata_t), col  ="darkgreen", lwd = 2)
+legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd = 1, box.lwd = 0)
+```
+
+
+## Checking Normality
+
+1. Normality tests ... again statistics ;-)
+2. Graphical methods `q-q plots`
+
+## Quantile - quantile plots
+
+Quantile quantile plots are used to visually compare the **theoretical quantiles** of a distribution with the **sample quantiles** 
+
+```{r}
+a <- rnorm(30)
+par(pty="s")
+qqnorm(a, main = "Normal q-q plot of normal data", pch = 19)
+qqline(a)
+```
+
+## 
+
+```{r}
+par(pty="s")
+qqnorm(lndata, main = "Normal q-q plot of log-normal data", pch = 19, col = "#984ea380")
+qqline(lndata)
+
+```
+ 
+
+
+
