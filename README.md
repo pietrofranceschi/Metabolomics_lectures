@@ -13,27 +13,27 @@
 ## Day Two
 
 * A targeted metabolomics data matrix
-* [Missing values and imputation](Day1/MissingValues.html)
-* [Data distribution](Day1/Variable_distribution.html)
-* [Multivariate visualization: PCA](Day1/PCA.html)
-* [Variable scaling and Sample normalization](Day1/Scaling_and_normalization.html)
+* [Missing values and imputation](Day2/MissingValues.html)
+* [Data distribution](Day2/Variable_distribution.html)
+* [Multivariate visualization: PCA](Day2/PCA.html)
+* [Variable scaling and Sample normalization](Day2/Scaling_and_normalization.html)
 
 
 ## Day Three
 
-* Untargeted metbolomics data matrix
-* Creating a data matrix in xcms from raw data
-* Differences/similarities with the targeted case
+* [Untargeted metbolomics data matrix](Day3/Untargeted_metabolomics_DM.html)
+* [Creating a data matrix in xcms from raw LC-MSdata](Day3/from_rawdata_to_DM.html)
+  * Practical: [html](Day3/faahko.html), [Rmd](Day3/faahko.Rmd)
+* Feature Filtering and quality assessment
 * Some words on annotation
 
 ## Day Four
 
 * Biomarker discovery: the univariate way.
 * False discoveries, and multiple testing
-* Partial Least Squares - DA
-* Random Forest
-* Variable selection
-* DIY
+* Machine Learning for Dummies
+* Random Forest - Variable selection
+* On-line tools 
 
 
 

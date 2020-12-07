@@ -1,0 +1,188 @@
+---
+title: "LCMS with xcms"
+author: "Pietro Franceschi"
+date: "12/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+Load the package and the data
+
+```{r}
+library(RColorBrewer) ## nicer color schemes
+library(xcms)         ## the package doing the job
+library(tidyverse)    ## potentially useful 
+```
+
+
+This library is used only to get some raw data to play with ...
+
+```{r}
+library(faahKO)
+```
+
+
+we will analyze a subset of the data from in which the metabolic consequences of knocking out the fatty acid amide hydrolase (FAAH) gene in mice was investigated. The raw data files (in NetCDF format) are provided with the faahKO data package. The data set consists of samples from the spinal cords of 6 knock-out and 6 wild-type mice. Each file contains data in centroid mode acquired in positive ion mode form 200-600 m/z and 2500-4500 seconds. To speed up processing of this vignette we will restrict the analysis to only 8 files and to the retention time range from 2500 to 3500 seconds.
+
+
+**Note** A large parte of this tutorial is taken from the official vignette of [`xcms`](https://bioconductor.org/packages/release/bioc/vignettes/xcms/inst/doc/xcms.html). Many thanks to Steffen Neumann and Juhannes Rainer! 
+
+
+# Part 1
+
+## Data Loading
+
+We start getting some raw data into R. 
+
+```{r}
+## Get the full path to the CDF files
+cdfs <- dir(system.file("cdf", package = "faahKO"), full.names = TRUE,
+            recursive = TRUE)[c(1, 2, 5, 6, 7, 8, 11, 12)]
+
+cdfs
+```
+
+As you can see we have four injections belonging to two classes, ko and wt.
+
+In the last few years the `xcms` developer has been making a big effort to make their package coherent with a general framework for the handling of MS data in R (metabolomics, proteomics, ...)
+
+all this goes beyond the scope of our course, for us is sufficient to know that this infrastructure allows to store sample "metadata" (e.g. treatment class, time point, etc) together with the raw experimental data.
+
+In our specific case, the tibble with the phenotypic data could be designed as follow
+
+```{r}
+phenodata <- tibble(sample_name = sub(basename(cdfs), pattern = ".CDF",
+                                   replacement = "", fixed = TRUE),
+                 sample_group = c(rep("KO", 4), rep("WT", 4)))
+phenodata
+```
+
+Up to now nothing has been actually loaded into R. To do that 
+
+```{r}
+raw_data <- readMSData(files = cdfs, 
+                       pdata = new("NAnnotatedDataFrame", phenodata), ## this is the structure of xcms holding phenotypic data
+                       mode = "onDisk")
+```
+
+We next restrict the data set to the retention time range from 2500 to 3500 seconds, just to spare some time ...
+
+```{r}
+raw_data <- filterRt(raw_data, c(2500, 3500))
+```
+
+
+## Data Visualization
+
+The raw_data object contains the full set of 2D data collected in all my 8 samples. The "raw" values can be extracted by using 
+
+```{r}
+rt <- rtime(raw_data)
+mz <- mz(raw_data)
+I <- intensity(raw_data)
+```
+
+
+Let's look to the structure of thse three objects
+
+```{r}
+glimpse(rt)
+```
+
+These are the retention time in seconds for the chromatography of all the 8 files. 
+"F!.S0001" stands for File1, scan number 1 ... it was recorded at 2501 seconde ...
+
+Another way to see that 
+
+```{r}
+plot(rt)
+```
+
+Where we see the increasing time scale for each file.
+
+`mz` and `I` holds the mass spectra collected at each scantime ... for this reason the two objects are lists and not vectors. Remember our data are 2d. For each  scantime we have a complete mass spectrum
+
+```{r}
+## only the first 20
+glimpse(mz[1:20])
+```
+
+```{r}
+## only the first 20
+glimpse(I[1:20])
+```
+
+We can plot a complete spectrum (here the first scan of the first sample ...)
+
+```{r}
+plot(mz$F1.S0001,I$F1.S0001, type = "h", main = names(mz)[1])
+```
+
+Ok, working with all files together is not the best ... for visualization and handling. To facilitate the "cutting" by file, xcms is provided with a `split()` function which can be combined with a `fromFile` function to create a list with the content separate by file
+
+```{r}
+by_file_mz <- split(mz, fromFile(raw_data))
+by_file_rt <- split(rt, fromFile(raw_data))
+by_file_I <- split(I, fromFile(raw_data))
+length(by_file_mz)
+```
+
+ As we discussed, metabolites are visible as peaks ia 2d mz/rt plane ...
+ 
+```{r}
+mytibble <- tibble(rt = by_file_rt[[2]], mz = by_file_mz[[2]], I = by_file_I[[2]])
+mytibble
+```
+ 
+```{r}
+
+jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
+
+mytibble %>% 
+  unnest(c("mz","I")) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = sqrt(I)), size = 0.1) + 
+  scale_color_gradientn(colours = jet.colors(7)) + 
+  theme_light()
+```
+
+
+1. A mass spectrum can be seen as a vertical cut of the previous map ... 
+2. Some of the "peaks" are organized in vertical groups ... these are the ions coming from the same metabolite ...
+
+
+In the first phase of the inspection is useful to visualize the "total" chromatograpic current ...
+
+```{r}
+## Get the total ion chromatograms. This reads data from the files.
+tics<- chromatogram(raw_data, aggregationFun = "sum")
+## Define colors for the two groups
+group_colors <- paste0(brewer.pal(3, "Set1")[1:2], "60")
+names(group_colors) <- c("KO", "WT")
+
+## Plot all chromatograms.
+plot(tics, col = group_colors[raw_data$sample_group])
+
+
+## raw_data$sample_group extracts the info on the phenotipic data inside the raw_data
+```
+
+
+As you can see, nothing happens after 4200 seconds ... we also appreciate the variability of the results.
+
+This visualization already shows you how it will be tricky to "match" the differnt samples. Some of the peaks are present everywhere, but others show-up only in specific samples ...
+
+
+## PRactical #1
+
+
+
+
+
+# Part 2
+
+

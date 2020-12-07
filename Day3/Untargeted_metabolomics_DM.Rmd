@@ -1,0 +1,93 @@
+---
+title: "Untargeted Metabollmics Data Matrix"
+author: "Pietro Franceschi"
+date: "12/3/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+library(MASS)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+```
+## Starting Ideas {#notes }
+
+>1. The data matrix will be **FAT**
+>2. The variable we measure are **not** metabolites
+>3. We want to process the raw data coming from the instrument and organize them in a data matrix
+
+## LC/GC MS
+
+**TWO dimensional data**
+
+1. Neutral molecules are separated "in time" on the bases of their chemical properties
+2. The separated molecules are ionized and then weighted in the mass spectrometer
+3. During ionization each molecule produces more than on ion
+
+<hr>
+
+**We have more ions than metabolites**
+
+---
+
+```{r out.width="80%", fig.align= "center"}
+include_graphics("../images/Liquid_chromatography_MS_spectrum_3D_analysis.png")
+```
+
+
+## LC/GC - MS: what we measure
+
+- Dimension 1: separation time (in sec or minutes)
+- Dimension 2: "weight of the molecule" (measured as mass/charge, _m/z_)
+- The intensity of the different ions coming from the same molecule are highly correlated
+- Due to analytical variability retention time and m/z slightly drift over time
+- Relative quantification
+
+## NMR
+
+**One dimensional data**
+
+NMR measures the a specific physical property of atomic nuclei in presence of magnetic field (their frequency of resonance). The measured frequency of resonance depends on the chemical environment, i.e. on the structure of the molecule which contains an active NMR nucleus 
+
+1. No separation in time is (generally) needed
+2. Each molecule/metabolite produces more than one NMR peak
+3. NMR is more reproducible, but less sensitive compared to MS based analytical techniques
+
+---
+
+```{r out.width="80%", fig.align= "center"}
+include_graphics("../images/nmr_spectroscopy.png")
+```
+
+
+* More peaks per molecule
+* functional groups from different molecules can add-up
+* intensity is proportional to the number of molecules
+
+## NMR: what we measure
+
+- Dimension 1: shift in frequency to a reference in **ppm**
+- The intensity of the different peaks coming from the same molecule are highly correlated
+- In metabolomics, the ppm scale is __binned__ to account for slight misalignments 
+
+
+
+
+
+

@@ -1,0 +1,98 @@
+---
+title: "LC-MS: from raw data to DM"
+author: "Pietro Franceschi"
+date: "12/3/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+library(MASS)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: black;
+}
+
+```
+## Starting Ideas {#notes }
+
+>1. Metabolites shows up as peaks in the rt/mz space
+>2. Each metabolites produces more than one peak
+>3. The peaks of the same compounds are slightly shifted in the  different samples
+
+## Pre processing workflow
+
+0. Get out the raw data
+1. Reliably find peaks in the 2D plane for each sample
+2. Align the different peak lists 
+3. Match the peak lists across the samples
+3. Select a good measure of intensity
+4. Arrange everything in a data matrix
+
+<br>
+
+**Provide reliable ways to visualize all the previous steps and check their consistency**
+
+## Visualization
+
+- Inspecting and checking the quality of each step
+- Checking the outcomes of the statistical analysis
+
+<hr>
+
+
+~~A result should be visible in the raw data ...~~
+
+
+
+## 0. Get the raw data
+
+Raw LC/Gc-MS are saved in **proprietary** format by the acquisition equipment (Bruker, Agilent, thermo, Waters, ...). 
+
+Before the analysis the raw data have to be **converted** into _open source_ formats:
+
+- mzData
+- cdf
+- mzXML
+- **mzML** , more recent and recommended
+
+<hr>
+
+Conversion tool
+
+[_proteowizard_](http://proteowizard.sourceforge.net/)
+
+
+
+
+
+
+
+
+
+
+
+
+
