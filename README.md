@@ -23,7 +23,7 @@
 
 * [Untargeted metbolomics data matrix](Day3/Untargeted_metabolomics_DM.html)
 * [Creating a data matrix in xcms from raw LC-MSdata](Day3/from_rawdata_to_DM.html)
-  * Practical: [html](Day3/faahko.html), [Rmd](Day3/faahko.Rmd)
+  * Practical: [html](Day3/faahKO.html), [Rmd](Day3/faahKO.Rmd)
 * Feature Filtering and quality assessment
 * Some words on annotation
 
