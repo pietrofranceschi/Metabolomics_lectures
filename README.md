@@ -14,9 +14,9 @@
 
 * A targeted metabolomics data matrix
 * [Missing values and imputation](Day1/MissingValues.html)
-* Data distribution
-* Multivariate visualization PCA
-* Variable scaling and Sample normalization
+* [Data distribution](Day1/Variable_distribution.html)
+* [Multivariate visualization: PCA](Day1/PCA.html)
+* [Variable scaling and Sample normalization](Day1/Scaling_and_normalization.html)
 
 
 ## Day Three
