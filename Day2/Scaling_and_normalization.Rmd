@@ -1,0 +1,250 @@
+---
+title: "Scaling and Normalization"
+author: "Pietro Franceschi"
+date: "12/3/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+library(MASS)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+```
+## Variable Scale
+
+Metabolomics aims at measuring the concentration of :
+
+1. The larger (as possible) number of metabolites 
+2. ... over the larger (as possible) range of concentration
+
+<hr>
+
+**We typically are dealing with huge differences in signal across the different variables**
+
+- potential issues in the reliability of some measurement
+- no direct effect on a univariate analysis 
+- strong effect on multivariate analysis 
+
+## Same data different scales
+
+
+```{r fig.height=5, fig.width=7, out.width="80%", fig.align='center'}
+par(pty="s")
+mu1 <- c(-0.5,0)
+mu2 <- c(0.5,0)
+sigma <- matrix(c(0.1,0, 0, 10), 2)  # Covariance matrix
+dummy <- rbind(mvrnorm(20, mu = mu1, Sigma = sigma),
+              mvrnorm(20, mu = mu2, Sigma = sigma))
+
+
+par(mfrow = c(1,2))
+
+plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-8,8), main = "Larger variability in var b")
+
+plot(scale(dummy), pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-8,8), , main = "Larger variability in var a")
+
+
+```
+
+## Take home {#notes}
+
+> - In the multivariate space the "shape" of the sample distribution depends on the absolute scale of the variables
+> - All multivariate methods based on the distance in that space will be affected by the variable scale (e.g. PCA, Clustering, PCoA, ...)
+
+## How to correct for that
+
+- Variable transfrmation (_e.g. log or sqrt_)
+- Variable scaling (_e.g. unit variance_)
+
+
+```{r}
+curve(log10(x), from = 1, to = 100, xaxt="n", yaxt="n", main = "Effect of log transformation", 
+      xlab = "Original Space", ylab = "Log transformed Space") 
+segments(2,0,20,0, lwd = 2, col = "red")
+segments(60,0,80,0, lwd = 2, col = "red")
+segments(2,log10(2),2,0, lwd = 1, col = "gray", lty = 2)
+segments(20,log10(20),20,0, lwd = 1, col = "gray", lty = 2)
+segments(0,log10(2),0,log10(20), lwd = 2, col = "blue")
+segments(0,log10(2),2,log10(2), lwd = 1, col = "gray", lty = 2)
+segments(0,log10(20),20,log10(20), lwd = 1, col = "gray", lty = 2)
+## 
+segments(60,log10(60),60,0, lwd = 1, col = "gray", lty = 2)
+segments(80,log10(80),80,0, lwd = 1, col = "gray", lty = 2)
+segments(0,log10(60),0,log10(80), lwd = 2, col = "blue")
+segments(0,log10(60),60,log10(60), lwd = 1, col = "gray", lty = 2)
+segments(0,log10(80),80,log10(80), lwd = 1, col = "gray", lty = 2)
+```
+
+## Notes {#notes .build}
+
+1. The best choice depends on what you want to see
+2. Increasing the weight of small signal is not always the best option 
+   * low signals are less reliable
+   * missing values pop-up there
+
+                                            -------------------------
+
+## Sample Normalization 
+
+The overall metabolite concentration in one or more samples can be different from the others. The sample will show-up as an _outlier_.
+
+ 1. There is a real differnce in that sample. **Good!**
+ 2. The samples show different levels of dilution (e.g. urine). **Bad**
+ 4. The signal is lower for "analytical" reasons. **Bad**
+    - lower extraction of metabolites
+    - reduce response of the instrument (in particular for MS based techniques)
+     - ...
+
+<hr>
+
+**Normalization** is used to compensate for the unwanted difference in sample response
+
+## Normalization and Scaling
+
+**In terms of data matrix**
+
+1. Normalization is performed acting on the **rows**
+3. Scaling is performed acting on the **columns**
+
+
+## Normalization strategies
+
+1. Use **chemical standards** to compensate for analytical issues
+2. Wisely plan (**randomize!**) your analytical sequence to avoid biases
+
+<hr>
+
+If 
+
+3. Normalize to the overall signal ... mmm   ... )-:
+4. Probabilistic Quotient Normalization (PQN)
+
+
+## Compositional Data
+
+```{r}
+compdf <- tibble(class = c("A","B"), Var1 = c(30,50), Var2 =  c(20,20)) %>% 
+  pivot_longer(-class) %>%
+  group_by(class) %>% 
+  mutate(sum_norm_value = value/sum(value)) %>% 
+  ungroup() %>% 
+  pivot_longer(-c("class","name"), names_to = "one", values_to = "two") %>% 
+  mutate(one = factor(one, levels = c("value","sum_norm_value"), labels = c("Raw data","Sum Normalized")))
+
+compdf %>% ggplot() + 
+  geom_bar(aes(x = class, y = two, fill = name), position="stack", stat="identity") + 
+  scale_fill_brewer(palette = "Set1", name = "Variable") + 
+  facet_wrap(~one, scales = "free_y") + xlab("") + ylab("") + 
+  theme_light()
+
+```
+
+**Sum normalization creates a new (...fake..) biomarker!**
+
+## PQN
+
+The idea behind Probabilistic Quotient Normalization is to identify a __consensus__ normalization factor taking into consideration the distribution of the variable specific factor for each sample
+
+**The Recipe**
+
+1. Identify a reference sample
+2. For each one of the other samples and each variable calculate the ratio with the reference
+3. For each sample use the median of the distribution of the ratios to estimate the consensus normalization factor
+
+
+## In action
+
+* Consider 4 samples where we measure 100 metabolites
+* For three samples out of the four the value of each metabolites is extracted from a gaussian distribution with mean 200 and variance 10
+* For the fourth sample, the mean is 100 and the variance is 10
+
+This design simulates a drop in the response of my pipeline of a factor of 2 while measuring the forth sample
+
+---
+
+
+```{r}
+s1 <- rnorm(100,200,10)
+s2 <- rnorm(100,200,10)
+s3 <- rnorm(100,200,10)
+s4 <- rnorm(100,100,10)
+
+DM <- rbind(s1,s2,s3,s4)
+
+pqndata <- DM %>% 
+  as.data.frame() %>% 
+  rownames_to_column()
+
+matplot(t(DM), type = "p", ylab = "Intensity", xlab = "Metabolite")
+
+
+
+```
+
+Let's take the first sample as reference ...
+
+## Distribution of ratios
+
+```{r message=FALSE, warning=FALSE}
+PQNratios <- apply(DM[2:4,],1,function(r) r/DM[1,]) %>% 
+  as_tibble() %>% 
+  pivot_longer(everything()) 
+
+
+PQNratios %>% 
+  ggplot() + 
+  geom_histogram(aes(x = value, fill = name), col  ="white") + 
+  scale_fill_brewer(palette = "Set1", name = "Sample") + 
+  facet_wrap(~name, ncol = 1) + 
+  theme_light() + 
+  xlab("ratio") + 
+  theme(aspect.ratio = 0.5)
+ 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
