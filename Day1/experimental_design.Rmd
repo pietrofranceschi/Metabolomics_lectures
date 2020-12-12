@@ -1,0 +1,208 @@
+---
+title: "Experimental Design"
+author: "Pietro Franceschi"
+date: "11/30/2020"
+output:
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: black;
+}
+
+```
+
+
+
+## Statistics
+
+**Statistics** is the science which deals with **the collection, the analysis, the visualization and the interpretation** of experimental data
+
+* random samplings
+* observational studies
+* experiments
+
+
+## Random Samplings (polls)
+
+Random samplings allow to characterize the properties of a finite population without measuring all of its members
+
+**Examples**
+
+* *Electoral polls*
+* *Normal levels of cholesterol in the human population*
+* ...
+
+## Observational Studies
+
+Observational studies are designed with tho objective of **identifying relationships** between the different properties of a conceptual population. The role of the experimenter is to perform the **selection of the sample**
+
+<hr>
+
+**Examples**
+
+>* *Is it true that people who eat more chocolate are more happy?*
+>* *The level of cholesterol of people eating more vegetables is lower*
+>* ...
+
+## Experiments
+
+**Experiments** are designed with the objective of identifying **causal relations** between the properties of a conceptual population. The role of the experimenter is to **modify the conditions** to verify the presence of causal relationship between the observed properties
+
+<hr>
+
+**Examples**
+
+>* *If you eat more chocolate you will get happier*
+>* *If I drink more beer I'll get more sympathetic*
+>* ...
+
+
+## Imortant notes
+
+* Causal relations can be assessed only in **experiments**
+* This is really Galileian ;-)
+* Experiments are impossible in many relevant fields ... human health, ecology
+
+<hr>
+
+<div class="red2">
+* Should we then give up on obtaining causal information?
+<div>
+
+## Mind the chocolate ... {.flexbox .vcenter}
+
+<div class="centered">
+
+[**Chocolate Consumption, Cognitive Function,
+and Nobel Laureates**](http://www.biostat.jhsph.edu/courses/bio621/misc/Chocolate%20consumption%20cognitive%20function%20and%20nobel%20laurates%20(NEJM).pdf)
+
+<hr>
+
+<div class="red2">
+*... Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country... *
+<div>
+
+<hr>
+
+[**...and more!**](https://tylervigen.com/spurious-correlations)
+<div>
+
+## Planning a sampling
+
+**Key question**: what is the best way to sample my population in a _representative_ way?
+
+* Do it _randomly_ to avoid any intentional or unintentional bias (**Randomized Sampling**)
+* Take into account subpopulations (**Stratified Random Sampling**)
+* The number of samples is determined by practical/economical considerations
+
+In presence of known subpopulations stratified random sampling result in a more accurate characterization of the population
+
+## Planning an observational study
+
+**Objective**: get a useful and clear answer
+**Mean**: start from a clear, useful and often simple question
+
+* Identify the **sampling unit**
+* Define the conceptual population
+* Can I sample it in a representative way?
+* Plan a clever sampling ...
+* Identify **confounding factors** 
+
+
+## Key idea #1: Sampling Unit
+The smaller unit of a population which retains the properties we are interested into.
+
+
+## Key idea #2: Confounding Factor
+
+In statistics, a confounder (also confounding variable, confounding factor, or lurking variable) is a variable that influences both the dependent variable and independent variable, causing a spurious association. Confounding is a causal concept, and as such, cannot be described in terms of correlations or associations. (*wikipedia*)
+
+* Smoke, cardiovascuar disease, alchool consumption
+* Birth order (1st child, 2nd child, etc.), presence of Down Syndrome in the child, maternal age
+
+---
+
+```{r, echo=FALSE, fig.align='center', out.width="60%"}
+include_graphics("../images/Confounding.png")
+```
+
+
+
+## Planning one experiment
+
+**Objective**: get a useful and clear answer
+**Mean**: start from a clear, useful and often simple question
+
+* What is my experimental unit?
+* How many samples should I measure?
+* What are the potential sources of variability?
+
+## Experimental Design
+
+A strategy to assign the experimental unit to the different treatments to optimize my capacity of inferring **causal relationships**
+
+* Control of unwanted sources of variability (technical/biological)
+
+## Key idea #3: Blocking
+
+* Group experimental units in homogeneous groups (bloks)
+* Study the variability inside the blocks
+* Identify and subtract the variability across the bloks
+* ANOVA!
+
+---
+
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+include_graphics("../images/blocks.png")
+```
+
+
+--- 
+
+**Block what you can; randomize what you cannot.**
+
+
+<div class="red2">
+*Blocking is better than randomizing because it is possible to "subtract" the variability between the blocks*
+<div>
+
+<hr>
+
+**Examples**
+
+* Location 
+* Analytical batch
+* Day
+* Operator 
+* ...
+
+
+
+
+
+

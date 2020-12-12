@@ -1,0 +1,188 @@
+---
+title: "ML for dummies"
+author: "Pietro Franceschi"
+date: "12/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+```
+
+## Introduction
+
+The objective of theis themo, and of the subsequent DIY, is to make you familiar with the basic ideas behind ML tuning and validation.
+
+To do that in a simple way we will try to solve in the ML way the problem of fitting a line to a set of points. It is clear that this could be easily done by regression, but the idea is not to use mathematics, but brute force ...
+
+
+As we discussed in the lecture to peform machine learnign we need 
+
+>1. collect data
+>2. propose a model
+>3. propose a _loss function_ used to fit the model to the data
+>4. find the best model
+>5. do the predictions
+
+
+## Get the data
+
+I create a dummy dataset ...
+
+```{r}
+## This is the vector of x
+x <- seq(0,10,0.3)
+
+## I put everything in a tibble
+dummy_data <- tibble(x = x, 
+                     y = 2*x+5 + rnorm(length(x),0,2))
+```
+
+
+```{r}
+plot(y~x, data = dummy_data , ylim = c(0,30))
+```
+
+
+## The model
+
+I propose to fit to these data a straight line, from my background of mathematics I know that a straight line has an equation like this
+
+$$
+y = bx + a
+$$
+
+My "model" is rather simple, and has two parameters which should be found to identify the "best" model (of this complexity)
+
+* $b$ is the slope
+* $a$ is the intercept with the $y$ axis (where $x=0$)
+
+
+```{r}
+plot(y~x, data = dummy_data , ylim = c(0,30))
+abline(a = 12, b=3, col = "red")
+abline(a = 5, b=0.1, col = "green")
+```
+
+The red and green lines here show two possible "forms" of my model.
+
+## Loss Function
+
+Ok, now I decide to use as loss function the sum of squared differences from the value predicted from the model and the one I observe. Graphically I'm using the sum of the squared distances between a line and the observed points
+
+
+For a specific model 
+
+```{r}
+## here I add the predictions to my data
+dummy_data$pred <- dummy_data$x*3 + 12
+```
+
+
+```{r}
+plot(y~x, data = dummy_data , ylim = c(0,30))
+abline(a = 12, b=3, col = "red")
+segments(x0 = dummy_data$x, y0 = dummy_data$y, y1 = dummy_data$pred, col = "green")
+```
+
+The green lines are the residuals, so the "loss" of this model will be the squared sum of the length of the green segments.
+
+
+## Find the best model
+
+Now we try to find the model which minimizes the loss function.
+
+To do that we need to vary the two model parameters loss of the corresponding model. To do that we need a "grid" of the values we have to test for the different parameters. Obviously the finer the grid (and the bigger the number of parameters) the more computationally demanding will be the task. 
+
+Due to the relevance of this issue, a consistent body of work has been done to develop and optimize this process. This goes beyond the scope of our corse.
+
+Just to understand the idea I decide to span the a parameter from 0 to 20 with a step of 0.5, and the b parameter from 0.1 to 10 with step 0.1.
+
+The grid can be constructed using a tidy way ;-)
+
+```{r}
+search_grid <- expand_grid(a = seq(0,20,0.5), b = seq(0.1,10,0.1))
+
+head(search_grid)
+```
+
+As you can see here I have the complete lost of possible combination, which is rather long:  `r nrow(search_grid)` entries!
+
+Now for each row I calculate the model predictions and then the loss function
+
+
+```{r}
+search_grid <- search_grid %>% 
+  mutate(pred = map2(a,b, function(a,b) a + b*dummy_data$x)) %>% 
+  mutate(res = map(pred, ~.x-dummy_data$y)) %>% 
+  mutate(loss = map_dbl(res, ~sum(.x^2)))
+
+head(search_grid)
+```
+
+
+Now we need a plot of the loss function
+
+
+```{r}
+library(viridis)
+
+search_grid %>% 
+  ggplot() + 
+  geom_tile(aes(x = a, y = b, fill = log10(loss))) + 
+  scale_fill_viridis() +
+  theme_light()
+```
+
+The presence of a "low" loss region is clear, remember that this is the space of the model parameters ...
+
+Now, let's look to the results of the fitting
+
+
+```{r}
+search_grid %>% 
+  slice_min(loss)
+```
+
+Let's look now to the results of the fit ...
+
+
+```{r}
+plot(y~x, data = dummy_data , ylim = c(0,30))
+abline(a = 4.5, b=2.2, col = "red")
+
+```
+
+
+Not Bad!
+
+Obviously we could refine our model by using a narrower grid in the vocinity of the minimum, but I hope that the idea is clear.
+
+**Note** When dealing with a really complex model the shape of the loss surface can be complex showing a lot of "local" minima.
+In these case the optimization problem can be extremely challenging...
+
+**2nd Note** Here we have been only performing the optimization of a given model, so we were neither selecting the complexity of our model, nor checking the predictive power of our results. To do that It would be necessary to split the data in a **training**  and **test** groups in order to be able to simulate the situation where the model is used to predict what happens in new (and unseen) data
+
+
+### Something for you
+
+1. Spend some time trying to fix what we did
+2. Try now to fit our data not with one line of equation $y=a+bx$, but with the sum of two lines which are forced to pass through the origin (e.g. $y=b_{1}x + b_{2}x$). To avoid problems keep both coefficient (parameters!) positives. Do you see something strange?
+3. Advanced: Try to assess which one of the two models is doing a better job ... remember the training/test split!
+
+
+
+
+
+
+
+
+
+
+
+

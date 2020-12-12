@@ -1,0 +1,285 @@
+---
+title: "Random_Forest_in_practice"
+author: "Pietro Franceschi"
+date: "12/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+library(randomForest)
+```
+
+## Introduction
+
+The objective of this demo, and of the subsequent DIY, is to make you familiar RandomForest, by applying it to two classification tasks of metabolomics data.
+
+These are the steps we will follow
+
+1. Load the KOMP targeted metabolomics dataset we used two days ago, our objective will be to classify the mouse gender
+2. Impute missing values with our old "analytical" approach
+3. Split the data in training and test sets
+4. Train our RF model and optimize the model parameters
+5. Evaluate how much we are good in prediction on the test set
+6. Look to the variable importance in a model build on all the data
+
+A couple of preliminary messages
+
+* **Imputation**: RF can be used also to perform imputation (there is an `rfImpute` function in the package!). It would be for sure interesting to compare rf imputation with our approach.
+* **Test Set**: in the demo we would only test our approach once. This is fine for illustration purposes, but with a single test set we cannot estimate how big is the variability of our prediction. In order to do that it would be necessary to have a _set_ of tests set ... this is normally performed by repeating the training-tuning-test workflow in a cross validation scheme. 
+
+
+## 1. Get the data 
+
+This we already know ...
+
+
+```{r}
+load("../data/KOMP_data_targeted.RData")
+```
+
+
+We have now three files
+
+* the description of the metabolites
+* the description of the samples
+* the actual data matrix
+
+
+```{r}
+DM <- DM %>% 
+  as.data.frame() %>% 
+  column_to_rownames("CompoundID") %>% 
+  t(.) %>% 
+  as_tibble(rownames = "Sampname") %>% 
+  separate(Sampname, c("One","MouseID"),"_") %>% ## split the column
+  select(-One) %>%   ## remov the first piece
+  mutate(MouseID = as.numeric(MouseID))
+```
+
+
+
+
+## 2. Impute missing values
+
+
+```{r}
+myimputer <- function(v){
+  if (sum(is.na(v)) == 0) {
+    return(v)
+  } else {
+    napos <- which(is.na(v))
+    newval <- runif(length(napos),0,min(v, na.rm = TRUE))
+    out <- v
+    out[napos] <- newval
+    return(out)
+  }
+  
+}
+```
+
+Now we apply it to the full set of columns
+
+```{r}
+DM_i <- DM %>% 
+  mutate(across(starts_with("CPD"), ~myimputer(.x)))
+```
+
+
+I'm formatting the data to be used for a RandomForest analysis, so I should give a look to the help of the package to be sure my data are OK.
+
+The absence of a coherent way to perform machine learning in R is a typical situation one have to face. If you are interested on a specific method this is not a huge problem, but when you would like to try different methods and check which is the best one the situation starts to be tricky. The community has (and is) developing several solutions to cope with that. 
+
+We need a df with the column with the factor we want to predict...
+
+
+```{r}
+rf_df <- DM_i %>% 
+  left_join(sample_meta_data) %>% 
+  select(c(Gender,starts_with("CPD"))) %>% 
+  mutate(Gender = factor(Gender))
+  
+```
+
+
+## 3. Split the data in training and test sets
+
+The situation with the samples is the following
+
+```{r}
+table(rf_df$Gender)
+```
+
+
+We need to split the data in training and test sets, doing it completely at random way could result in the unfortunate situation of having a test set composed mainly (if not exclusively!) of samples belonging to a single class.
+
+To avoid that we need to use **stratified sampling**, a concept we already introduced in the first day of the course.
+
+Here the situation is easy, since we have two perfectly balanced sample groups. 
+
+In general is preferred to split the data in training an test keeping more samples in the training set. This is done in order to be able to construct a model with less bias. More training samples will result in a model constructed with more data !
+
+In our example we will partition the data in leaving the 10% of the samples in the test set.
+
+```{r}
+
+set.seed(123)
+## let's fo it with brute force
+
+work_df <- rf_df %>% 
+  nest(data = starts_with("CPD")) %>% 
+  mutate(testid = map(data, ~sample(1:nrow(.x),11))) %>% 
+  mutate(training = map2(data,testid, ~.x %>% slice(-.y))) %>% 
+  mutate(test = map2(data,testid, ~.x %>% slice(.y)))
+  
+## now we build the training and test dfs
+
+training_df <- work_df %>% 
+  select(Gender,training) %>% 
+  unnest(training)
+
+
+test_df <- work_df %>% 
+  select(Gender,test) %>% 
+  unnest(test)
+```
+
+
+## 4. Train our RF model and optimize the model parameters
+
+
+Now we are ready to train the RF
+
+```{r}
+rfmodel <- randomForest(Gender~., data = training_df)
+
+rfmodel
+```
+
+Let's now dissect the output:
+
+* `Type of random forest: classification`: tells that we are doing a classification
+* `Number of trees: 500`: this is the number of trees of our forest. 500 is the default
+* `No. of variables tried at each split: 7`: this is the number of variables which is randomly taken into consideration at each split of each node
+* `OOB estimate of  error rate`: since we do bootstrap on the samples, some of them are already left out (out-of-bag) and are used as an independent measure of the error rate on the training set
+* `Confusion Matrix`: this split up the error rate in the two classes showing the class-specific misclassification rate
+
+Apparently our RF is working well! This should be not unexpected considering the results of the univariate analysis we performed on Day2.
+
+Let's look if the model parameters were correctly set.
+
+For `ntres` the training process itself can be used to check if it was necessary to increase the number of trees.
+The evolution of the OOB errors as the "forest" grows from 1 to 500 trees are stores inside the model
+
+```{r}
+head(rfmodel$err.rate)
+```
+
+
+Already from this visualization we can see that the error rate decreases as the forest grows. A plot can be helpful
+
+```{r}
+matplot(rfmodel$err.rate, type = "l", col = c("black","red","steelblue"), 
+        xlab = "Number of trees",
+        ylab = "Error Rate", 
+        lwd = 2, lty = 1) 
+legend("topright", legend = colnames(rfmodel$err.rate), col = c("black","red","steelblue"), lty = 1) 
+```
+
+As you can see the error rate stabilizes already with a forest of 150 trees. There is no point, then, to change the default value of this parameter in our model.
+
+The testing of `mtry` have to be done by hand
+
+
+```{r}
+## create a testing tibble with the values
+mtrytest <-tibble(mtry = 1:13) %>% 
+  mutate(rfs = map(mtry, ~randomForest(Gender~., data = training_df, mtry = .x))) ## run the battery of models
+```
+
+now we have to get out the error rates and plot them
+
+```{r}
+mtrytest %>% 
+  mutate(err = map(rfs, ~.x$err.rate[500,])) %>% 
+  unnest_wider(err) %>% 
+  select(-rfs) %>% 
+  pivot_longer(-mtry) %>% 
+  ggplot(aes(x = mtry, y = value, col = name)) + 
+  geom_line() + 
+  geom_point() +
+  geom_vline(xintercept = 7, col = "red", lty = 2) + 
+  theme_light()
+```
+
+Apparently the minimum of the error rate is obtained with `mtry` set to 6 
+
+
+```{r}
+bestrf <- randomForest(Gender~., data = training_df, mtry = 6)
+bestrf
+```
+
+
+
+
+## 5. Evaluate how much we are good in prediction on the test set
+
+Now is time to look to the prediction on the test set
+
+```{r}
+pred <- predict(bestrf,test_df)
+```
+
+And now we can calculate the confusion matrix
+
+```{r}
+cm <-  table(test_df$Gender, pred)
+cm
+```
+
+If you look to these predictions the error rates are higher compared to what we observed for the training set. This is not strange, but remember that this is the fair way of evaluating the goodness of your model.
+
+As we discusses at the beginning, we would also need an estimate of the variability in the prediction error, and to do that all our approach should be included in a repeated validation scheme.
+
+
+## 6. Look to the variable importance in a model build on all the data
+
+The last step of our analysis is to identify the variables which are more important to differentiate males and females.
+To do that, we first construct a model on all the data (to have the minimu possible bias), and then we look to the variable importance in that model
+
+
+```{r}
+full_model <- randomForest(Gender~., data = rf_df, mtry = 6)
+
+
+full_model
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

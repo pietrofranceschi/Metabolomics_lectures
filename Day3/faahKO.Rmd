@@ -16,6 +16,7 @@ Load the package and the data
 library(RColorBrewer) ## nicer color schemes
 library(xcms)         ## the package doing the job
 library(tidyverse)    ## potentially useful 
+library(knitr)
 ```
 
 
@@ -174,15 +175,381 @@ plot(tics, col = group_colors[raw_data$sample_group])
 
 As you can see, nothing happens after 4200 seconds ... we also appreciate the variability of the results.
 
-This visualization already shows you how it will be tricky to "match" the differnt samples. Some of the peaks are present everywhere, but others show-up only in specific samples ...
+This visualization already shows you how it will be tricky to "match" the different samples. Some of the peaks are present everywhere, but others show-up only in specific samples ...
+
+The overall integral of the signal in each sample is often used as a way to spot unexpected analytical drifts
+
+```{r}
+
+## here we rely on the old (and efficient) R style
+total_I <- sapply(tics, function(x) sum(intensity(x)))
+
+plot(total_I, col = factor(raw_data$sample_group), pch = 19, cex = 2)
 
 
-## PRactical #1
+```
+
+Here the response is comparable, but if this would be the injection order, we should highlight the absence of a proper randomization of the samples!
 
 
+I know that a specific metabolite present in my samples yields an ion @mz335 ... let's look to the profile of this ion signal over the chromatographic time
+
+```{r}
+## here we get the traces ... compare the function with the one used for the TICs
+ion_I_know <- chromatogram(raw_data, mz = c(334.9, 335.1))
+
+```
+
+```{r}
+plot(ion_I_know, col = group_colors[raw_data$sample_group])
+```
+
+The previous plot is important. It is tellin us that the _metabolite_I_know_ is present in the sample and is released by the chromatographic column at around 2800 sec ... There it is producing a peal in the signal of the _ion_I_know_ @mz335
+
+**To automatically find metabolites in my data I have to teach a computer to look for peaks in the chromatographic traces of all possible ions**
+
+
+## Practical #1
+
+1. Play around with the faahKO dataset, looking for potentially interesting idea to check the data quality
+  - boxplot showing the tics and not only their sum ...
+  - correlation between the different tics (Note: to do that you need to make the time scale uniform with binning ... you can      do it manually or using the function `bin` - see `?bin` for details)
+  - ...
 
 
 
 # Part 2
+
+## Peak Picking: one sample
+
+The "older" and most sounding way of finding peaks implemented in `xcms` is the `matched filter` algorithm.
+
+A full description of the parametrs of the algorithm can be found in the `xcms` manual, here we focus on
+
+* binSize: the "width" of the m/z bins used to find the peaks
+* fwhm : the "expected" size of the peak
+* snthresh :the signal/to noise ratio of the peak
+
+In xcms the parameters of the algorithm are stored into aspecific object
+
+```{r}
+mf <- MatchedFilterParam(binSize = 0.1, 
+                         fwhm = 30 ,
+                         snthresh = 6)
+
+mf
+```
+
+Now I can use the previous parameters to find the peaks in **one** sample
+
+
+```{r}
+
+first_file <- readMSData(files = cdfs[1], 
+                       mode = "onDisk") %>% 
+  filterRt(c(2500, 3500))
+
+first_peaks <- findChromPeaks(first_file,param = mf)
+```
+
+The actual list of peaks can be extracted from the previous object by the method `chromPeaks`
+
+Let's look to the head of the output
+
+```{r}
+
+first_peak_table <- chromPeaks(first_peaks) 
+
+dim(first_peak_table)
+
+head(first_peak_table, 5)
+```
+
+The first two numbers are telling us that with the setting we have been choosing we were able to find 464 peaks
+
+The help of xcms describes the most relevant columns of the table
+
+__"mz" (intensity-weighted mean of mz values of the peak across scans/retention times), "mzmin" (minimal mz value), "mzmax" (maximal mz value), "rt" (retention time of the peak apex), "rtmin" (minimal retention time), "rtmax" (maximal retention time), "into" (integrated, original, intensity of the peak), "maxo" (maximum intensity of the peak), "sample" (sample index in which the peak was identified)__
+
+
+
+This is the map of the identified peaks superimposed to the "real" experimental data
+
+```{r}
+
+peaks_tibble <- as_tibble(first_peak_table)
+
+
+tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>% 
+  unnest(c("mz","I")) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = sqrt(I)), size = 0.1) + 
+  geom_point(data = peaks_tibble, mapping = aes(x = rt, y = mz), col = "orange", alpha = 0.5) + 
+  scale_color_gradientn(colours = jet.colors(7)) + 
+  theme_light()
+```
+
+- we have a lot of peaks!
+- in some cases peaks are arranged in vertical stripes ... these are the signatures that on emetabolite is giving you more than one ion ... but all these ions are coming out at the same retention time
+
+
+Peak piching can also be performed with another algorithm ... CentWave ...
+
+```{r}
+cwp <- CentWaveParam(peakwidth = c(20, 80), 
+                     ppm = 30,
+                     prefilter = c(3, 5000))
+```
+
+
+Also here many parameters (and others are not mentioned). I highlight here some of them
+
+* peakwidth : this is the expected range of the width of the chromatographic peaks. In this case from 20 to 80 seconds 
+* ppm : this is the expected mass shift of the signal of a "true" ion due to electric noise
+* prefilter: this is an initial filter which will consider valid only ion traces which are preserving a signal of more than 5000 for more than three samples.
+
+
+If we run the peak picking with this new algorithm ...
+
+```{r}
+first_peaks_cw <- findChromPeaks(first_file,param = cwp)
+```
+
+
+```{r}
+first_peak_table_cw <- chromPeaks(first_peaks_cw) 
+
+dim(first_peak_table_cw)
+
+head(first_peak_table_cw, 5)
+```
+
+As you see the number of columns is different, but the key infos are there. Remarkably we have been able to find less peaks
+
+```{r}
+
+peaks_tibble_cw <- as_tibble(first_peak_table_cw)
+
+
+tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>% 
+  unnest(c("mz","I")) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = sqrt(I)), size = 0.1) + 
+  geom_point(data = peaks_tibble_cw, mapping = aes(x = rt, y = mz), col = "orange", alpha = 0.5) + 
+  scale_color_gradientn(colours = jet.colors(7)) + 
+  theme_light()
+```
+
+If we superimpose them ...
+
+```{r}
+tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>% 
+  unnest(c("mz","I")) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = sqrt(I)), size = 0.1, alpha = 0.5) + 
+  geom_point(data = peaks_tibble_cw, mapping = aes(x = rt, y = mz), col = "red", alpha = 0.7) + 
+  geom_point(data = peaks_tibble, mapping = aes(x = rt, y = mz), col = "green", alpha = 0.7, shape = 1) + 
+  scale_color_gradientn(colours = jet.colors(7)) + 
+  theme_light()
+```
+
+The difference is striking. 
+
+Obviously one could fiddle around with the parameters to look for a more coherent picture, but the difference is not unexpected considering the fact that we are dealing with two different approaches
+
+## Practical #2
+
+1. Play around with the two algorithm trying to find 
+
+## Peak Picking: all the dataset
+
+When we are satisfied with a set of peak picking parameters, the algorithm will be sequentially run on all the files of the dataset resulting in a large list of peaks assigned to the different samples.
+
+```{r}
+xdata <- findChromPeaks(raw_data, param = cwp)
+```
+
+Here a table of the peaks found in all files
+
+
+```{r}
+table(chromPeaks(xdata)[,"sample"])
+```
+
+
+An overall representation of their distribution in the plane is extremely interesting
+
+
+```{r}
+chromPeaks(xdata) %>% 
+  as_tibble() %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz), siaze = 0.3) + 
+  facet_wrap(~sample) + 
+  theme_light()
+```
+
+As you can see the samples are different, but the overall "look and feel" is coherent. This is telling us that the overall analytical run was good. 
+
+I was metioning retention time shifts ... 
+
+```{r}
+chromPeaks(xdata) %>% 
+  as_tibble() %>% 
+  filter(sample %in% c(1,8)) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = factor(sample)), siaze = 0.3) + 
+  scale_color_brewer(palette = "Set1") + 
+  theme_light()
+```
+
+... The shift is clear! It is small, but it is visible. the shift is responsible of a difference in the samples coming from the analysis and not the biology. This shift has to be corrected to avoid biased results
+
+`xcms` can do much more to browse and characterize the peaks, but here we want to focus on the key ideas.
+
+In summary:
+
+* the list are always different
+* they are different even if we analyze the same sample twice
+* they are different for analytical/instrumental reasons
+* they are different for biological reasons.
+
+
+
+## Alignment
+
+The alignment step, also referred to as retention time correction, aims at adjusting this by shifting signals along the retention time axis to align the signals between different samples within an experiment.
+
+Also here a plethora of approaches is available. As usual, everything will work better if the chormatography is more reproducible (for GC, for example, retention time correction is often not necessary).
+
+In `xcms` the most used and reliable method for alignment of high resolution experiments is based on the **obiwarp** approach. The algorithm was developed for proteomics and is based on _dynamic time warping_.
+
+The alignment is performed directly on the profile-matrix and can hence be performed independently of the peak detection or peak grouping.
+
+```{r}
+xdata <- adjustRtime(xdata, param = ObiwarpParam(binSize = 0.2))
+```
+
+
+* binSize set the width of the slices of the m/z bins used to extract the traced which are then aligned
+
+It is of utmost importance to check the amount of correction since large time shifts are not reasonable
+
+```{r}
+plotAdjustedRtime(xdata, col = group_colors[xdata$sample_group])
+```
+
+
+The previous plot shows the extent of correction of the different samples (one is not corrected since is considered the reference). 
+
+As you can see the correction is never bigger than 15 seconds. With a chromatographic peak width of around 30 seconds this is more than acceptable and, another time it speaks of a overall good analytical reproducibility
+
+`xdata` now still contains the list of the peaks for the different samples, but now they retention time should be less erratic ...
+
+```{r}
+chromPeaks(xdata) %>% 
+  as_tibble() %>% 
+  filter(sample %in% c(1,8)) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = factor(sample)), siaze = 0.3) + 
+  scale_color_brewer(palette = "Set1") + 
+  theme_light()
+```
+
+As you can see the situation has improved and some of the verticl stripes are now well aligned.
+
+
+## Correspondence
+
+The last step is to find a consensus list of variable across the different samples. The list of peaks is now aligned in retention time but:
+
+* peaks are still separated per sample
+* a peak could be present only in a group of samples (because a metabolite is missing there)
+* a peak could be missing because it was not correctly identified
+
+
+The common way of doing this step in `xcms` relies in a density based approach discussed in the slides.
+
+The algorithm combines chromatographic peaks depending on the density of peaks along the retention time axis (all peaks found in all samples together!) within small slices along the mz dimension. 
+
+Car should be taken to account for the fact that a peak could be absent in a sample or in a set of samples and to avoid, in the meantime, to keep peaks found only in one sample.
+
+As before, the parameters of this step are included in a specific object
+
+```{r}
+pdp <- PeakDensityParam(sampleGroups = xdata$sample_group,
+                        minFraction = 0.4, 
+                        bw = 30,
+                        binSize = 0.2)
+```
+
+A set of peaks will be considered a candidate to become a "valid" group if it contains peaks coming from at least a `minFraction` of samples belonging to one of the `sampleGroups`.
+
+An example will make this more clear. Suppose I have a dataset with two sample groups: one of 4 samples, the other of 6. 
+If I set `minFraction` to 0.5, a group of peaks will be considered a **feature** if it contains at least:
+
+* peaks coming from two samples of the first group
+* peaks coming from three samples of the second group
+
+... or more.
+
+* binsize : set the width in the m/z dimension to collect peaks from the different peaklists
+* bw: this is the bandwidth of the density estimate used to estimate the distribution of the peaks in the retention time dimension
+
+
+
+Grouping is finally performed with
+
+```{r}
+xdata <- groupChromPeaks(xdata, param = pdp)
+```
+
+
+The **features** are now the variables which will show-up in the data matrix. Their definition has been added by the `groupChromPeaks` method to the `xdata` object (which also contains the definition of the peaks of the different samples)
+
+
+The definition can be extracted as a dataframe 
+
+```{r}
+myfeatures <- featureDefinitions(xdata)
+
+head(myfeatures, 5)
+```
+
+
+The table contains:
+
+* the definition of the "position" of the feature in the mz/rt plane (`mzmed`,`mzmin`,`mzmax`,`rtmed`,`rtmin`,`rtmax`)
+* the number of peaks which were assigned to that feature `npeaks`
+* the number of samples (per group) which have peaks that have been joined in each feature
+* the index of the peaks grouped in each feature
+
+
+The (almost) final untargeted data matrix can be extracted from the same object with
+
+```{r}
+DM <- featureValues(xdata, value = "into")
+dim(DM)
+```
+
+The intensity used to build the data matrix is normally chosen as
+
+* `into`: integrated, original, intensity of the peak 
+* `maxo`: maximum intensity of the peak
+
+
+In our simple example we have 233 variables measured over 8 samples
+
+```{r}
+head(DM)
+```
+
+
+Note that DM holds samples in columns and variables in rows, so it should be transposed to be ready for the standard analysis
+
+
+
+
+
 
 

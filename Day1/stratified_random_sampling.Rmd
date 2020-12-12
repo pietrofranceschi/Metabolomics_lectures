@@ -1,0 +1,140 @@
+---
+title: "Stratified Random Sampling"
+author: "Pietro Franceschi"
+date: "11/30/2020"
+output:
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+## Intro
+
+During the presentation I clearly affirmed that in presence of subpopulations **stratified random sampling** is able to give a more accurate estimate of the properties of my reference population. Let's check my statement ...
+
+
+## The question
+Suppose that I'm interested in estimating the average height of group of 10000 people (6000 males and 4000 females). The two subpopulations are characterized by the following properties, which normally are unknown ...
+
+* Males: mean = 180 cm, sd = 10 cm
+* Females: mean = 150 cm, sd = 10 cm
+
+Let's generate the population
+
+```{r}
+males <- tibble(gender = "M", height = rnorm(8000,180,10))
+females <- tibble(gender = "F", height = rnorm(2000,150,10))
+
+mypop <- males %>% 
+  bind_rows(females)
+
+```
+
+
+Just for fun let's give a look 
+
+```{r}
+mypop %>% 
+  ggplot() + 
+  geom_histogram(aes(x = height, fill = gender), col = "darkblue",  alpha = 0.6) + 
+  facet_wrap(~gender) + 
+  theme_light()
+```
+
+
+Now we can calculate the "true" value for the population mean 
+
+```{r}
+pop_mu <- mean(mypop$height)
+```
+
+
+## Simple Random Sampling
+Suppose that we plan to sample 30 people and we use this group to estimate the population mean, what is the type of variability we expect with a simple **Random Sampling**?
+
+```{r}
+## start creating the tibble container
+x <- tibble(sampid = paste0("s",1:500))
+head(x)
+```
+
+```{r}
+## here we do the complete random sampling ...
+x <- x %>% 
+  mutate(random_samples = map(sampid, ~sample(x = mypop$height,size = 30)))
+head(x)
+```
+
+
+```{r}
+## now we calculate the averages
+x <- x %>% 
+  mutate(random_averages = map_dbl(random_samples, ~mean(.x)))
+head(x)
+```
+
+
+```{r}
+x %>% 
+  ggplot() + 
+  geom_point(aes(x = sampid, y = random_averages)) + 
+  geom_hline(yintercept = pop_mu, col = "red", lty = 2) + 
+  theme_light() + 
+  theme(axis.text.x = element_blank())
+```
+
+## Stratified sampling
+
+Now we do the same with a stratified random sampling ...
+
+```{r}
+## here we do the complete random sampling ...
+x <- x %>% 
+  mutate(stratified_random_samples = map(sampid, function(n) {
+    smales <- 24
+    sfemales <- 6
+    out_males <- sample(mypop %>% filter(gender == "M") %>% pull(height),smales)
+    out_females <- sample(mypop %>% filter(gender == "F") %>% pull(height),sfemales)
+    return(c(out_males,out_females))
+  }))
+head(x)
+```
+
+```{r}
+## now we calculate the averages
+x <- x %>% 
+  mutate(stratified_averages = map_dbl(stratified_random_samples, ~mean(.x)))
+head(x)
+```
+
+
+
+```{r}
+x %>% 
+  ggplot() + 
+  geom_point(aes(x = sampid, y = random_averages)) + 
+  geom_point(aes(x = sampid, y = stratified_averages), col = "red") + 
+  geom_hline(yintercept = pop_mu, col = "red", lty = 2) + 
+  theme_light() + 
+  theme(axis.text.x = element_blank())
+```
+
+```{r}
+x %>% 
+  ggplot() + 
+  geom_histogram(aes(x = random_averages), fill = "blue", alpha = 0.5) + 
+  geom_histogram(aes(x = stratified_averages), fill = "red", alpha = 0.5) + 
+  geom_vline(xintercept = pop_mu, col = "red", lty = 2) 
+```
+
+
+**Something for You
+
+
+
+
+

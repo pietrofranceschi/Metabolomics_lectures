@@ -25,7 +25,6 @@ slides > slide {
   color: blue;
 }
 
-
 del {
   color: red;
   text-decoration: none;
@@ -42,14 +41,24 @@ strong {
 >2. Each metabolites produces more than one peak
 >3. The peaks of the same compounds are slightly shifted in the  different samples
 
+
+## Fragmentation
+
+During ionization chemical structures ~~fragment~~ in different ions
+
+```{r fig.align="center", out.width="100%"}
+include_graphics("../images/LCMS.png")
+```
+
+
 ## Pre processing workflow
 
 0. Get out the raw data
 1. Reliably find peaks in the 2D plane for each sample
 2. Align the different peak lists 
 3. Match the peak lists across the samples
-3. Select a good measure of intensity
-4. Arrange everything in a data matrix
+3. Select a good measure of intensity and arrange everything in a data matrix
+
 
 <br>
 
@@ -84,6 +93,94 @@ Conversion tool
 
 [_proteowizard_](http://proteowizard.sourceforge.net/)
 
+
+
+# 1. Peak Picking
+
+## General Ideas
+
+Almost all software for the analysis of untargeted metabolomics data will propose different algorithms to perform peak picking:
+
+* None of the algorithms is perfect
+* There are a lot of parameters to tweak
+* The practice (and **the awareness**) makes the master
+
+
+
+## Matched Filter
+
+```{r fig.align="center", out.width="80%"}
+include_graphics("../images/matchedFilter.png")
+```
+
+
+## Cent-Wave
+
+```{r fig.align="center", out.width="60%"}
+include_graphics("../images/cent_wave.png")
+```
+
+
+## Finding the best parameters
+
+* Look for molecules ~~you know~~ should be there
+* ~~Visually Check~~ your output
+* Do no look for _perfection_
+
+# 2. Alignment
+
+## General Ideas
+
+In a multi sample experiment ~~peak lists~~ are
+
+* different even if we analyze the same sample twice
+* they are different for ananlytical/instrumental reasons
+* they are different for biological reasons.
+
+<hr>
+
+The objective of alignment is to **compensate** the analytical drifts, without putting together things that should not be aligned
+
+# 3. Correspondance
+
+## General Ideas
+
+The last step is to find a consensus list of variable across the different samples. After alignment, the list of peaks is now aligned in retention time but:
+
+* peak lists are still separated per sample
+* a peak could be present only in a group of samples (because a metabolite is missing there)
+* a peak could be missing because it was not correctly identified
+
+## Density Based Grouping
+
+```{r fig.align="center", out.width="80%"}
+include_graphics("../images/grouping.png")
+```
+
+
+## Features and Peaks
+
+* ~~Peaks~~: show up in each sample at a specific time during chromatography due to the ionization of a metabolite
+* ~~Features~~: are consensus variables which group together different peaks 
+
+
+# 3. Get the DM
+
+## MMeasuring Intensity
+
+The actual signal intensity of each chromatographic peak (and then of each feature) can be characterized:
+
+* by the area of the peak
+* by the maximal intensity of the signal
+* by the area of the filter used to find the peak
+
+The ~~area~~ is often more robust, but can give erratic results if the peak is not well defined. The ~~max~~ intensity can be erratic. The signal of the filter is rarely used
+
+## maxo - into
+
+```{r fig.align="center", out.width="80%"}
+include_graphics("../images/maxointo.png")
+```
 
 
 

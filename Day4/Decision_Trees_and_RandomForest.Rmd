@@ -1,0 +1,151 @@
+---
+title: "Trees and Forests"
+author: "Pietro Franceschi"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(knitr)
+library(tidyverse)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: #404040;
+}
+
+```
+# Decision Trees
+
+## Decision Trees {.smaller}
+
+```{r}
+library(readr)
+library(rpart)
+library(rpart.plot)
+```
+
+Titanic survival _decision tree_
+
+
+```{r}
+train_titanic <- read_csv("../data/train_titanic.csv") %>% 
+  dplyr::select(Survived, Sex, Age) %>% 
+  na.omit() %>% 
+  mutate(Survived = ifelse(Survived == 1, "survived","died"))
+```
+
+
+```{r out.width= "70%", fig.align="center"}
+fit <- rpart(Survived~., data = train_titanic, method = "class")
+rpart.plot(fit, type = 2, extra = 103)
+```
+
+Each node shows
+
+- the predicted class (died or survived),
+- the predicted probability of survival,
+- the percentage of observations in the node.
+
+## Pros anc Cons {.build} 
+
+**Pros**
+
+> - Trees are versatile (they can combine different types of variables)
+> - No problems with variable scaling
+> - Interpretable by definition
+
+<hr>
+
+**Cons**
+
+> - High **variance** i.e. they do not always do well on the test set ...
+
+## Selecting the split point: impurity
+
+In a decision tree the order of the variables and the split points are selected trying to maximize the "purity". 
+
+A perfect split will separate the classes without misclassifications, leaving with absolutely "pure" groups.
+
+Among the different criteria used to define the _impurity_ of a node two stands out:
+
+- the **Gini** index: $\sum_{i\neq{j}}p_{i}p_{j}$
+- the **entropy** : $-\sum_{j}p_{j}log(p_{j})$
+
+were $p_{k}$ is the fraction of samples of class $k$ in the node
+
+## Best Split on the Age 
+
+```{r fig.height=4, fig.width=7, out.width="100%", fig.align="center"}
+train_titanic %>% 
+  filter(Sex == "male") %>% 
+  ggplot() + 
+  geom_histogram(aes(x = Age, fill = Survived), position="identity", alpha = 0.7, col = "white") + 
+  scale_fill_brewer(palette = "Set1") + 
+  geom_vline(xintercept = 6.5, col = "red", lty = 2) + 
+  geom_text(x = 10, y = 30, label = "Split", size = 4) + 
+  theme_light() + 
+  ggtitle("Males") + 
+  theme(aspect.ratio = 0.5)
+```
+
+# Random Forest
+
+## Random Forest
+
+_As we discussed, decision trees have many good properties but show high variance_
+
+A good idea to circumvent this limitation could be to construct a large set of trees (build a Forest!) and to average their predictions to reduce variability.
+
+To do that we need to somehow ~~perturb~~ our dataset, because building differnt trees on the same data will not change the results
+
+* perturb the dataset by **bootstrapping**
+* use only a **subset of the variables** at each split
+* build a **large number** of **simple trees** and "average" their outcomes
+
+## The majority takes all {.smaller}
+
+```{r out.width="70%", fig.align="center"}
+include_graphics("../images/Random_forest_diagram_complete.png")
+```
+_from Wikipedia_
+
+## Bagging
+
+This mixture of _bootstrap_ and _averaging_ is technically called ~~bagging~~
+
+## Most Relevant Model Parameters
+
+- **ntree**: Number of trees to grow. Larger number of trees produce more stable models and covariate importance estimates, but require more memory and a longer run time. For small datasets, 50 trees may be sufficient. For larger datasets, 500 or more may be required.
+- **mtry**: Number of variables available for splitting at each tree node. For classification models, the default is the square root of the number of predictor variables (rounded down). For regression models, it is the number of predictor variables divided by 3 (rounded down). 
+
+
+## Advantages
+
+> - **Error estimate**: due to bootstrapping some of the sample are left out (technically they are _out-of-bag_), so an error estimate on an independent set of samples comes for free
+> - **Interpretability**: even if in a less sample way the importance of each variables can be assessed as in decision trees
+> - **Low sensitivity to model parameters**: it appears that in practice RF is robust to the change of settings 
+
+
+
+
+
+

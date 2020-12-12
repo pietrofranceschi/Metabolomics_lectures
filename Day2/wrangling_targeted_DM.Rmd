@@ -1,0 +1,623 @@
+---
+title: "Wrangling a Targeted Metabolomics DM"
+author: "Pietro Franceschi"
+date: "12/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+
+## Dataset and description
+
+[**KOMP Plasma Metabolomics Dataset**](https://www.kaggle.com/desertman/komp-plasma-metabolomics-dataset)
+
+Mouse knockouts facilitate the study of gene functions. Often, multiple abnormal phenotypes are induced when a gene is inactivated. The International Mouse Phenotyping Consortium (IMPC) has generated thousands of mouse knockouts and cataloged their phenotype data. We have acquired metabolomics data from 220 plasma samples from 30 unique mouse gene knockouts and corresponding wild-type mice from the IMPC. To acquire comprehensive metabolomics data, we have used liquid chromatography (LC) combined with mass spectrometry (MS) for detecting polar and lipophilic compounds in an untargeted approach. We have also used targeted methods to measure bile acids, steroids and oxylipins. In addition, we have used gas chromatography GC-TOFMS for measuring primary metabolites. The metabolomics dataset reports 832 unique structurally identified metabolites from 124 chemical classes as determined by ChemRICH software
+
+In this themo we will use only the metabolites quantified in the targeted assays. The belong to the chemical classes of _bile acids, steroids and oxylipins_
+
+
+Here we get the data
+```{r}
+load("../data/KOMP_data_targeted.RData")
+```
+
+
+We have now three files
+
+* the description of the metabolites
+* the description of the samples
+* the actual data matrix
+
+## Metabolite Description
+
+The amount of info in the table is uncommon
+
+```{r}
+colnames(metabolite_meta)
+```
+
+What is interesting for us is to see how much effort has been made to precisely identify the compounds. The problem of "naming" is typical of analytical chemistry and metabolomics.
+
+- common chemical names are ambiguous
+- unique identifiers are impractical (look to the InChiKey for example)
+
+```{r}
+metabolite_meta$InChiKey[1]
+```
+Some of the identifier refer to publicly available databases. This is the general trend of this scientific discipline.
+
+**KEGGID** refers to _kegg_ so it can be used to link the metabolite to its position within metabolic networks.
+
+
+## Sample Description
+
+The second tibble contains the description of the sample metadata 
+
+```{r}
+head(sample_meta_data)
+```
+
+The field are auto explanatory. The MouseID is the code we need to associate the sample to the class
+
+First of all we give a look to the experimental design, just to understand the numbers we are dealing with
+
+```{r}
+table(sample_meta_data$Gender,sample_meta_data$Genotype)
+```
+
+* Is true that we have many animals ... but the number of samples per class is really limited
+* Luckily enough the design is "orthogonal" (in the sense that for each genotype we have both genders) and balanced 
+* The small number of samples per class is in a sense ruling out the possibility of usining with a good efficacy non parametric tests ...at least to compare the genotypes.
+
+## The Data Matrix
+
+```{r}
+head(DM[,1:20])
+```
+
+
+* it is switched compared to the "standard" shape. This is often done because the number of variables is larger then the number of samples. Since R wants the reverse we transpose ...
+
+Since our mouse ID is a number without the leading "KOMP_" we fix this on the fly
+
+
+
+```{r}
+DM <- DM %>% 
+  as.data.frame() %>% 
+  column_to_rownames("CompoundID") %>% 
+  t(.) %>% 
+  as_tibble(rownames = "Sampname") %>% 
+  separate(Sampname, c("One","MouseID"),"_") %>% ## split the column
+  select(-One) %>%   ## remov the first piece
+  mutate(MouseID = as.numeric(MouseID))
+  
+```
+
+
+Now the matrix looks like this 
+
+```{r}
+head(DM[,1:20])
+```
+
+* As expected we have missing data, which most likely show up for metabolites with very low concentrations. 
+* This statement is not always true because the detection limit con vary between different compounds.
+
+
+To check that we organize the matrix in a different way also joining the concentration data with the sample metadata
+
+
+```{r}
+DM_nest <- DM %>% 
+  left_join(sample_meta_data) %>% 
+  pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") %>% 
+  group_by(CompoundID) %>% 
+  nest()
+```
+
+This data structure highlights the reole of each metabolite 
+
+```{r}
+head(DM_nest)
+```
+
+the intensities of each metabolite are stored in the "data" column
+
+```{r}
+head(DM_nest$data[[1]])
+```
+
+The new tibble can be efficiently used to inspect the data in a univariate perspective ...
+
+
+## Missing Values
+
+For example, the number of NAs in relation of the median intensity can be visualized as
+
+```{r}
+DM_nest %>% 
+  mutate(nnas = map_dbl(data,~sum(is.na(.x$I))),                  ## calculate the univariate statistics "on the fly"
+         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
+  filter(nnas > 0) %>% ## we keep only features with at leas on NA!
+  ggplot() +   ## plot them
+  geom_point(aes(x = medI, y = nnas)) + 
+  scale_x_log10() + 
+  theme_light()
+  
+```
+
+Which actually shows what we expected. High number of missing values are visible only with low median intensities ... note the log scale in x. 
+
+This is telling us that there is a distinction of metabolites in two groups showing a marked difference in concentration
+
+Is this effect dependent on the class of metabolite? 
+
+
+```{r}
+DM_nest %>% 
+  left_join(metabolite_meta) %>% 
+  mutate(nnas = map_dbl(data,~sum(is.na(.x$I))),                  ## calculate the univariate statistics "on the fly"
+         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
+  filter(nnas > 0) %>% ## we keep only features with at leas on NA!
+  ggplot(aes(x = medI, y = nnas, col = Assay)) +   ## plot them
+  geom_point() + 
+  scale_x_log10() + 
+  scale_color_brewer(palette = "Set2") + 
+  theme_light()
+```
+
+That's strange ... the largest number of NAs is corresponding to lower intensities for the BileAcids_Steroids amd not for Oxylipins. This is curious 
+
+It is worth highlighting the name of the metabolites showing a number of NAs larger than 50 ...
+
+```{r}
+DM_nest %>% 
+  left_join(metabolite_meta) %>% 
+  mutate(nnas = map_dbl(data,~sum(is.na(.x$I))),                  ## calculate the univariate statistics "on the fly"
+         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
+  filter(nnas > 0) %>% ## we keep only features with at leas on NA!
+  ggplot(aes(x = medI, y = nnas, col = Assay)) +   ## plot them
+  geom_point(size = 2) + 
+   geom_text(aes(label=ifelse(nnas>50,CompoundName,'')), size = 4, nudge_y = -3) + 
+  scale_x_log10() + 
+  scale_color_brewer(palette = "Set2") + 
+  theme_light()
+```
+
+
+As we discussed in the lecture, it is difficult to decide which metabolites have too many missing values ...
+
+When we have a "limited" number of variables the best approach is to plot the data. With the `DM_nest` we can do that quite efficiently
+
+To do that I create a custom plotting function which takes as input the tibble of the data and a potential title
+
+```{r fig.height=3, fig.width=8}
+myplot <- function(t,l = ""){
+  p <- t %>% 
+  ggplot() + 
+  geom_jitter(aes(x = Genotype, y = I, color = Gender, shape = Zygosity), width = 0.1) + 
+  scale_y_log10() + 
+  scale_color_brewer(palette = "Set1") + 
+  theme_light() + 
+  ggtitle(l) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+  
+  p
+}
+
+
+myplot(DM_nest$data[[1]], "test")
+
+```
+
+And I recursively apply it to the nested data tibbles ...
+
+
+```{r}
+DM_nest <- DM_nest %>%
+  left_join(metabolite_meta %>% select(CompoundID,CompoundName)) %>% 
+  mutate(rawplots = map2(data,CompoundName, ~myplot(.x,.y)))
+```
+
+
+Now I can visualize (or save) the plot I want ...
+
+
+This one, in particular show the trend of one of the features with a large fractio of NAs
+```{r fig.height=3, fig.width=8}
+DM_nest$rawplots[[5]]
+```
+
+As it can be expected, progesterone is lower in males, and, most likely close to the detection limit. It is worth remarking that progesterone was the steroid showing the lower intensity. Its behavior is then not odd.
+
+Let's now look to PGD2
+
+```{r fig.height=3, fig.width=8}
+DM_nest$rawplots[[22]]
+```
+The trend of this metabolite is really wired. Its large fraction of missing values do not seems to be associated to the intensity of the signal
+
+
+As far as I can see (but you could check better ... ;-) ), the distribution of the missing data does not seems to be higly associated with the study factors. 
+
+Considering that we have 220 samples the level of missingness is never extremely severe, so when it will be needed imputation should not be something that strongly influence the 
+
+
+**Something For you**
+
+1. play around trying to visualize the other metabolites showing high levels of missingness
+
+
+## Variable Distribution
+
+The need of displaying the intensity in log scale is already suggesting that the distribution of the intensities is far from being normal. This is not unexpected in metabolomics. In real life what i do is to work almost invariably with log-transformed datasets.
+
+For sure
+
+1. The low number of samples for each genotypes makes a class based assessment completely hopeless
+2. What we could do is to look to the different variables highlighting the gender and the zygosity.
+
+
+We can follow the spirit of the previous plot by defining a function and using it to produce a full list of plots ...
+
+An alternative could be to `unnest` the data and rely on faceting ...
+
+
+```{r fig.height=14, fig.width=8}
+DM_nest %>% 
+  ungroup() %>% 
+  select(CompoundName,data) %>% 
+  unnest(data) %>% 
+  ggplot(aes(sample = I)) +
+  stat_qq(aes(col = Gender, shape = Zygosity)) + 
+   scale_color_brewer(palette = "Set1") + 
+  stat_qq_line() + 
+  facet_wrap(~CompoundName, scales = "free_y", ncol = 5) +
+  theme_light() + 
+  theme(aspect.ratio = 1, 
+        legend.position = "bottom")
+```
+
+
+Ok, the plot is "ugly" (maybe creating a set of plots as we did before could have been more pleasant), but is really informative.
+
+* No sign of normal distribution
+* For some metabolites M and F are really differnt ... and for 12(13)Ep-9-KODE the trend is really interesting.
+
+
+```{r fig.height=3, fig.width=8}
+DM_nest$rawplots[[50]]
+```
+
+The interpretation for that would, most likely require a chat with a good biochemist...
+
+Let's look to the global effect of a log transformation on the q-q plots
+
+```{r fig.height=14, fig.width=8}
+DM_nest %>% 
+  ungroup() %>% 
+  select(CompoundName,data) %>% 
+  unnest(data) %>% 
+  ggplot(aes(sample = log10(I))) +
+  stat_qq(aes(col = Gender, shape = Zygosity)) + 
+  scale_color_brewer(palette = "Set1") + 
+  stat_qq_line() + 
+  facet_wrap(~CompoundName, scales = "free_y", ncol = 5) +
+  theme_light() + 
+  theme(aspect.ratio = 1, 
+        legend.position = "bottom")
+```
+
+The situation largely improves, even if some compounds are still showing strange behaviors ...
+
+**Something For you**
+
+1. Could you look to the metabolites showing outlying behaviors? Is this a matter of genotype? 
+
+## Multivariate Visualization - PCA
+
+The previous univariate journey should have been already pointing out some interesting aspects of the dataset.
+
+The subsequent step is to look to visualize the multivariate structure of the data to spot larger scale patterns.
+
+In order to do that it is necessary to impute the data matrix, substituting NAs with meaningful numbers.
+
+1. The number should have a variability
+2. The number should not know anything about the experimental design
+3. The number should have a reasonable analytical meaning
+
+_My choice here is to work variable wise and replace the NAs with a random number drawn from an uniform distribution spanning from 0 to the  minimum value measured for that variable_
+
+The rationale behind this choice is that 
+
+* a concentration is a positive number
+* everything I cannot measure is equally likely
+
+
+In my practical example imputation could be perfoed both in the `DM` and in its nested version `DM_nest`. Since we are going to do PCA, I'll work on the unnested data matrix.
+
+First of all I need a function to perform the imputation of a vector
+
+```{r}
+myimputer <- function(v){
+  if (sum(is.na(v)) == 0) {
+    return(v)
+  } else {
+    napos <- which(is.na(v))
+    newval <- runif(length(napos),0,min(v, na.rm = TRUE))
+    out <- v
+    out[napos] <- newval
+    return(out)
+  }
+  
+}
+```
+
+Now we apply it to the full set of columns
+
+```{r}
+DM_i <- DM %>% 
+  mutate(across(starts_with("CPD"), ~myimputer(.x)))
+```
+
+
+As we have seen, log transformation is helpful ...
+
+
+```{r}
+DM_i <- DM_i %>% 
+  mutate(across(starts_with("CPD"), ~log10(.x)))
+```
+
+And now PCA!
+
+```{r}
+library(FactoMineR)
+library(factoextra)
+```
+
+```{r}
+myPCA <- PCA(DM_i %>% select(starts_with("CPD")), graph = FALSE)
+```
+
+
+```{r}
+fviz_pca_ind(myPCA, 
+             habillage = factor(sample_meta_data$Gender), 
+             geom = "point", 
+             pointsize = 2,
+             axes = c(1,2)) + 
+  scale_color_brewer(palette = "Set1")
+```
+Even if the amount of variability captured in this representation is 0only the 30%, the previous plot shows the presence of a separation between males and females.
+
+This is not unexpected considering the results of our univariate investigation
+
+
+What about the variables?
+
+```{r}
+fviz_pca_biplot(myPCA, 
+             habillage = factor(sample_meta_data$Gender), 
+             geom = "point", 
+             pointsize = 2,
+             axes = c(1,2)) + 
+  scale_color_brewer(palette = "Set1")
+```
+
+The biplot here shows that females show an higher level of the large majority of the metabolites. 
+
+Since the partial separation is visible along PC1 we could visualize the variables which show the higher contribution to that direction
+
+
+```{r}
+fviz_contrib(myPCA, "var", axes = 1)
+```
+
+These plots are really informative, let's give a look inside the PCA object to see how these number could be get out. 
+
+
+This list contains the information about the samples (the scores) so it can be used to reconstruct the score plot. What one needs are the coordinates 
+
+```{r}
+str(myPCA$ind)
+```
+
+The `dist` and `cos2` can be used to assess how far a sample is from the PCA plane (or projection). This is important to identify potential outliers.
+
+
+The list
+
+```{r}
+str(myPCA$var)
+```
+
+instead contains the info about the variables, their loadings and the correlation with the principal components.
+
+To extract the previous information in a more programmatic way, `FactoMineR` has a specific function
+
+```{r}
+head(facto_summarize(myPCA, "var", axes = 1))
+```
+which returns as a table the content of the PCA object.
+
+By using the content of the myPCA object it is possible to "reconstruct" the PCA plots with `ggplot` and this can be handy if specific representation of the data are needed.
+
+Suppose, for example, that you would like to construct a more informative variable importance plot which shows the correct metabolite name and also color the bars according to the chemical/metabolic class of the compound.
+
+
+```{r fig.height=8, fig.width=6}
+facto_summarize(myPCA, "var", axes = 1) %>% 
+  as_tibble() %>% 
+  select(name, `Dim.1`) %>% 
+  left_join(metabolite_meta, by = c("name" = "CompoundID")) %>% 
+  arrange(`Dim.1`) %>% 
+  mutate(CompoundName = factor(CompoundName, levels = CompoundName)) %>% 
+  ggplot() + 
+  geom_point(aes(x = CompoundName,  y= `Dim.1`, col = Assay), size = 2) + 
+  geom_segment(aes(x = CompoundName,  yend = `Dim.1`, col = Assay, xend = CompoundName, y = 0)) + 
+  scale_color_brewer(palette = "Set2") + 
+  coord_flip() + 
+  theme_light()
+```
+
+Which can be of help for the interpretation of the results
+
+**Something For you**
+
+1. Could you try a different imputation strategy? Is this affecting the results of your exploratory data analysis?
+2. Just play and ask!
+
+
+## Biomarker Discovery
+
+What we did so far is called **exploratory data analysis**. To write the paper we should also find the variables which are showing a significant effect of the design factors. 
+
+**Notes**
+
+1. One could look for biomarkers with univariate and multivariate methods. 
+2. In a univariate perspective, to avoid the risks of non matching the assumption of many statistical tests it would be safer to rely on non-parametric approaches
+3. As far as the difference in genotype is concerned, the number of samples is limited. Most likely, there we should use parametric tests
+4. Since we are performing multiple tests, we should remember that false positives will be present!
+
+For illustrative purposes let's focus on the Female-Male Comparison.
+
+```{r}
+## here i nest the imputed data matrix, most likely I could do the testing also in the "non" imputed one
+## we also add the gender of the animal
+DM_i_nest <- DM_i %>% 
+  pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") %>% 
+  left_join(sample_meta_data) %>% 
+  nest(-c(CompoundID))
+```
+
+Now we run the tests on the metabolites
+
+
+```{r}
+DM_i_nest <- DM_i_nest %>% 
+  mutate(wilcoxon = map(data, ~wilcox.test(I ~ Gender, data = .x, exact = FALSE)))
+```
+
+
+If we want to see one of the tests ... 
+
+```{r}
+DM_i_nest$wilcoxon[[10]]
+```
+
+Now we extract the p-values
+
+```{r}
+DM_i_nest <- DM_i_nest %>% 
+  mutate(ps = map_dbl(wilcoxon, ~.x$p.value))
+```
+
+
+As we have seen yesterday, a first idea on the presence of "relevant" differences in the two classes is the distribution of the p-values
+
+```{r}
+hist(DM_i_nest$ps)
+```
+
+This is clearly not uniform and it speaks of the presence of a significant fraction of differences between males and females.
+
+Now we would like to rank the variables on the base of their contrast on the two classes ... but as we know it is not correct to use the _p-value_ for that. 
+
+We need to calculate the **effect size**! Now I'll use the Cohen's d. A word of caution here, this type of effect size is parametric ... but I've been stressing that non parametric analysis here should be preferred. 
+Right. A non parametric measure of the effect size should be better. A possibility could be to calculate the ratio between the difference between the two medians and divide it by the larger interquartile range. You could be creative there ...
+
+Let's stick to Cohen's d. In the same time I'll also calculate the p-values corrected for multiplicity
+
+```{r}
+library(effsize)
+
+DM_i_nest <- DM_i_nest %>%  
+  mutate(pcorr = p.adjust(ps, method = "bonferroni")) %>% 
+  mutate(cohend = map_dbl(data, ~cohen.d(I ~ Gender, data = .x)$estimate))
+```
+
+Now we focus on the compound which are significant at the 0.01 level and we sort the results by effect size ...
+
+
+```{r}
+markers <- DM_i_nest %>% 
+  filter(pcorr < 0.01) %>% 
+  arrange(desc(abs(cohend))) %>% 
+  left_join(metabolite_meta)
+
+head(markers)
+```
+
+
+This is the list of "biomarkers", let's plot one of them ...
+
+```{r fig.height=3, fig.width=8}
+DM_nest$rawplots[[54]]
+```
+Which exactly shows what we expect.
+
+**Notes**
+
+1. This is the metabolite showing the larger "contrast" so our interpretation could start from there. 
+2. This is also the metabolite showing up in the PCA ;-)
+
+
+## Variable Correlation
+
+The association between the intensity of two metabolites in the samples is often considered an interesting evidence in the perspective of the interpretation. Metabolites are indeed linked in metabolic pathways and their concentrations are not independent
+
+As we have seen yesterday, however, correlation can be there only by chance so care have to be taken to jump from the observation of an association to the conclusion of a causal relation.
+
+These caveats are particularly true in the case of untargeted metabolomics assays and can be somehow taken more easily as far as targeted metabolomics is concerned.
+
+The best tool to inspect variable correlation in R is the `pairs` plot. With `pairs` one really sees the experimental data and it is easy to spot subgroups and outlying samples.
+
+Unfortunately, the pairs visualization is manageable only with a small number of variables (something like 15). For this reason it is a resource which can be exploited after the identification of the most relevant _biomarkers_
+
+```{r}
+## here I get the names of the first 5
+focuscp <- markers %>% 
+  slice(1:5) %>% 
+  pull(CompoundID)
+```
+
+
+```{r fig.height=6, fig.width=6}
+## This is a littel of magic ...
+mypalette <- c("#F24D2970","#1C366B70")
+names(mypalette) <- unique(sample_meta_data$Gender)
+
+par(pty="s")
+
+DM_i %>% 
+  select(all_of(focuscp)) %>% 
+  as.matrix(.) %>% 
+  pairs(., col = mypalette[sample_meta_data$Gender], pch = 19)
+
+
+```
+
+**Notes**
+
+1. We see correlations between the compounds. The biochemist will be happy. In particular we see an indication of a change in correlation between different oxylipins. This should be checked against metabolic pathways. 
+2. It would be interesting to use the previous approach to see if some of the outlying samples are associated to a specific genotype
+
+
+**Something For you**
+
+1. Could you try to use ANOVA to look to metabolites potentially different in the genotypes?
+2. Do you think that the ANOVA assumption here are fulfilled?
+3. Run a similar analysis on the rubus targeted data
+

@@ -1,0 +1,135 @@
+---
+title: "Machine Learning: a gentle introduction"
+author: "Pietro Franceschi"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+library(MASS)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: black;
+}
+
+```
+## Machine Learning
+
+_Machine learning (ML) is the study of ~~computer algorithms~~ that improve automatically through ~~experience~~. It is seen as a subset of artificial intelligence. Machine learning algorithms build a ~~model~~ based on sample data, known as "training data", in order to make ~~predictions or decisions~~ without being explicitly programmed to do so_
+
+<hr>
+
+* **ML** focus on prediction
+* **Statistical models** focus on interpretation and inference
+* **ML** need data, data are ~~experience~~
+
+## Teaching a machine to play chess
+
+Two strategies:
+
+1. teach a computer the rules and for each one of your moves ask him to play all possible games choosing the best one (classical algorithmic approach)
+2. collect the database of all the games played so far and use a ML model to predict which move will most likely lead to victory ("AI" approach)
+
+
+## Two contexts 
+
+>* **Regression** if the predicted property is continuous
+>* **Classification** if the predicted property is categorical
+
+## ML conceptual workflow {.build}
+
+>1. collect data
+>2. propose a model
+>3. propose a _loss function_ used to fit the model to the data
+>4. find the best model
+>5. do the predictions
+
+<hr>
+
+_Our Working example: fit a line through a group of points_
+
+
+## Loss Function {.smaller}
+
+```{r out.width="100%", fig.align= "center"}
+include_graphics("../images/linefit.png")
+```
+1. The (square) sum of the green lines is our loss function
+2. Our best line is the one that **minimizes**˘ the sum of the green lines
+
+
+## Overfitting {.smaller}
+
+```{r out.width="100%", fig.align= "center"}
+include_graphics("../images/overfitting.png")
+```
+
+* the yellow line better fits the data
+* the yellow line is a more **complex** model (more wiggling)
+* to check if the yellow line does a better job **I need new data**
+
+## Important
+
+Given a model the loss function will allow me to best fit that model to my data
+
+... **then** I always need **two** sets of new data:
+
+1. ~~to find the best model (_train_)~~ 
+    - in our example how wiggling is the line
+2. ~~to assess how good is my "optimal" model in predicting unseen observations~~ 
+    - in our example how good is the best (wiggling) line to predict new data  
+
+
+## The _bias_, _variance_ tradeoff
+
+**Bias** is the difference between the prediction of our model and the correct value which we are trying to predict. Models with high bias are oversimplified and they lead high errors also on training data.
+
+
+**Variance** is the variability of model prediction. Models with high variance pays a lot of attention to training data and does not generalize on the data which it hasn’t seen before. As a result, such models perform very well on training data but has high error rates on test data.
+
+~~The best ML model~~ strikes a balance between _bias_ and _variance_
+
+
+
+## Model Interpretation
+
+In a multivariate setting the model can be extremely complex (SVM, Random Forest, Artificial Neural Network)
+
+- large number of data are needed for tuning
+- many parameters have to be tuned
+- variables can interact in non linear ways
+
+~~Model Interpretation can be difficult~~
+
+## Model Interpretation II
+
+- Spot the variables which are more relevant to characterize our problem
+- Perform biological/ecological interpretation
+- Propose new ideas for experiments
+
+In the case of scientific research (that is not the only field where ML is used ...), _model interpretability_ is an hot topic 
+
+
+
+

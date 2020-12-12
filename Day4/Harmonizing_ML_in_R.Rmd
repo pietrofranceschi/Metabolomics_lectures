@@ -1,0 +1,50 @@
+---
+title: "Harmonizing ML in R"
+author: "Pietro Franceschi"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: #404040;
+}
+
+```
+
+## The issue
+
+
+## Solution 1
+
+
+## Solution 2
+
+
+
+
+
+
