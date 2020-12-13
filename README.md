@@ -3,16 +3,18 @@
 ## Day One
 
 * What is Metabolomics
-* Analytical Tecnologies in metabolomics
-* Esperimental design
+* [Our R cheatsheet](), [Rmd]()
+* [Experimental design](Day1/experimental_design.html)
+  * Practical: [html](Day1/stratified_random_sampling.html), [Rmd](Day1/stratified_random_sampling.Rmd)
 * Group Activity: design your study
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)
-* Fat data matrices and false positives: practical
-* Statistical testing and effect size
+* [Fat data matrices and false positives](Day1/False_Positives.html), [Rmd](Day1/False_Positives.Rmd) 
+* [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.html)
 
 ## Day Two
 
 * A targeted metabolomics data matrix
+  * Practical: [html](), [Rmd]()
 * [Missing values and imputation](Day2/MissingValues.html)
 * [Data distribution](Day2/Variable_distribution.html)
 * [Multivariate visualization: PCA](Day2/PCA.html)
@@ -33,7 +35,6 @@
 * False discoveries, and multiple testing
 * Machine Learning for Dummies
 * Random Forest - Variable selection
-* On-line tools 
 
 
 

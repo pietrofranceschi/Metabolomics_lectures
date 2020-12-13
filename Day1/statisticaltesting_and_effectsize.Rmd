@@ -1,0 +1,400 @@
+---
+title: "Statistical Testing and Effect Size"
+author: "Pietro Franceschi" 
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(knitr)
+library(tidyverse)
+library(MASS)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: black;
+}
+
+```
+
+
+## The BIG question
+
+Is what I’m observing **true beyond my sample**. Can I draw general conclusions from a limited set samples?
+
+
+<hr>
+
+In presence of variability, there will be always the possibility that what I observe in my data cannot be generalized at the population level.
+
+* measure more sample
+* validate
+* give a measure of my **confidence** on the results
+
+
+## On Variability
+The overall variability comes from the *sum* of the different sources of variability
+
+
+## Distributions
+
+Due to variability each property can have different values with different probabilities, this result in a *distribution*
+Each distribution can be characterized by:
+
+* location (e.g. mean)
+* spread (e.g variance)
+
+
+
+## Sampling Distribution
+
+We are always dealing with a group of "individuals": a **Sample**
+
+
+~~The sampling distribution is always normally distributed~~
+
+
+```{r fig.height=3, fig.width=8, out.width= "100%", fig.align="center"}
+twopop <- c(rnorm(1000,10,3),rnorm(1000,20,3))
+
+samplings <- tibble(samp = paste0("s",1:500)) %>% 
+  mutate(means = map_dbl(samp, ~mean(sample(twopop,20))))
+
+par(mfrow = c(1,2))
+hist(twopop, breaks = 30)
+abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
+abline(v = mean(twopop), col = "green")
+
+hist(samplings$means, col = "steelblue", main = "Histrogram of the sample means", breaks  = 15, xlim = c(0,25))
+abline(v = mean(twopop), col = "green")
+
+
+```
+
+
+## More samples ...
+
+
+```{r, out.width= "100%", fig.align="center"}
+tibble(samp = paste0("s",1:500)) %>% 
+  mutate(s5 = map_dbl(samp, ~mean(sample(twopop,5))),
+         s10 = map_dbl(samp, ~mean(sample(twopop,10))),
+         s50 = map_dbl(samp, ~mean(sample(twopop,50)))
+         ) %>% 
+  pivot_longer(c("s5","s10","s50")) %>% 
+  mutate(name = factor(name, levels = c("s5","s10","s50"))) %>% 
+  ggplot() + 
+  geom_histogram(aes(x = value, fill = name), col  ="white") + 
+  facet_wrap(~name, nrow = 1) + 
+  theme_light() + 
+  theme(aspect.ratio = 1)
+
+```
+
+
+More samples, ~~narrower~~ distribution.
+
+## Statistical testing
+
+Due to variability, it is impossible to get **certain** answers from an experiment. The best one can due is to try to **quantify the level of confidence**.
+
+Statistical testing is a procedure which allows us to quantify this level of confidence
+
+## The concept 
+
+1. Suppose that what we observe is the result of chance alone (Null Hypothesis - H0)
+2. Use statistics to calculate the probability of getting at least what we observe under H0 (by chance!) (*p-value*)
+3. Set a threshold of reasonable confidence (0.05,0.01, ...)
+
+
+## Example: lowering cholesterol
+
+* Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
+* We claim that a new secret drug reduces significantly the cholesterol level in the population
+* To prove that we get a sample of 50 people, we treat them with the drug and we measure their average cholesterol level.  The levels turns out to be 193.
+* Is this pilot study supporting my claim?
+
+## Let's test that!
+
+1. Suppose that the drug has no effect (H0), so my 50 people are a random drawing from the population
+2. Calculate the distribution of the mean level of cholesterol on groups of 50 people (it is not the distribution of cholesterol in the population!)
+3. Calculate the probability of obtaining at least the observed value from this distribution (p-value)
+4. Reject the H0 if the p-value is lower than the selected threshold
+
+## Let's plot it!
+
+```{r out.width="90%", fig.align='center'}
+
+set.seed(123)
+means50 <- rep(0,100)
+
+for(i in (1:100)){
+  means50[i] <- mean(rnorm(50,200,50))
+}
+
+mycols <- rep("#C8081570",100)
+mycols[means50 < 193] <- "#377eb870"
+
+plot(x = 1:100, means50, ylim = c(150, 250), pch = 19, col = mycols, 
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling from theoretical population")
+abline(h = 193, col = "steelblue", lty = 2)
+abline(h = 200, col = "darkred")
+
+```
+
+## What we see
+
+* The distribution of the means is nicely centered around the population mean!
+* The blue line represents the mean of my sample 50 people
+* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (0.14 !)
+* I cannot reject H0 at the 0.05 level ...
+
+## More samples! {.smaller}
+
+I'm stubborn ... We redo the same study with a test group of 500 people ...
+
+```{r out.width="80%", fig.align='center'}
+means50 <- rep(0,50)
+
+for(i in (1:50)){
+  means50[i] <- mean(rnorm(500,200,50))
+}
+
+
+mycols <- rep("#C8081570",50)
+mycols[means50 < 193] <- "#377eb870"
+
+plot(x = 1:50, means50, ylim = c(180, 220), pch = 19, col = mycols, 
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling from theoretical population")
+abline(h = 193, col = "steelblue", lty = 2)
+abline(h = 200, col = "darkred")
+
+```
+
+Magic! Now it is significant!  No more blue dots, so it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect
+
+
+## Take home messages
+
+* The choice of a ~~threshold (here 0.05) for statistical significance is arbitrary~~
+* With more samples we can "see" smaller differences
+* We are never sure!
+* Is statistical significance the only thing we are looking for?
+
+
+# ;-)
+
+## Back to our magic drug ...
+
+Unfortunately it turns out that our drug is not so good ... apparently it reduces the cholesterol only of 0.01%
+
+```{r}
+
+samp_serie <- rep(c(5,50,500,5000,50000), each = 100)
+group_means <- rep(0,length(samp_serie))
+
+for(i in 1:length(samp_serie)){
+  group_means[i] <- mean(rnorm(samp_serie[i],200,50))
+}
+
+mycols <- rep("#C8081570", length(samp_serie))
+mycols[group_means < 198] <- "#377eb870"
+
+
+plot(x = 1:length(samp_serie), group_means, ylim = c(150, 250), pch = 19, col = mycols, cex = 0.5,
+     ylab = "mean of n individuals", xlab = "Replicated sampling from theoretical population", xaxt="n")
+abline(h = 198, col = "steelblue", lty = 2)
+abline(h = 200, col = "darkred")
+abline(v = c(0,100,200,300,400), col = "gray80")
+text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000","50000"), pos = 4)
+
+```
+
+## Is a low *p-value* the only thing we need?
+
+* Is a reduction of 0.01% really useful/relevant?
+* Big number of samples will make tiny differences statistically significant!
+* Statistical significance does not mean biological/agronomic relevance
+* The *p-value* alone cannot be used to judge the relevance of a research ...
+
+
+## Erroneous ...
+
+* _p-values_ deals with probability of obaining by chance, not with the strength of an effect
+* strong effects with low variability **will** result in low _ps_
+* the reverse is not necessarily true!
+* "look, I have a low p value!" is not the only thing to look for
+
+## Measuring the _effect size_
+
+
+```{r out.width= "100%", fig.align='center'}
+## Standard normal distribution:
+
+xvalues <- data.frame(x = c(-20, 20))
+
+## add a second normal curve
+normal1 <- function(x){
+  dnorm(x, mean = -15, sd = 2)
+}
+
+normal2 <- function(x){
+  dnorm(x, mean = -13, sd = 2)
+}
+
+normal3 <- function(x){
+  dnorm(x, mean = 5, sd = 2)
+}
+
+normal4 <- function(x){
+  dnorm(x, mean = 15, sd = 2)
+}
+
+
+
+xvalues %>% ggplot(aes(x = x)) + 
+  stat_function(fun = normal1, lwd = 1, col = "darkblue") + 
+  stat_function(fun = normal1, geom = "area", fill = "steelblue", alpha = 0.5) +
+  stat_function(fun = normal2, lwd = 1, col = "darkred") + 
+  stat_function(fun = normal2, geom = "area", fill = "red", alpha = 0.5) +
+  stat_function(fun = normal3, lwd = 1, col = "darkblue") + 
+  stat_function(fun = normal3, geom = "area", fill = "steelblue", alpha = 0.5) +
+  stat_function(fun = normal4, lwd = 1, col = "darkred") + 
+  stat_function(fun = normal4, geom = "area", fill = "red", alpha = 0.5) +
+  geom_hline(yintercept = 0, lwd = 1) + xlab("") + ylab("") + 
+  geom_text(x = -14, y = 0.25, label = "Small Effect") + 
+  geom_text(x = 10, y = 0.25, label = "Large Effect") + 
+  theme_light() + 
+  ylim(c(0,0.3)) +
+  theme(aspect.ratio = 0.3)
+
+
+```
+
+## Notes
+
+1. The difference in means is not sufficient
+2. The measure should take into account of the variability
+3. The variability of the population not the one of he sampling distribution ;-)
+
+<hr>
+
+The _fold change_ is **not**  a good measure of the effect size ...
+
+
+## Cohen's d
+
+$$
+d = \frac{\bar{x}_{1} - \bar{x}_{2}}{s}
+$$
+
+Where
+
+* $\bar{x}$ are the estimates of the population means
+* $s$ is the estimate of the population standard deviation (pooled)
+
+<hr>
+
+## Let's _see_
+
+- 2 populations: $\mu_{1}=5$, $\mu_{2}=10$, $\sigma=5$
+- _t-test_ to test the difference
+- different sample sizes
+
+
+```{r}
+library(effsize)
+library(tidyverse)
+
+## We start with two gaussians @0 and @5 with sd of 5
+## for a set of different sample sizes we calculate 100 samplings and for each one p values and cohen d
+
+
+
+x <- tibble(size = c(3,5,20,50,100))
+
+## now we create the dataset
+
+x <- x %>% 
+  mutate(
+    g1 = map(size, function(s) {
+      out <- matrix(0,nrow = s, ncol = 100)
+      for(i in 1:s){
+        out[i,] <- rnorm(100,0,5)
+      }
+      out
+    }),
+    g2 = map(size, function(s) {
+      out <- matrix(0,nrow = s, ncol = 100)
+      for(i in 1:s){
+        out[i,] <- rnorm(100,5,5)
+      }
+      out
+    })
+  ) 
+    
+  ## Now we calculate the pvalues
+
+
+x <- x %>% 
+  mutate(ps = map2(g1,g2, function(x,y){
+    ps <- rep(0,ncol(x))
+    for(i in 1:ncol(x)){
+      ps[i] <- t.test(x[,i],y[,i])$p.value
+    }
+    ps
+  }))
+
+## Now the cohen's d
+
+x <- x %>% 
+  mutate(ds = map2(g1,g2, function(x,y){
+    ds <- rep(0,ncol(x))
+    for(i in 1:ncol(x)){
+      ds[i] <- cohen.d(x[,i],y[,i])$estimate
+    }
+    ds
+  }))
+
+
+x %>% 
+  unnest(c("ps","ds")) %>%
+  mutate(size = factor(size)) %>% 
+  dplyr::select(size,ps,ds) %>% 
+  pivot_longer(-size) %>% 
+  ggplot() + 
+  geom_jitter(aes(x = size, y = value), width = 0.2, col = "steelblue", alpha = 0.7) +
+  geom_hline(aes(yintercept = if_else(name == "ds",-1,0.05)), col  ="red", lty = 2) +
+  facet_wrap(~name, scales = "free") + 
+  xlab("Sample Size") + 
+  theme_light() + 
+  theme(aspect.ratio = 0.7)
+  
+```
+
+## Notes
+
+* With three samples variability is large
+* Also the possibility of calling non significant the difference is large
+* the effect size does not tell to me if something is biologically/ecologically relevant
+
+

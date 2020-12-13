@@ -57,7 +57,7 @@ include_graphics("../images/LCMS.png")
 1. Reliably find peaks in the 2D plane for each sample
 2. Align the different peak lists 
 3. Match the peak lists across the samples
-3. Select a good measure of intensity and arrange everything in a data matrix
+4. Select a good measure of intensity and arrange everything in a data matrix
 
 
 <br>
@@ -164,9 +164,9 @@ include_graphics("../images/grouping.png")
 * ~~Features~~: are consensus variables which group together different peaks 
 
 
-# 3. Get the DM
+# 4. Get the DM
 
-## MMeasuring Intensity
+## Measuring Intensity
 
 The actual signal intensity of each chromatographic peak (and then of each feature) can be characterized:
 

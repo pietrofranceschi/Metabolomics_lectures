@@ -1,5 +1,5 @@
 ---
-title: "Random_Forest_in_practice"
+title: "Random Forest in practice"
 author: "Pietro Franceschi"
 date: "12/11/2020"
 output: html_document
@@ -265,6 +265,22 @@ full_model
 
 
 
+```{r fig.height=9, fig.width=6}
+full_model$importance %>% 
+  as_tibble(rownames = "CompoundID") %>% 
+  left_join(metabolite_meta) %>% 
+  arrange(`MeanDecreaseGini`) %>% 
+  mutate(CompoundName = factor(CompoundName, levels = CompoundName)) %>% 
+  ggplot() + 
+  geom_point(aes(x = CompoundName,  y= `MeanDecreaseGini`, col = Assay), size = 2) + 
+  geom_segment(aes(x = CompoundName,  yend = `MeanDecreaseGini`, col = Assay, xend = CompoundName, y = 0)) + 
+  scale_color_brewer(palette = "Set2") + 
+  coord_flip() + 
+  theme_light()
+  
+```
+
+Which givs a picture slightly different from PCA. Remember, however, that RF is a supervised classifier wile PCA is not
 
 
 

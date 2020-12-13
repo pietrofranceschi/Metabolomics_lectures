@@ -1,13 +1,11 @@
 ---
 title: "Stratified Random Sampling"
 author: "Pietro Franceschi"
-date: "11/30/2020"
-output:
-  ioslides_presentation: default
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = FALSE)
 library(tidyverse)
 ```
 
@@ -23,15 +21,18 @@ Suppose that I'm interested in estimating the average height of group of 10000 p
 * Males: mean = 180 cm, sd = 10 cm
 * Females: mean = 150 cm, sd = 10 cm
 
-Let's generate the population
+## Running the simulations
+
+First of all I create my population
 
 ```{r}
+## separate tibbles
 males <- tibble(gender = "M", height = rnorm(8000,180,10))
 females <- tibble(gender = "F", height = rnorm(2000,150,10))
 
+## merge everything in a df
 mypop <- males %>% 
   bind_rows(females)
-
 ```
 
 
@@ -40,21 +41,41 @@ Just for fun let's give a look
 ```{r}
 mypop %>% 
   ggplot() + 
-  geom_histogram(aes(x = height, fill = gender), col = "darkblue",  alpha = 0.6) + 
-  facet_wrap(~gender) + 
+  geom_histogram(aes(x = height, fill = gender), col = "white",  alpha = 0.6, position = "identity") + 
   theme_light()
 ```
 
+Ok, we see what we expect, the two groups are different, and there is an unbalancing of the two subpopulations.
 
-Now we can calculate the "true" value for the population mean 
+
+
+
+## The problem
+
+suppose that I'm interested in estimating well the true population mean. In my case this parameter is known ...
 
 ```{r}
 pop_mu <- mean(mypop$height)
+pop_mu
 ```
+
+```{r}
+mypop %>% 
+  ggplot() + 
+  geom_histogram(aes(x = height, fill = gender), col = "white",  alpha = 0.6, position = "identity") + 
+  geom_vline(xintercept = pop_mu, col="red", lty = 2) + 
+  theme_light()
+```
+
+What I would do is to **sample** a group of people from the population and use the mean of this group as an estimate of the population mean. The number of samples I can extract is normally dictated by practical or economical reasons.
 
 
 ## Simple Random Sampling
-Suppose that we plan to sample 30 people and we use this group to estimate the population mean, what is the type of variability we expect with a simple **Random Sampling**?
+suppose that I have no clue about the presence of the two sub-populations, so the best I can do to avoid biases is **simple random sampling**.
+
+Suppose that I can afford to take 30 people and we use this group to estimate the population mean, what is the type of variability we expect with a simple **Random Sampling**?
+
+To do that I simulate the extraction of 30 people from my population and to see the variability of the process I do it 500 times
 
 ```{r}
 ## start creating the tibble container
@@ -77,6 +98,7 @@ x <- x %>%
 head(x)
 ```
 
+This plot show the variability of the estimate as a reference with the true population mean
 
 ```{r}
 x %>% 
@@ -87,22 +109,59 @@ x %>%
   theme(axis.text.x = element_blank())
 ```
 
-## Stratified sampling
-
-Now we do the same with a stratified random sampling ...
 
 ```{r}
-## here we do the complete random sampling ...
+x %>% 
+  ggplot() + 
+  geom_histogram(aes(x = random_averages), alpha = 0.5, col = "white") + 
+  geom_vline(xintercept = pop_mu, col = "red", lty = 2) + 
+  theme_light()
+```
+
+
+As we can see, the estimate has variance (:-P), and it is centered around the correct value for the population mean. It is also normally distributed, but this is something we will touch later today.
+
+## Stratified sampling
+
+Suppose now that I'm aware of the fact that my population is composed by different subgroups. To take into account that I switch to **stratified random sampling**
+
+
+If I'm sticking with 30 people I have to allocate them to the two groups in a proportion that mirrors the proportions of the individuals in the population
+
+```{r}
+nsamp <- 30
+
+## here I calculate the fraction
+subfractions <- (table(mypop$gender)/nrow(mypop))*nsamp %>% ceiling(.)
+
+
+
+## just to show
+library(magrittr)
+
+another_subfraction <- mypop$gender %>% 
+  table(.) %>% 
+  divide_by(nrow(mypop)) %>% 
+  multiply_by(nsamp) %>% 
+  ceiling(.)
+
+subfractions
+```
+
+
+```{r}
+## here we do the complete random sampling of the two populations
+## and we return a vector with the samples extracted in a stratified way
 x <- x %>% 
   mutate(stratified_random_samples = map(sampid, function(n) {
-    smales <- 24
-    sfemales <- 6
-    out_males <- sample(mypop %>% filter(gender == "M") %>% pull(height),smales)
-    out_females <- sample(mypop %>% filter(gender == "F") %>% pull(height),sfemales)
+    out_males <- sample(mypop %>% filter(gender == "M") %>% pull(height),subfractions["M"])
+    out_females <- sample(mypop %>% filter(gender == "F") %>% pull(height),subfractions["F"])
     return(c(out_males,out_females))
   }))
 head(x)
 ```
+
+Now, the average of the samples will be another time the estimate of the population mean
 
 ```{r}
 ## now we calculate the averages
@@ -111,7 +170,7 @@ x <- x %>%
 head(x)
 ```
 
-
+And now we plot!
 
 ```{r}
 x %>% 
@@ -126,13 +185,20 @@ x %>%
 ```{r}
 x %>% 
   ggplot() + 
-  geom_histogram(aes(x = random_averages), fill = "blue", alpha = 0.5) + 
-  geom_histogram(aes(x = stratified_averages), fill = "red", alpha = 0.5) + 
-  geom_vline(xintercept = pop_mu, col = "red", lty = 2) 
+  geom_histogram(aes(x = random_averages), fill = "blue", alpha = 0.5, col = "white") + 
+  geom_histogram(aes(x = stratified_averages), fill = "red", alpha = 0.5, col = "white") + 
+  geom_vline(xintercept = pop_mu, col = "red", lty = 2) + 
+  theme_light()
 ```
 
 
-**Something for You
+As you can see the average is still good, but the _variability (variance) is much smaller_
+This is true for all the tings you would like to estimate from your sample. If you think to it, the reason for this fact is that using stratification we ensure that our sample is representative of both subpopulations.
+
+**Something for You**
+
+* Could you check what happens to the two types of sampling if you change the unbalancing in the population? 
+* Could you check what happens to the two types of sampling if you change the size of the sample (here 30)?
 
 
 
