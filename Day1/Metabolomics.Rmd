@@ -228,6 +228,18 @@ _~~Most likely, chemical annotation is the current bottleneck in untargeted meta
 
 _e.g. how to sample in a representative way in GC? How to quench the metabolism of microorganisms? how to store biofluids?_ 
 
+## Statistical Validation {.build}
+
+> 1. Unfavorable variables-to-samples ratio
+> 2. Unexpected subpopulations
+> 3. not always easy to place the results inside the established body of knowledge
+
+<hr>
+
+**~~Two stage design:~~** 
+
+1. hypothesis generation;
+2. validation
 
 ## Key Elements to design a succesfull metabolomics {.build .smaller}
 
