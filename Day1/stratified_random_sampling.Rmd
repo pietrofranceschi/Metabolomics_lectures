@@ -16,7 +16,7 @@ During the presentation I clearly affirmed that in presence of subpopulations **
 
 
 ## The question
-Suppose that I'm interested in estimating the average height of group of 10000 people (6000 males and 4000 females). The two subpopulations are characterized by the following properties, which normally are unknown ...
+Suppose that I'm interested in estimating the average height of group of 10000 people (8000 males and 2000 females). The two subpopulations are characterized by the following properties, which normally are unknown ...
 
 * Males: mean = 180 cm, sd = 10 cm
 * Females: mean = 150 cm, sd = 10 cm
@@ -41,7 +41,7 @@ Just for fun let's give a look
 ```{r}
 mypop %>% 
   ggplot() + 
-  geom_histogram(aes(x = height, fill = gender), col = "white",  alpha = 0.6, position = "identity") + 
+  geom_histogram(aes(x = height, fill = gender), col = "white",  alpha = 0.4, position = "identity")  +
   theme_light()
 ```
 
@@ -132,7 +132,7 @@ If I'm sticking with 30 people I have to allocate them to the two groups in a pr
 nsamp <- 30
 
 ## here I calculate the fraction
-subfractions <- (table(mypop$gender)/nrow(mypop))*nsamp %>% ceiling(.)
+subfractions <- ceiling((table(mypop$gender)/nrow(mypop))*nsamp)
 
 
 
@@ -154,8 +154,8 @@ subfractions
 ## and we return a vector with the samples extracted in a stratified way
 x <- x %>% 
   mutate(stratified_random_samples = map(sampid, function(n) {
-    out_males <- sample(mypop %>% filter(gender == "M") %>% pull(height),subfractions["M"])
-    out_females <- sample(mypop %>% filter(gender == "F") %>% pull(height),subfractions["F"])
+    out_males <- mypop %>% filter(gender == "M") %>% pull(height) %>% sample(.,subfractions["M"])
+    out_females <- mypop %>% filter(gender == "F") %>% pull(height) %>% sample(.,subfractions["F"])
     return(c(out_males,out_females))
   }))
 head(x)

@@ -79,6 +79,10 @@ This can be done in a very compact and clear way as follows
 ```{r}
 my_first_tibble <- 
   my_first_tibble %>% 
+  mutate(determinant = map(tables, ~.x[1,1]))
+  
+  
+  
   mutate(determinant = map(tables, ~determinant(.x)))
 
 my_first_tibble

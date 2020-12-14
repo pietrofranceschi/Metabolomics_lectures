@@ -123,6 +123,7 @@ In presence of known subpopulations stratified random sampling result in a more 
 ## Planning an observational study
 
 **Objective**: get a useful and clear answer
+
 **Mean**: start from a clear, useful and often simple question
 
 * Identify the **sampling unit**
@@ -154,6 +155,7 @@ include_graphics("../images/Confounding.png")
 ## Planning one experiment
 
 **Objective**: get a useful and clear answer
+
 **Mean**: start from a clear, useful and often simple question
 
 * What is my experimental unit?
@@ -185,9 +187,8 @@ include_graphics("../images/blocks.png")
 **Block what you can; randomize what you cannot.**
 
 
-<div class="red2">
-*Blocking is better than randomizing because it is possible to "subtract" the variability between the blocks*
-<div>
+
+*~~Blocking is better than randomization because it is possible to "subtract" the variability between the blocks]]*
 
 <hr>
 
