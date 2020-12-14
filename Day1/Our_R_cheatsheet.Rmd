@@ -1,0 +1,102 @@
+---
+title: "Our R cheatsheet"
+author: "Pietro Franceschi"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+## Rmd
+Everything you see in the course website has been created with R relying on `.Rmd` files.
+What you see here is an Rmd file which combines 
+
+1. text with a simplified format
+2. R chunks which can be executed independently
+
+Rmd files can be "compiled" in various forms (html, doc, pdf, md) and are extremely handy.
+
+## Pipes 
+In almost all my code I rely on _pipes_ (`%>%`).
+The pipe operator has been introduced in R (as part of the `magrittr` package) to make the code easier to read in presence of nested functions.
+
+```{r}
+library(magrittr)
+
+## consider for example
+a <- 10
+b <- sqrt(log(a+2)) ## this is a trivial nested function ...
+
+## with pipes I could write the same as 
+b1 <- a %>% add(2) %>% log(.) %>% sqrt(.)
+
+## the "dot" represent what is coming from the pipe
+
+```
+
+You can imagine the pipe operator just like a pipe, which connects two functions passing the output of the first to the input of the second.
+
+This way of programming is particularly efficient when you want to do "data carpentry" on tabular data
+
+## Tibbles 
+
+Tibbles are the new version of R "data.frames". If you are not an expert you can think to them as the analogous of Excel tables. Tibbles are the workhorse of the data analyst since almost all the data we will be digesting are organized as tables.
+
+An interesting feature of tibbles is that they can contain columns of tables. The advantage of that will be clear during the demos. Just as an appetizer
+
+```{r}
+library(tidyverse)
+
+## here I create a dummy table
+my_first_tibble <- tibble(names = c("One","Two"),
+                          counts = c(1,2))
+
+my_first_tibble
+
+```
+
+and now I add a column of tables ...
+
+```{r}
+a_table <- matrix(1:4, nrow = 2)
+my_first_tibble$tables <- list(a_table,a_table)
+
+my_first_tibble
+
+```
+
+Now you see that my table contains a column made of matrices
+
+## `purrr` and cycles
+
+The `purrr` package (which is part of `tidyverse` ) allows you to recursively apply operations to data stored in tabular form.
+Suppose, for example, that we want to calculate the determinant of the previous matrices
+
+This can be done in a very compact and clear way as follows
+
+```{r}
+my_first_tibble <- 
+  my_first_tibble %>% 
+  mutate(determinant = map(tables, ~determinant(.x)))
+
+my_first_tibble
+```
+
+1. take `my_first_tibble`
+2. pipe it to a function called `mutate`, which creates a new column called _determinant_.
+3. the content of determinant is created by `map`ing the R function `determinant` to the objects stored in the _tables_ column
+
+
+
+
+
+
+
+
+
+
+
+
+

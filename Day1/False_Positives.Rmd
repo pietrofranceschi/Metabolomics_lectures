@@ -14,12 +14,12 @@ library(tidyverse)
 ```
 
 
-This first demo deals with "random organization". Asw we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization" 
+This first demo deals with "random organization". As we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization" 
 
 * can mirror a population level property
 * can be the result of a "unlucky" sampling
 
-To undertand the second point, just consider an hypothetic sampling of the human population made by an extraterrestrial entity. If he/she (it?) random sample a couple of humans, it will likely conclude that we are all chinese! 
+To understand the second point, just consider an hypothetic sampling of the human population made by an extraterrestrial entity. If he/she (it?) random sample a couple of humans, it will likely conclude that we are all chinese! 
 
 Let's make a more scientific example. Let's create a fake metabolomics experiment (but it can be everything you like ...) where I'm measuring the concentration of 1000 variables on a group of samples. And let's suppose that I want to study the correlation between the different variables to infer new regulatory networks ...
 
@@ -36,7 +36,7 @@ dummy_data <- tibble(nsamples = seq(10,500,10)) %>%
 head(dummy_data)
 ```
 
-That's the battery of data matrices of growing size. Do I have some "true" results inaide my data? 
+That's the battery of data matrices of growing size. Do I have some "true" results inside my data? 
 
 **NO!**
 
@@ -70,7 +70,7 @@ dummy_data <- dummy_data %>%
 ```
 
 
-Let's now start from the most "unfavourable" situation: 10 samples and 1000 variables
+Let's now start from the most "unfavorable" situation: 10 samples and 1000 variables
 
 ```{r}
 hist(dummy_data$uptri[[1]], 

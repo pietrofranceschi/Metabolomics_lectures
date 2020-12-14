@@ -1,7 +1,6 @@
 ---
 title: "Experimental Design"
 author: "Pietro Franceschi"
-date: "11/30/2020"
 output:
   ioslides_presentation: default
 ---
@@ -24,14 +23,13 @@ slides > slide {
   color: blue;
 }
 
-
 del {
   color: red;
   text-decoration: none;
 }
 
 strong {
-  color: black;
+  color: #404040;
 }
 
 ```
@@ -42,14 +40,14 @@ strong {
 
 **Statistics** is the science which deals with **the collection, the analysis, the visualization and the interpretation** of experimental data
 
-* random samplings
+* random sampling
 * observational studies
 * experiments
 
 
 ## Random Samplings (polls)
 
-Random samplings allow to characterize the properties of a finite population without measuring all of its members
+Random sapling allow to characterize the properties of a finite population without measuring all of its members
 
 **Examples**
 
@@ -142,7 +140,7 @@ The smaller unit of a population which retains the properties we are interested 
 
 In statistics, a confounder (also confounding variable, confounding factor, or lurking variable) is a variable that influences both the dependent variable and independent variable, causing a spurious association. Confounding is a causal concept, and as such, cannot be described in terms of correlations or associations. (*wikipedia*)
 
-* Smoke, cardiovascuar disease, alchool consumption
+* Smoke, cardiovascular disease, alcohol consumption
 * Birth order (1st child, 2nd child, etc.), presence of Down Syndrome in the child, maternal age
 
 ---
@@ -170,9 +168,9 @@ A strategy to assign the experimental unit to the different treatments to optimi
 
 ## Key idea #3: Blocking
 
-* Group experimental units in homogeneous groups (bloks)
+* Group experimental units in homogeneous groups (blocks)
 * Study the variability inside the blocks
-* Identify and subtract the variability across the bloks
+* Identify and subtract the variability across the books
 * ANOVA!
 
 ---

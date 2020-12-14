@@ -1,13 +1,36 @@
 ---
 title: "Metabolomics Data Matrix"
 author: "Pietro Franceschi"
-date: "12/2/2020"
 output: ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(knitr)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: #404040;
+}
+
 ```
 
 ## Many variables in many samples
@@ -16,7 +39,7 @@ As in all _omic_ experiments, a metabolomic assay allows to measure a large numb
 
 <hr>
 
-**... what are the varibles ...**
+**... what are the variables ...**
 
 > 1. In a targeted metabolomics investigation
 > 2. In an untargeted MS based metabolomics analysis
@@ -34,7 +57,7 @@ As in all _omic_ experiments, a metabolomic assay allows to measure a large numb
 ## Data Matrix
 
 ```{r, echo=FALSE, fig.align='center', out.width="60%"}
-include_graphics("images/Matrix.svg")
+include_graphics("../images/Matrix.svg")
 ```
 
 ## Variables (columns) are not independent
@@ -80,7 +103,7 @@ image(t(mymat), asp = 20/300, xaxt='n', ann=FALSE, yaxt='n', bty="n")
 
 ## Univariate approach
 
-The **Univariate** appraoch considers each variable separately and it applies "standard" statistical tools to spot the more **interesting** variables
+The **Univariate** approach considers each variable separately and it applies "standard" statistical tools to spot the more **interesting** variables
 
 1. Statistical testing 
 2. Linear modeling (`lm`, `glm`, ...)
@@ -103,7 +126,7 @@ Each samples is represented as a point in the multidimesional variable space. Th
 The size of the space equals the number of variables we are measuring. **Multivariate methods** (PCA, PLS, ASCA, ...) are able to exploit the structure of the space
 
 ```{r, echo=FALSE, fig.align='center', out.width="40%"}
-include_graphics("images/Coord_planes_color.svg")
+include_graphics("../images/Coord_planes_color.svg")
 ```
 
 ## Why multivariate
@@ -184,7 +207,7 @@ plot(y = runif(100,0,10), x = runif(100,0,10), xlab = "D1", ylab = "D2", main = 
 ## Practical !
 
 ```{r, echo=FALSE, fig.align='center', out.width="50%"}
-include_graphics("images/drill.svg")
+include_graphics("../images/drill.svg")
 ```
 
 

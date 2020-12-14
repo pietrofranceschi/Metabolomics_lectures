@@ -24,14 +24,13 @@ slides > slide {
   color: blue;
 }
 
-
 del {
   color: red;
   text-decoration: none;
 }
 
 strong {
-  color: black;
+  color: #404040;
 }
 
 ```
@@ -239,7 +238,7 @@ text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000",
 
 ## Erroneous ...
 
-* _p-values_ deals with probability of obaining by chance, not with the strength of an effect
+* _p-values_ deals with probability of obtaining by chance, not with the strength of an effect
 * strong effects with low variability **will** result in low _ps_
 * the reverse is not necessarily true!
 * "look, I have a low p value!" is not the only thing to look for
@@ -326,7 +325,7 @@ library(effsize)
 library(tidyverse)
 
 ## We start with two gaussians @0 and @5 with sd of 5
-## for a set of different sample sizes we calculate 100 samplings and for each one p values and cohen d
+## for a set of different sample sizes we calculate 100 saplings and for each one p values and cohen d
 
 
 
