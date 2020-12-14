@@ -2,7 +2,7 @@
 
 ## Day One
 
-* What is Metabolomics
+* [What is Metabolomics](Day1/Metabolomics.html)
 * [Our R cheatsheet]() - [Rmd]()
 * [Experimental design](Day1/experimental_design.html)
   * Practical: [html](Day1/stratified_random_sampling.html), [Rmd](Day1/stratified_random_sampling.Rmd)

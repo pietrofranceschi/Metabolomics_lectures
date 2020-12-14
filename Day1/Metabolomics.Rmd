@@ -1,0 +1,233 @@
+---
+title: "Metabolomics!"
+author: "Pietro Franceschi"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(DiagrammeR)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: #404040;
+}
+
+```
+## What is Metabolomics
+
+The objective of ~~metabolomics~~ is to characterize in the most complete and comprehensive way the pool of small molecules which are the end product of the metabolism.
+
+The pool of these molecules is known as ~~metabolome~~. 
+
+Metabolomics aims at measuring the metabolites in a quantitative way and to characterize their relations and associations
+
+
+## Why Metabolomics 
+
+> 1. For the quest of ~~molecular markers~~ (_e.g. nutrition, health, cancer_ )
+> 2. To perform ~~molecular phenotyping~~ (_e.g. personalized medicine_)
+> 3. To associate a ~~genes~~ to its ~~function~~ (_e.g. to support breeding_)
+> 4. To study the ~~chemical interaction~~ in complex systems (_e.g. ecological interaction are often mediated by chemicals_) 
+
+
+## Challenges of Metabolomics {.smaller .build}
+
+### 1 - Size of the metabolic chemical space
+The molecules included in the **metabolome** can be extremely diverse in particular if plants/microorganisms are concerned
+
+### 2 - Diversity in the chemical properties of the metabolites
+The chemical diversity results in different properties which would require different methods of analysis
+
+### 3 - Huge differences in concentrations
+Some of the metabolite are present in high concentration, while other highly relevant compounds are present only in small traces. Our analytical method should be able to ~~see them at the same time~~
+
+### 4. - ~~Coverage~~
+The chemical diversity makes extremely difficult to have only **one** analytical method able to analyze everything
+
+## How Metabolomics
+
+We need an analytic technique:
+
+> 1. Sensitive to the **chemical structure**
+> 2. **Universal** - able to see almost all classes of molecules
+> 3. **Sensitive** - able to see metabolites with low concentrations 
+> 4. With an high **dynamic range** - able to measure at the same time low and high and low abundant compounds
+
+# Analytical Techniques in Metabolomics
+
+## Nuclear Magnetic Resonance
+```{r out.width="100%", fig.align="center"}
+include_graphics("../images/NMR.png")
+```
+
+## Molecules and Peaks
+
+```{r out.width="100%", fig.align="center"}
+include_graphics("../images/NMR1.png")
+```
+
+## Mass Spectrometry
+
+```{r out.width="100%", fig.align="center"}
+include_graphics("../images/MS.png")
+```
+
+
+## Molecules and Ions
+
+```{r out.width="100%", fig.align="center"}
+include_graphics("../images/MS1.png")
+```
+
+
+## Chromatographic Separation
+
+```{r out.width="100%", fig.align="center"}
+include_graphics("../images/LC-MS.png")
+```
+
+
+## Molecules and features
+
+```{r out.width="100%", fig.align="center"}
+include_graphics("../images/MS_NMR_multi.png")
+```
+
+## Molecules and features
+In all the techniques presented so far, ~~each metabolite~~ give rise to a large set of ~~different signals~~ 
+
+* **MS** - the different ions produced in the ionization of the metabolite
+* **NMR** - the different peaks coming from the resonance of the nuclei present in the molecule
+* **LC/GC-MS** - the different ions which are eluted at different time. These mz/rt couples are called *features*
+
+All the variables coming from the same molecule are ~~highly correlated~~
+
+## Sources of Analytical Variability {.smaller}
+
+### 1 - The measurement itself
+Even with the perfect instrument the "numbers" will change. Try measuring your temperature 10 times in a row ;-)
+
+### 2 - Chromatographic drifts
+When chromatographic separation is present, elution times will slightly change from run to run. for GC the situation is better, but far from being perfect
+
+### 3 - Matrix effects
+In metabolomics we are loading on the instruments a complex mixture of chemicals. this complex environment will affect the _response_ of the molecules in a complex and often unpredictable way. The importance of this effect is so strong in MS that this technique is almost always coupled with chromatography in metabolomics
+
+## NMR vs LC/GC MS {.build}
+
+### NMR
+1. Reproducible
+2. Inherently quantitative
+3. Relatively insensitive
+
+### LC/GC - MS
+1. Sensitive
+2. Universal
+3. Less reproducible
+
+# Doing Metabolomics
+
+## Targeted vs Untargeted Metabolomics {.smaller .build}
+
+### Targeted
+We use the analytical method of choice to analyze a selected set of metabolites. The list can go from around 10 to something around 500.  
+
+_The measured variables are metabolites_
+
+
+### Untargeted
+We "throw" a raw extract in our instrument trying to analyze as much metabolites as possible. How many things we are able to see is unknown. 
+
+_The measured variables are **noy ** metabolites_
+
+
+## Why targeted, why untargeted {.smaller .build }
+
+### Targeted
+
+> 1. ! ~~quantitative~~ results are obtained "by definition"
+> 2. ! results can be interpreted under the light of the ~~known metabolic pathways~~
+> 3. ! the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited _batch effect_) 
+> 4. :( we basically look only to the expected
+
+### Untargeted
+
+> 1. ! ~~holistic~~
+> 2. ! open to ~~unexpected~~
+> 3. :( tricky
+> 4. :( hardly quantitative
+
+
+## The ideal Metabolomics road-map
+
+
+# Pitfalls and caveats
+
+## Poor planning {.build }
+
+_~~Aka ... I have a refrigerator of samples ... shall we give a look?~~_
+
+> 1. Unclear scientific target
+> 2. Suboptimal experimental design (no replicates, no proper definition of the study factors)
+> 2. Erratic analytical planning (unreliable sample extraction, disorganized analytical runs)
+> 4. ... 
+
+Remember that instrument are ~~sensitive~~ so errors will unavoidably show up in the final data
+
+
+## Annotation in Untargeted Metabolomics
+
+As you have already understood, in metabolomics (untargeted)
+
+- We do not measure the concentration of metabolites
+- If I have the metabolite is easier to understand how to get the corresponding variables (ions, NMR peaks, features)
+- ... the reverse (called ~~annotation~~) is not at all trivial
+
+_~~Most likely, chemical annotation is the current bottleneck of metabolomics~~_
+
+
+## Sampling and sample handling {.build}
+
+> - The analytical techniques used in metabolomics are extremely sensitive
+> - More often than not the samples are complex mixtures of chemicals
+> - Poor preparation, handling and storage will hamper the overall investigation
+
+_e.g. how to sample in a representative way in GC? How to quench the metabolism of microorganisms? how to store biofluids?_ 
+
+
+## Key Elements to design a succesfull metabolomics {.build}
+
+### 1 - Planning
+> - Scientific question
+> - Experimental design
+> - Analytical platform and analytical run
+> - Data analysis strategy
+
+### 2 - Awareness
+
+> - The Strength Of The Chain Is In The Weakest Link
+
+
+
+
+

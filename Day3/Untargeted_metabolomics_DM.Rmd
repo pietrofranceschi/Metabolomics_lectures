@@ -25,6 +25,15 @@ slides > slide {
   color: blue;
 }
 
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: #404040;
+}
+
 ```
 ## Starting Ideas {#notes }
 
