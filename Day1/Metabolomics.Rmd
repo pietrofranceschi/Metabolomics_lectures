@@ -39,7 +39,7 @@ The objective of ~~metabolomics~~ is to characterize in the most complete and co
 
 The pool of these molecules is known as ~~metabolome~~. 
 
-Metabolomics aims at measuring the metabolites in a ~~quantitative]] way and to characterize their relations and associations.
+Metabolomics aims at measuring the metabolites in a ~~quantitative~~ way and to characterize their relations and associations.
 
 
 ## Why Metabolomics 
