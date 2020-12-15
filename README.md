@@ -14,6 +14,8 @@
 ## Day Two
 
 * [Wrangling a targeted metabolomics data matrix](Day2/wrangling_targeted_DM.html) - [Rmd](Day2/wrangling_targeted_DM.Rmd)
+  * [KOMP data](Day2/KOMP_data_targeted.RData)
+  * [Rubus data](Day2/rubus_targeted.csv)
 * [Missing values and imputation](Day2/MissingValues.html)
 * [Data distribution](Day2/Variable_distribution.html)
 * [Multivariate visualization: PCA](Day2/PCA.html)
