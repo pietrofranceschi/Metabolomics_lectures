@@ -1,0 +1,21 @@
+---
+title: "Rubus_targeted_data"
+author: "Pietro Franceschi"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+
+```{r}
+rubus_targeted <- read_delim("rubus_targeted.csv", 
+                             "\t", escape_double = FALSE, trim_ws = TRUE)
+```
+

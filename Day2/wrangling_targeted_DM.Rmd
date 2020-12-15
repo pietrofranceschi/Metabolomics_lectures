@@ -28,7 +28,7 @@ In this themo we will use only the metabolites quantified in the targeted assays
 
 Here we get the data
 ```{r}
-load("../data/KOMP_data_targeted.RData")
+load("KOMP_data_targeted.RData")
 ```
 
 
@@ -177,7 +177,7 @@ DM_nest %>%
   theme_light()
 ```
 
-That's strange ... the largest number of NAs is corresponding to lower intensities for the BileAcids_Steroids amd not for Oxylipins. This is curious 
+That's strange ... the largest number of NAs is corresponding to lower intensities for the Bile Acids_Steroids and not for Oxylipins. This is curious 
 
 It is worth highlighting the name of the metabolites showing a number of NAs larger than 50 ...
 
@@ -324,6 +324,8 @@ The situation largely improves, even if some compounds are still showing strange
 **Something For you**
 
 1. Could you look to the metabolites showing outlying behaviors? Is this a matter of genotype? 
+
+
 
 ## Multivariate Visualization - PCA
 
