@@ -77,7 +77,7 @@ table(sample_meta_data$Gender,sample_meta_data$Genotype)
 
 * Is true that we have many animals ... but the number of samples per class is really limited
 * Luckily enough the design is "orthogonal" (in the sense that for each genotype we have both genders) and balanced 
-* The small number of samples per class is in a sense ruling out the possibility of usining with a good efficacy non parametric tests ...at least to compare the genotypes.
+* The small number of samples per class is in a sense ruling out the possibility of using with a good efficacy non parametric tests ...at least to compare the genotypes.
 
 ## The Data Matrix
 
@@ -533,12 +533,31 @@ As we have seen yesterday, a first idea on the presence of "relevant" difference
 hist(DM_i_nest$ps)
 ```
 
+Create a set of data with permuted intensities
+
+
+```{r}
+DM_i_nest <- DM_i_nest %>% 
+  mutate(perm_data = map(data, function(t)  t %>% mutate(I = sample(I)))) %>% 
+  mutate(perm_wilcoxon = map(perm_data, ~wilcox.test(I ~ Gender, data = .x, exact = FALSE))) %>% 
+  mutate(perm_ps = map_dbl(perm_wilcoxon, ~.x$p.value))
+  
+```
+
+
+```{r}
+hist(DM_i_nest$perm_ps)
+```
+
+
+
 This is clearly not uniform and it speaks of the presence of a significant fraction of differences between males and females.
 
 Now we would like to rank the variables on the base of their contrast on the two classes ... but as we know it is not correct to use the _p-value_ for that. 
 
 We need to calculate the **effect size**! Now I'll use the Cohen's d. A word of caution here, this type of effect size is parametric ... but I've been stressing that non parametric analysis here should be preferred. 
 Right. A non parametric measure of the effect size should be better. A possibility could be to calculate the ratio between the difference between the two medians and divide it by the larger interquartile range. You could be creative there ...
+
 
 Let's stick to Cohen's d. In the same time I'll also calculate the p-values corrected for multiplicity
 
