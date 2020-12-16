@@ -1,5 +1,5 @@
 ---
-title: "Experimental Design"
+title: "Annotation"
 author: "Pietro Franceschi"
 output:
   ioslides_presentation: default
