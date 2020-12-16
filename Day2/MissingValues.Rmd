@@ -40,10 +40,10 @@ missing values pop up for different reasons
 
 ## Analytical Absence
 
-**Missing is not equivalent of having **zero** concentration!
+**Missing** is ~~not~~ equivalent of having **zero** concentration!
 
-- Each analytical method is characterized by a well defined **detection limit*
-- Every concetration between zero and the detection limit will not be detected
+- Each analytical method is characterized by a well defined *detection limit*
+- Every concentration between zero and the detection limit will not be detected
 
 ## Scenario 1: 1 class
 
@@ -81,8 +81,10 @@ legend("topright", legend = c("Class A", "Class B"), pch = c(19,3), bty = "n")
 
 ```
 
+Missing values are ~~not~~ "randomly" popping-up
 
-## ## Scenario 3: 2 class ??
+
+## Scenario 3: 2 class ??
 
 ```{r fig.align='center', out.width="90%"}
 set.seed(123)
@@ -108,16 +110,16 @@ What would do you do here?
 
 <hr>
 
-How many NAs are acceptable **depends on the experimental design** 
+How many NAs are acceptable **depends on the allocation of the samples to the factors of the study** 
 
 
 ## Imputation
 
 **Imputation** is the process of substituting a missing value with a reasonable number:
 
-- multivariate imputation uses the value of "close" samples to select a good number (`missMDA` package)
-- a reasonable number can be chosen on the bases of analytical considerations (e.g. a random number between zero and the detection limit)
-- the imputation strategy should be not "aware" of the experimental design
+> 1. multivariate imputation uses the value of "close" samples to select a good number (`missMDA` package)
+> 2. a reasonable number can be chosen on the bases of analytical considerations (e.g. a random number between zero and the detection limit)
+> 3. the imputation strategy should be not "aware" of the design of the study
 
 ## Further Observations
 

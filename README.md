@@ -27,8 +27,8 @@
 * [Untargeted metbolomics data matrix](Day3/Untargeted_metabolomics_DM.html)
 * [Creating a data matrix in xcms from raw LC-MSdata](Day3/from_rawdata_to_DM.html)
   * Practical: [html](Day3/faahKO.html), [Rmd](Day3/faahKO.Rmd)
-* Some words on annotation
-* Web based resources
+* [Some words on annotation](Day3/annotation.html)
+* [SW resources for preprocessing](Day3/software_resources_for_preprocessing.html)
 
 ## Day Four
 

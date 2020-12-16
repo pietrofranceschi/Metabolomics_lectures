@@ -548,6 +548,53 @@ head(DM)
 Note that DM holds samples in columns and variables in rows, so it should be transposed to be ready for the standard analysis
 
 
+## Handling NAs
+
+So we finally get there, we have our data matrix full of intensities, but (as usual) missing values are not absent ...
+
+Another time:
+
+* in some case NAs are there because that feature was not present (low concentration metabolites)
+* in other cases they are there because the long chain of steps we have made could have been leaking somewhere. Maybe one peak was showing a bad shape, or two peaks were not well separated ...
+
+
+To go on we have to try to fill at least a part of the holes with a reasonable number. We could for sure rely on the strategy we used yesterday for targeted data, but in the case of LC-MS data we could do something more clever.
+
+Well, the table of the definition of the features tells us the chromatographic limits of all features in terms of `rtmin` and `rtmax`. A good idea would be to go back to the raw data and use the signal that was in fact measured there to put a reasonable number where the NA shows up
+
+* if the peak was missing for an error in the preprocessing, it will somehow be recovered by this procedure (obviously as far as the samples are aligned ... )
+* if nothing is there, the algorithm will find electrical/chemical noise ... and this number will be areasonable estimate of the signal we get when something is undetectable.
+
+This smart approach (which works well in many cases, even if there are exceptions) is implemented in `xcms` in the `fillChromPeaks` function
+
+
+```{r}
+xdata_filled <- fillChromPeaks(xdata)
+```
+
+Now our filled data matrix looks like this ...
+
+
+```{r}
+DM_f <- featureValues(xdata_filled, value = "into")
+head(DM_f)
+```
+
+A clear improvement, isn't it ? :-)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,67 @@
+---
+title: "Experimental Design"
+author: "Pietro Franceschi"
+output:
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+```
+
+
+```{css}
+
+slides > slide {
+  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
+  background-color: white;
+}
+
+
+#notes {
+  color: blue;
+}
+
+del {
+  color: red;
+  text-decoration: none;
+}
+
+strong {
+  color: #404040;
+}
+
+```
+
+
+
+## Annotation
+
+~~Annotation~~ is the process of **going "back"** from the variables measured in an untargeted metabolomics experiment to the corresponding metabolites.
+
+### Challenges
+
+1. Unknown metabolites
+2. Poor standardization of chromatography (in particular LC)
+3. Bioinformatic infrastructures (_databases,workflows, ..._)
+
+## The tools for the trade
+
+In the case of MS based experiments, the process of annotation requires the interpretation of the ionization pattern of each molecule and the additional information which can be derived from chromatography and fragmentation experiments
+
+1. Chemical expertise
+2. Database of standards
+3. Fragmentation experiments
+4. Chemoinformatics and predictive models
+
+
+
+
+
+1. Analytical and chemical experience 
+
+
+
+
+

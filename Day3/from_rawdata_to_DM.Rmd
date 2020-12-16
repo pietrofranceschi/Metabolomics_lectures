@@ -134,7 +134,7 @@ include_graphics("../images/cent_wave.png")
 In a multi sample experiment ~~peak lists~~ are
 
 * different even if we analyze the same sample twice
-* they are different for ananlytical/instrumental reasons
+* they are different for analytical/instrumental reasons
 * they are different for biological reasons.
 
 <hr>
