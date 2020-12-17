@@ -35,7 +35,7 @@
 * Biomarker discovery: the univariate way
 * False discoveries, and multiple testing
 * [Machine Learning for Dummies](Day4/ML_intro.html)
-* [Decision Trees and Random Forest](Day4/Decision-Trees_and_RandomForest.html)
+* [Decision Trees and Random Forest](Day4/Decision_Trees_and_RandomForest.html)
   * Practical: [html](Day4/Random_Forest_in_practice.html), [Rmd](Day4/Random_Forest_in_practice.Rmd)
 
 
