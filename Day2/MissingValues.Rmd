@@ -1,8 +1,9 @@
 ---
 title: "Missing Values"
 author: "Pietro Franceschi"
-date: "12/3/2020"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -12,20 +13,13 @@ library(tidyverse)
 ```
 
 
-```{css}
 
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-  }
-
-```
 
 
 ## Missing Values
 
 - _In statistics, missing data, or missing values, occur when no data value is stored for the variable in an observation. Missing data are a common occurrence and can have a significant effect on the conclusions that can be drawn from the data._
-- In **Metabolomics** missing values arise when the value of a specific feature/metabolite is not returned from some of the samples
+- In **metabolomics** missing values arise when the value of a specific feature/metabolite is not returned from some of the samples
 - Data can be missing **at random** or **not at random**
 
 
@@ -105,10 +99,12 @@ What would do you do here?
 ## Dealing with missing values
 
 - Use statistical methods able to handle missing data
-- **Impute** them put a reasonable number with variability
+- ~~Impute~~ them put a reasonable number with variability
 - Remove features with too many NAs (scenario 3)
 
+<br>
 <hr>
+<br>
 
 How many NAs are acceptable **depends on the allocation of the samples to the factors of the study** 
 
@@ -117,7 +113,7 @@ How many NAs are acceptable **depends on the allocation of the samples to the fa
 
 **Imputation** is the process of substituting a missing value with a reasonable number:
 
-> 1. multivariate imputation uses the value of "close" samples to select a good number (`missMDA` package)
+> 1. multivariate imputation uses the value of "close" samples to select a good number (`missMDA` package, KNN imputation )
 > 2. a reasonable number can be chosen on the bases of analytical considerations (e.g. a random number between zero and the detection limit)
 > 3. the imputation strategy should be not "aware" of the design of the study
 

@@ -1,0 +1,161 @@
+---
+title: "thired_meeting"
+author: "Pietro Franceschi"
+date: "2/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+# Variable Distribution
+
+## Why it is important
+
+```{r}
+hist(rlnorm(50), breaks = 20, main = "Lognormal Data")
+```
+
+```{r}
+hist(rnorm(50), breaks = 20, main = "Normal Data")
+```
+
+* Checking the distribution of my data is EXTREMELY important because many statistical (parametric) tests/tools assume normality
+* I test "means" and, with normal distribution, the mean is the most probable value
+
+```{r}
+my_lognormal_dataset <- rlnorm(200)
+
+
+hist(my_lognormal_dataset, breaks = 30)
+abline(v = mean(my_lognormal_dataset), col = "red", lty = 2)
+abline(v = median(my_lognormal_dataset), col = "blue", lty = 2)
+
+
+```
+
+
+Is "better" to check if my data are normal before happily running to statistical testing
+
+## Checking normality
+
+* there statistical tests
+* visual methods (qq-plots AKA quantile-quantile plots)
+
+### qq-plots
+
+```{r}
+qqnorm(my_lognormal_dataset)
+qqline(my_lognormal_dataset, col = "red")
+```
+
+* Theoretical normal quantiles vs "Empirical" (measured) quantiles
+* If my data would be normally distributed the dosts would stay on the line
+
+
+```{r}
+my_normal_dataset <- rnorm(100)
+qqnorm(my_normal_dataset)
+qqline(my_normal_dataset, col = "red")
+```
+
+
+## What can I do?
+
+* Forget the problem and live in peace
+* Use non-parametric tests/tools
+* Use statistical tools designed for non-normal data (Generalized Linear Models)
+* TRansform your data to improve the distribution
+
+
+```{r}
+qqnorm(log10(my_lognormal_dataset))
+qqline(log10(my_lognormal_dataset), col = "red")
+```
+
+Which transformation should I use?
+
+* log (quite gerneral)
+* arcsin (percentages)
+* box-cox transformation (it requires a lot of data)
+
+How to select it?
+
+* Look to the data distribution (as we did)
+* Domain knowledge
+
+
+## Example: the airquality dataset
+
+```{r}
+data("airquality")
+head(airquality)
+
+
+
+```
+
+
+Let's look to the distribution of Ozone Level
+```{r}
+
+hist(airquality$Ozone, breaks = 30)
+
+```
+```{r}
+qqnorm(log10(airquality$Ozone))
+qqline(log10(airquality$Ozone))
+```
+
+## DIY: iris and berry
+
+Either using `qqnorm` of base plot or `geom_qq` in ggplot
+
+
+
+
+# Multivariate
+
+## Organization in the multivariate space 
+
+
+## The idea of Projection: pairs plots
+
+
+## Projections: loadings and scores
+
+
+## PRojecting variance: PCA
+
+
+## PCA on the iris data
+
+
+## DIY: PCA on the rubus data ...
+
+What should I do with the NAs???
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

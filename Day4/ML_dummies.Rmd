@@ -16,9 +16,9 @@ library(tidyverse)
 
 ## Introduction
 
-The objective of theis themo, and of the subsequent DIY, is to make you familiar with the basic ideas behind ML tuning and validation.
+The objective of this demo, and of the subsequent DIY, is to make you familiar with the basic ideas behind ML tuning and validation.
 
-To do that in a simple way we will try to solve in the ML way the problem of fitting a line to a set of points. It is clear that this could be easily done by regression, but the idea is not to use mathematics, but brute force ...
+To do that in a simple way we will try to solve in the ML way the problem of fitting a line through a set of points. It is clear that this could be easily done by regression, but the idea is not to use mathematics, but brute force ...
 
 
 As we discussed in the lecture to peform machine learnign we need 
@@ -41,6 +41,9 @@ x <- seq(0,10,0.3)
 ## I put everything in a tibble
 dummy_data <- tibble(x = x, 
                      y = 2*x+5 + rnorm(length(x),0,2))
+
+dummy_data
+
 ```
 
 

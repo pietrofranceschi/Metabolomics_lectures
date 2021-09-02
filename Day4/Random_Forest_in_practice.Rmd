@@ -40,7 +40,7 @@ This we already know ...
 
 
 ```{r}
-load("../data/KOMP_data_targeted.RData")
+load("../Day2/KOMP_data_targeted.RData")
 ```
 
 
@@ -198,7 +198,7 @@ The testing of `mtry` have to be done by hand
 
 ```{r}
 ## create a testing tibble with the values
-mtrytest <-tibble(mtry = 1:13) %>% 
+mtrytest <-tibble(mtry = 1:25) %>% 
   mutate(rfs = map(mtry, ~randomForest(Gender~., data = training_df, mtry = .x))) ## run the battery of models
 ```
 
@@ -251,11 +251,11 @@ As we discusses at the beginning, we would also need an estimate of the variabil
 ## 6. Look to the variable importance in a model build on all the data
 
 The last step of our analysis is to identify the variables which are more important to differentiate males and females.
-To do that, we first construct a model on all the data (to have the minimu possible bias), and then we look to the variable importance in that model
+To do that, we first construct a model on all the data (to have the minimum possible bias), and then we look to the variable importance in that model
 
 
 ```{r}
-full_model <- randomForest(Gender~., data = rf_df, mtry = 6)
+full_model <- randomForest(Gender~., data = rf_df, mtry = 8)
 
 
 full_model

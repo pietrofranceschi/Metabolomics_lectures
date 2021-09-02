@@ -99,14 +99,13 @@ Observational studies are designed with tho objective of **identifying relations
 [**Chocolate Consumption, Cognitive Function,
 and Nobel Laureates**](http://www.biostat.jhsph.edu/courses/bio621/misc/Chocolate%20consumption%20cognitive%20function%20and%20nobel%20laurates%20(NEJM).pdf)
 
+<br>
 <hr>
 
-<div class="red2">
-*... Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country... *
-<div>
+*~~Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country~~*
 
 <hr>
-
+<br>
 [**...and more!**](https://tylervigen.com/spurious-correlations)
 <div>
 
@@ -115,7 +114,8 @@ and Nobel Laureates**](http://www.biostat.jhsph.edu/courses/bio621/misc/Chocolat
 **Key question**: what is the best way to sample my population in a _representative_ way?
 
 * Do it _randomly_ to avoid any intentional or unintentional bias (**Randomized Sampling**)
-* Take into account subpopulations (**Stratified Random Sampling**)
+* Take into account known subpopulations (**Stratified Random Sampling**)
+* Take into account known confounding factors (**Blocking**)
 * The number of samples is determined by practical/economical considerations
 
 In presence of known subpopulations stratified random sampling result in a more accurate characterization of the population
@@ -130,7 +130,7 @@ In presence of known subpopulations stratified random sampling result in a more 
 * Define the conceptual population
 * Can I sample it in a representative way?
 * Plan a clever sampling ...
-* Identify **confounding factors** 
+* Identify **confounding factors** and stratify the sampling
 
 
 ## Key idea #1: Sampling Unit
@@ -164,7 +164,7 @@ include_graphics("../images/Confounding.png")
 
 ## Experimental Design
 
-A strategy to assign the experimental unit to the different treatments to optimize my capacity of inferring **causal relationships**
+A strategy to assign the experimental units to the different *treatments* to optimize my capacity of inferring **causal relationships**
 
 * Control of unwanted sources of variability (technical/biological)
 
@@ -172,8 +172,9 @@ A strategy to assign the experimental unit to the different treatments to optimi
 
 * Group experimental units in homogeneous groups (blocks)
 * Study the variability inside the blocks
-* Identify and subtract the variability across the books
-* ANOVA!
+* Identify and subtract the variability across the blocks
+* Blocking allows to "subtract" the difference between the blocks
+* Blocks and study factors should be *orthogonal*
 
 ---
 
@@ -188,13 +189,14 @@ include_graphics("../images/blocks.png")
 
 
 
-*~~Blocking is better than randomization because it is possible to "subtract" the variability between the blocks]]*
+*~~Blocking is better than randomization because it is possible to "subtract" the variability between the blocks~~*
 
+<br>
 <hr>
+<br>
+**Examples of common blocking factors:**
 
-**Examples**
-
-* Location 
+* Location  
 * Analytical batch
 * Day
 * Operator 

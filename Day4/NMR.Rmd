@@ -1,0 +1,109 @@
+---
+title: "NMR dataset"
+author: "Pietro Franceschi"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(randomForest)
+library(tidyverse)
+library(readxl)
+library(readr)
+```
+
+
+
+
+## Load the NMR data
+```{r}
+DM <- read_excel("data/MTBLS1/ADG_transformed_data.xlsx")
+
+sample_meta <- read_delim("data/MTBLS1/s_MTBLS1.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
+```
+
+Let's now give a look
+
+```{r}
+DM %>% select(-`Primary ID`) %>% t(.) %>% matplot(., type = "l")
+```
+
+
+Cleanup columns with only zeroes
+
+
+```{r}
+DM_nest <- DM %>% 
+  pivot_longer(starts_with("["), names_to = "bin", values_to = "Intensity") %>% 
+  nest(-bin) %>% 
+  mutate(zerofrac = map_dbl(data,~(sum(.x$Intensity == 0)/132)*100))
+```
+
+```{r}
+plot(DM_nest$zerofrac)
+```
+
+
+```{r}
+table(sample_meta$`Factor Value[Gender]`, sample_meta$`Factor Value[Metabolic syndrome]`)
+```
+
+Imputation proposal ... all zeroes with a uniform number extracted from zero and the global minimum ...
+
+
+```{r}
+abs_min <- DM_nest <- DM %>% 
+  pivot_longer(starts_with("["), names_to = "bin", values_to = "Intensity") %>% 
+  filter(Intensity > 0) %>% 
+  pull(Intensity) %>% 
+  min(.)
+```
+
+
+```{r}
+
+myimputer <- function(v){
+  if (sum(v == 0) == 0) {
+    return(v)
+  } else {
+    zpos <- which(v == 0)
+    newval <- runif(length(zpos),0,abs_min)
+    out <- v
+    out[zpos] <- newval
+    return(out)
+  }
+  
+}
+```
+
+Now we apply it to the full set of columns
+
+```{r}
+DM_i <- DM %>% 
+  mutate(across(starts_with("["), ~myimputer(.x)))
+```
+
+
+We set_up the data for RF
+
+
+```{r}
+DM_rf <- DM_i %>%
+  left_join(sample_meta %>% select(`Source Name`, `Factor Value[Metabolic syndrome]`)) %>% 
+  select(-`Source Name`) %>% 
+  mutate(`Factor Value[Metabolic syndrome]` = factor(`Factor Value[Metabolic syndrome]`)) %>% 
+  filter(!is.na(`Factor Value[Metabolic syndrome]`))
+```
+
+
+```{r}
+library(randomForest)
+rfmodel <- randomForest(`Factor Value[Metabolic syndrome]`~., data = DM_rf)
+
+rfmodel
+```
+
+
+
+
+
