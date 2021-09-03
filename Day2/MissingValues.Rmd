@@ -94,7 +94,7 @@ legend("topright", legend = c("Class A", "Class B"), pch = c(19,3), bty = "n")
 
 ```
 
-What would do you do here?
+What would you do here?
 
 ## Dealing with missing values
 
@@ -120,7 +120,7 @@ How many NAs are acceptable **depends on the allocation of the samples to the fa
 ## Further Observations
 
 * It is "easier" to handle missing values randomly distributed
-* Use **domain specific knowledge** (e.g analytical) inject new knowledge in the data analysis pipeline!
+* Use **domain specific knowledge** (e.g analytical - LOD) inject new knowledge in the data analysis pipeline!
 * **Quality Check**: try different forms of imputation: are the outcomes sensitive to that?
 
 
