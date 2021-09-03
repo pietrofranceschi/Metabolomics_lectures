@@ -1,7 +1,9 @@
 ---
 title: "Metabolomics!"
 author: "Pietro Franceschi"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -11,28 +13,6 @@ library(DiagrammeR)
 ```
 
 
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: #404040;
-}
-
-```
 ## What is Metabolomics
 
 The objective of ~~metabolomics~~ is to characterize in the most complete and comprehensive way the pool of small molecules which are the end product of the metabolism.
@@ -138,49 +118,49 @@ With chromatography the differnt molecules reach the ionization source at differ
 ## NMR vs LC/GC MS {.build}
 
 ### NMR
-> 1. ! Reproducible
-> 2. ! Inherently quantitative
-> 3. ! Sensitive to the chemical structure
+> 1. :-) Reproducible
+> 2. :-) Inherently quantitative
+> 3. :-) Sensitive to the chemical structure
 > 4. :-( Relatively insensitive
 > 5. :-( Dynamic range
 
 ### LC/GC - MS
-> 1. ! Sensitive
-> 2. ! Universal
-> 3. ! With high dynamic range
+> 1. :-) Sensitive
+> 2. :-) Universal
+> 3. :-) With high dynamic range
 > 3. :-( Less reproducible (euphemysm)
 
 # Doing Metabolomics
 
-## Targeted vs Untargeted Metabolomics {.smaller .build}
+## Targeted vs Untargeted {.smaller .build}
 
 ### Targeted
 We use the analytical method of choice to analyze a selected set of metabolites. The list can go from around 10 to something around 500.  
 
-_The measured variables are metabolites_
+~~The measured variables are metabolites~~
 
 
 ### Untargeted
 We "throw" a raw extract in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown. 
 
-_The measured variables are **not** metabolites_
+~~The measured variables are **not** metabolites~~
 
 
 ## Why targeted, why untargeted {.smaller .build }
 
 ### Targeted
 
-> 1. ! ~~quantitative~~ results are obtained "by definition"
-> 2. ! results can be interpreted under the light of the ~~known metabolic pathways~~
-> 3. ! the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited _batch effect_) 
-> 4. :( we basically look only to the expected
+> 1. :-) ~~quantitative~~ results are obtained "by definition"
+> 2. :-) results can be interpreted under the light of the ~~known metabolic pathways~~
+> 3. :-) the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited _batch effect_) 
+> 4. :- ( we basically look only to the expected
 
 ### Untargeted
 
-> 1. ! ~~holistic~~
-> 2. ! open to ~~unexpected~~
-> 3. :( tricky
-> 4. :( hardly quantitative
+> 1. :-) ~~holistic~~
+> 2. :-) open to ~~unexpected~~
+> 3. :-( tricky
+> 4. :-( hardly quantitative
 
 
 ## The ideal Metabolomics road-map
@@ -200,7 +180,7 @@ _~~Aka ... I have a refrigerator of samples ... shall we give a look?~~_
 > 2. Erratic analytical planning (unreliable sample extraction, disorganized analytical runs)
 > 4. ... 
 
-Remember that instrument are ~~sensitive~~, so errors will unavoidably show-up in the final data (_garbage in, garbage out_)
+Remember that ~~instruments are sensitive~~, so errors will unavoidably show-up in the final data (_garbage in, garbage out_)
 
 ## Annotation ...
 
@@ -219,6 +199,14 @@ As you have already understood, in untargeted metabolomics
 
 _~~Most likely, chemical annotation is the current bottleneck in untargeted metabolomics~~_
 
+## Annotation strategies {.build}
+
+> * Fragmentation experiments (in MS!)
+> * In house db of standards
+> * On-line db of standards
+> * Chemoinformatics
+> * ML (prediction of chemical structures from spectra )
+
 
 ## Sampling and sample handling {.build}
 
@@ -232,16 +220,18 @@ _e.g. how to sample in a representative way in GC? How to quench the metabolism 
 
 > 1. Unfavorable variables-to-samples ratio
 > 2. Unexpected subpopulations
-> 3. not always easy to place the results inside the established body of knowledge
+> 3. Not always easy to place the results inside the established body of knowledge
 
+<br>
 <hr>
+<br>
 
 **~~Two stage design:~~** 
 
-1. hypothesis generation;
-2. validation
+1. Hypothesis generation
+2. Validation
 
-## Key Elements to design a succesfull metabolomics {.build .smaller}
+## Key Elements to design a succesfull metabolomics investigation {.build .smaller}
 
 ### 1 - Planning
 > - Scientific question
@@ -250,9 +240,9 @@ _e.g. how to sample in a representative way in GC? How to quench the metabolism 
 > - Data analysis strategy
 
 ### 2 - Awareness
-> - The Strength Of The Chain Is In The Weakest Link
+> - _The Strength Of The Chain Is In The Weakest Link_
 
-### 2 - Interdisciplinarity
+### 3 - Interdisciplinarity
 > - The analyst and the data analyst are your best friends ...
 
 

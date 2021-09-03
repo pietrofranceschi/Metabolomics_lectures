@@ -17,21 +17,23 @@ library(knitr)
 
 As in all _omic_ experiments, a metabolomic assay allows to measure a large number of _variables_(properties) in a (hopefully) reasonably large number of samples.
 
+<br>
 <hr>
+<br>
 
-**... what are the variables ...**
+~~... what are the variables ...~~
 
 > 1. In a targeted metabolomics investigation
 > 2. In an untargeted MS based metabolomics analysis
 > 3. In an untargeted NMR based metabolomics assay
 
 	
+## Number of variables | place your guess {.build}
 
-## Number of variables ... place your guess
-
-> 1. from 10 to 300
-> 2. from 1000 to 30000
-> 3. from 500 to 1000
+> * Targeted metabolomics investigation
+> * ~~from 10 to 300~~
+> * Unargeted metabolomics investigation
+> * ~~from 1000 to 30000~~ 
 
 
 ## Data Matrix
@@ -54,9 +56,9 @@ plot(x,y, main = "Correlation", xlab = "Var1", ylab = "Var2", cex = 1, col = "co
 
 ## Rows (samples) are often dependent
 
-The design of the study can result in a multilevel hierarchical structure of the samples which violate independence. In other words some samples are "by construction" associated and share something in common
+The design of the study can result in a ~~multilevel hierarchical structure~~  of the samples which violate independence. In other words some samples are "by construction" associated and share something in common
 
-**Examples**
+~~**Examples**~~
 
 1. Repeated measures of the same individual
 2. Subpopulations
@@ -68,11 +70,11 @@ In the typical "happy" statistical context, the number of variable we measure is
 
 In _omics_ the number of variables normally outperforms the number of samples
 
+<br>
 <hr>
 
-<div class="red2">
-*FAT DATA MATRIX*
-<div>
+~~*FAT DATA MATRIX*~~
+
 
 
 ```{r fig.align='center', fig.height=2.5, fig.width=10, out.width="100%"}
@@ -103,7 +105,7 @@ rect(xleft = 0.7, xright = 0.71, ybottom = -0.1, ytop = 1.1, border = "steelblue
 
 Each samples is represented as a point in the multidimesional variable space. The dataset is a **cloud** of points in that space.
 
-The size of the space equals the number of variables we are measuring. **Multivariate methods** (PCA, PLS, ASCA, ...) are able to exploit the structure of the space
+The size of the space equals the number of variables we are measuring. **Multivariate methods** (PCA, PLS, ASCA, ...) are able to exploit the correlation between the variables to highlight/extract the organization of the data
 
 ```{r, echo=FALSE, fig.align='center', out.width="40%"}
 include_graphics("../images/Coord_planes_color.svg")
@@ -111,23 +113,25 @@ include_graphics("../images/Coord_planes_color.svg")
 
 ## Why multivariate
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE, fig.align='center',out.width="60%"}
 library(cowplot)
 library(ggpubr)
 
 ggscatterhist(
   iris, x = "Sepal.Length", y = "Sepal.Width",
   color = "Species", # comment out this and last line to remove the split by species
-  #margin.plot = "histogram", # I'd suggest removing this line to get density plots
+  margin.plot = "histogram", # I'd suggest removing this line to get density plots
   margin.params = list(fill = "Species", color = "black", size = 0.2)
 ) 
 
 ```
 
+Group separation is clearer in the 2d space ...
+
 ## Multivariate
 
 
-**PRO**
+~~**PRO**~~
 
 1. Potentially more powerful
 2. Explicit use of variable correlation
@@ -135,7 +139,7 @@ ggscatterhist(
 
 <hr>
 
-**CONS**
+~~**CONS**~~
 
 
 1. Chance correlations in fat matrices
@@ -145,7 +149,7 @@ ggscatterhist(
 ## Univariate
 
 
-**PRO**
+~~**PRO**~~
 
 
 1. Statistical modeling is there!
@@ -153,7 +157,7 @@ ggscatterhist(
 
 <hr>
 
-**CONS**
+~~**CONS**~~
 
 
 1. Multiple testing
@@ -168,14 +172,14 @@ set.seed(123)
 par(mfrow = c(1,3))
 par(pty="s")
 plot(y = rep(0,10), x = runif(10,0,10), xaxt='n', yaxt='n', bty="n", xlim = c(-1,11), 
-     main = "10 points 1D", xlab = "", ylab = "", col = "steelblue", cex = 1.5, pch  =21)
+     main = "10 points 1D", xlab = "", ylab = "", col = "#FFA50060", cex = 2, pch  =19)
 arrows(x0 = 0 , y0 = 0, x1 = 11)
 
 par(pty="s")
-plot(y = runif(10,0,10), x = runif(10,0,10), xlab = "D1", ylab = "D2", main = "10 points 2D", col = "steelblue", cex = 1.5, pch  =21)
+plot(y = runif(10,0,10), x = runif(10,0,10), xlab = "D1", ylab = "D2", main = "10 points 2D", col = "#FFA50060", cex = 2, pch =19)
 
 
-plot(y = runif(100,0,10), x = runif(100,0,10), xlab = "D1", ylab = "D2", main = "100 points 2D", col = "steelblue", cex = 1.5, pch  =21)
+plot(y = runif(100,0,10), x = runif(100,0,10), xlab = "D1", ylab = "D2", main = "100 points 2D", col = "#FFA50060", cex = 2, pch  =19)
 
 ```
 

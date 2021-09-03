@@ -19,16 +19,14 @@ This first demo deals with "random organization". As we discussed in the lecture
 * can mirror a population level property
 * can be the result of a "unlucky" sampling
 
-To understand the second point, just consider an hypothetic sampling of the human population made by an extraterrestrial entity. If he/she (it?) random sample a couple of humans, it will likely conclude that we are all chinese! 
+To understand the second point, just consider an hypothetic sampling of the human population made by an extraterrestrial entity. If he/she (it?) random sample a couple of humans, it will likely conclude that we are all Chinese! 
 
-Let's make a more scientific example. Let's create a fake metabolomics experiment (but it can be everything you like ...) where I'm measuring the concentration of 1000 variables on a group of samples. And let's suppose that I want to study the correlation between the different variables to infer new regulatory networks ...
+Let's make a more scientific example. Let's create a fake metabolomics experiment (but it can be everything you like ...) where I'm measuring 1000 **independent** variables on a group of samples. And let's suppose that I want to study the correlation between the different variables to infer new regulatory networks ...
 
-
-To simulate my dummy experiment I will fill my data matrices with random numbers, to show the role of the sample/variable ratio in this business I'll also simulate may dummy data with different number of samples
+To simulate my dummy experiment I will fill my data matrices with random numbers, to show the role of the sample/variable ratio in this business I'll also simulate my dummy data with different number of samples
 
 ```{r}
 ## Random expression data matrix
-
 dummy_data <- tibble(nsamples = seq(10,500,10)) %>% 
   mutate(DM = map(nsamples,~matrix(rnorm(1000*.x), ncol = 1000)))
 
@@ -43,11 +41,13 @@ That's the battery of data matrices of growing size. Do I have some "true" resul
 OK, let's calculate the correlation among the different variables in all the 40 scenarios
 
 ```{r}
+## I'm using purrr
+
 dummy_data <- dummy_data %>% 
   mutate(varCorr = map(DM,~cor(.x)))
 ```
 
-Just to see what's going on let's give a look to one of the correlation matrices
+Just to see what's going on let's give a look to one of the correlation matrices, actually the first 100 variables
 
 ```{r}
 dim(dummy_data$varCorr[[3]])
@@ -55,11 +55,13 @@ dim(dummy_data$varCorr[[3]])
 jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
 
 par(pty="s")
-image(t(dummy_data$varCorr[[3]][1:100,100:1]), xaxt = "n", yaxt = "n", col = jet.colors(20))
+image(t(dummy_data$varCorr[[3]][1:100,1:100]), xaxt = "n", yaxt = "n", col = jet.colors(20))
 ```
 
 Right, in the matrix the color of each pixel is proportional to the correlation between two variables (here only 100 are shown).
-The diagonal is made up of !s, because the correlation between each variable and itself is 1. The matrix is symmetric, since the measure of Pearson correlation is symmetric
+The diagonal is made up of 1s, because the correlation between each variable and itself is 1. The matrix is symmetric, since the measure of Pearson correlation is symmetric.
+
+The plot is rotated ... this is an idiosyncrasy of the `image` basic plot ... however
 
 
 Now we get only the upper triangle of the matrix in order to look to the distribution of the correlation coefficients
@@ -81,7 +83,7 @@ abline(v = c(-0.8,0.8), col = "red", lty = 2)
 ```
 
 
-Unexpectedly ( ;-) ) ... we also have high correlation variables! The vertical lines show the 0.8 limit ... 
+Unexpectedly ( ;-) ) ... we also have variables showing high correlation! The vertical lines show the 0.8 limit ... 
 
 In absolute terms 
 ```{r}
@@ -93,7 +95,7 @@ The code below gives you the indexes of the variables showing high correlation (
 
 
 ```{r}
-highcorrid <- which(dummy_data$varCorr[[1]] > 0.95 & dummy_data$varCorr[[1]] != 1, arr.ind = TRUE)
+highcorrid <- which(dummy_data$uptri[[1]] > 0.95 & dummy_data$varCorr[[1]] != 1, arr.ind = TRUE)
 highcorrid
 ```
 
@@ -115,7 +117,7 @@ Before giving the chance to you to play with some random science, let's look oh 
 ```{r}
 dummy_data %>% 
   filter(nsamples %in% c(10,100,300, 500)) %>% 
-  select(nsamples, uptri) %>% 
+  dplyr::select(nsamples, uptri) %>%                              ## this is needed because a function called `select` is abiguous
   unnest(uptri) %>% 
   ggplot() + 
   geom_histogram(aes(x = uptri, fill = factor(nsamples)), alpha = 0.5, col = "white", binwidth = 0.05) + 
@@ -128,6 +130,7 @@ What we see here is interesting, the probability of getting high correlation coe
 
 **Something for you!**
 
+0. Go back to the code I used to plot the correlation matrix and try to rewrite the nested function by using pipes ...
 1. Play around and try to understand what I did
 2. Simulate an experiment where I have two classes of samples (10 treated, 10 controls) and I'm characterizing them with an array of new machines able to measure 5, 10, 100, 1000, 10000 variables. Fill each data matrix with random numbers. In each case calculate the p-value of an univariate t-test for each variable (you will have 5, 10, 1000, 10000 p-values). Do you find p-values lower than 0.05? Can you plot the histograms of the p-values?
 
