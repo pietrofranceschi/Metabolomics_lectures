@@ -5,14 +5,21 @@ slides > slide {
 
 
 #notes {
-  color: blue;
+  color: #377eb8;
+}
+
+
+#highlights {
+  color: #e41a1c;
 }
 
 del {
-  color: red;
+  color: #e41a1c;
   text-decoration: none;
 }
 
 strong {
-  color: #404040;
+  color: #377eb8;
 }
+
+

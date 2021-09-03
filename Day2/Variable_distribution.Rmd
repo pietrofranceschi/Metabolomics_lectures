@@ -1,5 +1,5 @@
 ---
-title: "Variable Distribution"
+title: "Distribution of Measured Variables"
 author: "Pietro Franceschi"
 output: 
   ioslides_presentation:
@@ -14,12 +14,12 @@ library(tidyverse)
 
 
 
-## Normal Distribution
+## Normal Distribution {#notes .smaller}
 
 - The Normal (Gaussian) distribution has a prominent role in statistics
 - Some sort of "normality" is often the prerequisite of many statistical tools
-- With normal data the ~~mean is the value with higher likelihood~~
-- Reasoning on the mean is equivalent of reasoning on the most probable value ...
+- With normal data, ~~the mean is the value with higher likelihood~~
+- Reasoning on the mean is equivalent is reasoning on the most probable value ...
 
 ```{r out.width= "50%", fig.align='center'}
 ## Standard normal distribution:
@@ -35,17 +35,20 @@ normal1 <- function(x){
 xvalues %>% ggplot(aes(x = x)) + 
   stat_function(fun = normal1, lwd = 1, col = "darkblue") + 
   stat_function(fun = normal1, geom = "area", fill = "steelblue", alpha = 0.5) +
-  theme_void() + 
-  geom_hline(yintercept = 0, lwd = 1)
+  theme_light() + 
+  geom_hline(yintercept = 0, lwd = 1) + 
+  geom_vline(xintercept = 0, lty = 2, col = "red") + 
+  geom_text(x = 0, y = 0.1, label = "mean", size =7) + 
+  ylab("Likelihood")
 
 
 ```
 
 ## Sampling Distribution
 
-The distribution of the mean of a sample extracted from every type of distribution is always normal
+The distribution of the mean of a ~~sample~~ extracted from every type of distribution is always normal
 
-```{r fig.width=7}
+```{r fig.width=7, fig.align='center'}
 popunif <- runif(10000)
 
 means <- rep(0,500)
@@ -60,7 +63,7 @@ hist(means, main = "Means of repeated sampling (20)", col = "Orange")
 
 ```
 
-## Sampling Distribution
+## Sampling Distribution {#highlights}
 
 **Noteworthy**
 
@@ -81,7 +84,7 @@ Where $N$ is the size of the sample
 
 We are often dealing with data non normally distributed
 
-1. Count based technologies (MS!)
+1. Count based technologies never return negative numbers ... (MS!)
 2. Presence of sub-populations
 3. Outliers
 
@@ -89,7 +92,7 @@ Sub populations are typically present in complex experiments
 
 ## Subpopulations
 
-```{r}
+```{r fig.align='center'}
 subpop <- c(rnorm(100,10,3),rnorm(100,20,3))
 
 hist(subpop, breaks = 30)
@@ -100,7 +103,7 @@ abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
 
 Lognormal data are extremely common in metabolomics ...
 
-```{r out.width= "90%", fig.align='center'}
+```{r out.width= "70%", fig.align='center'}
 set.seed(124)
 lndata <- rlnorm(200, meanlog = 0, sdlog = 1)
 
@@ -115,13 +118,16 @@ legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd 
 
 ## Solutions
 
-> 1. **Non-parametric** approaches (Kruskall-Wallis, quantile-regression, permutations, bootstrap)
+> 1. **Non-parametric** approaches (Kruskall-Wallis, quantile-regression, permutations, bootstrap, ...)
 > 2. Variable **transformations** 
+
+
+Remember that non parametric tests suffer of lack of power and are often completely useless fin investigations with only few samples (5-10)
 
 ---
 
 
-```{r}
+```{r fig.align='center'}
 lndata_t <- log10(lndata)
 
 hist(lndata_t, breaks = 50, col = "steelblue", main = "Log trasformed Lognormal Data")
@@ -129,6 +135,8 @@ abline(v = mean(lndata_t), col  ="red", lwd = 2)
 abline(v = median(lndata_t), col  ="darkgreen", lwd = 2)
 legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd = 1, box.lwd = 0)
 ```
+
+~~Mean and median are ok!~~
 
 
 ## Checking Normality
@@ -140,16 +148,16 @@ legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd 
 
 Quantile quantile plots are used to visually compare the **theoretical quantiles** of a distribution with the **sample quantiles** 
 
-```{r}
+```{r fig.align='center'}
 a <- rnorm(30)
 par(pty="s")
 qqnorm(a, main = "Normal q-q plot of normal data", pch = 19)
 qqline(a)
 ```
 
-## 
+## q-q plot for lognormal data
 
-```{r}
+```{r fig.align='center'}
 par(pty="s")
 qqnorm(lndata, main = "Normal q-q plot of log-normal data", pch = 19, col = "#984ea380")
 qqline(lndata)
@@ -157,5 +165,6 @@ qqline(lndata)
 ```
  
 
+## Take home message {#highlights}
 
-
+Before running your statistical machinery give a look to your data to check if what you are doing makes sense ...

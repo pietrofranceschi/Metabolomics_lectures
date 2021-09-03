@@ -12,32 +12,33 @@ library(knitr)
 library(tidyverse)
 ```
 
-
-
-
-
 ## Missing Values
 
-- _In statistics, missing data, or missing values, occur when no data value is stored for the variable in an observation. Missing data are a common occurrence and can have a significant effect on the conclusions that can be drawn from the data._
+_In statistics, missing data, or missing values, occur when no data value is stored for the variable in an observation. Missing data are a common occurrence and can have a significant effect on the conclusions that can be drawn from the data._
+
+<br>
+
 - In **metabolomics** missing values arise when the value of a specific feature/metabolite is not returned from some of the samples
 - Data can be missing **at random** or **not at random**
 
 
-## Notes
+## Notes {#notes}
 
-missing values pop up for different reasons
+In metabolomics missing values pop up for different reasons
 
 >1. Missing values arise in presence of errors in preprocessing (targeted or untargeted)
 >2. Missing values arise more easily in presence of low intensity signals
->3. A metabolite is "absent" in a signal I'll get a missing value (_eg. red pigment in a an extract of white grape_)
+>3. If a metabolite is "absent" in a sample I'll get a missing value (_eg. red pigment in a an extract of white grape_)
 
 
-## Analytical Absence
+## Analytical Absence {#highlights}
 
-**Missing** is ~~not~~ equivalent of having **zero** concentration!
+Having a **Missing** is **not** equivalent of having **zero** concentration!
 
 - Each analytical method is characterized by a well defined *detection limit*
 - Every concentration between zero and the detection limit will not be detected
+- We cannot be never 100% sure that something is absent from my sample ...
+
 
 ## Scenario 1: 1 class
 
@@ -109,11 +110,11 @@ What would you do here?
 How many NAs are acceptable **depends on the allocation of the samples to the factors of the study** 
 
 
-## Imputation
+## Imputation {#notes}
 
 **Imputation** is the process of substituting a missing value with a reasonable number:
 
-> 1. multivariate imputation uses the value of "close" samples to select a good number (`missMDA` package, KNN imputation )
+> 1. multivariate imputation uses the value of samples whicha are close in the multivariate space to select a good number (`missMDA` package, KNN imputation, ... ). This works well if data are missing at random ...
 > 2. a reasonable number can be chosen on the bases of analytical considerations (e.g. a random number between zero and the detection limit)
 > 3. the imputation strategy should be not "aware" of the design of the study
 

@@ -1,7 +1,6 @@
 ---
 title: "Wrangling a Targeted Metabolomics DM"
 author: "Pietro Franceschi"
-date: "12/9/2020"
 output: html_document
 ---
 
@@ -293,7 +292,7 @@ DM_nest %>%
 Ok, the plot is "ugly" (maybe creating a set of plots as we did before could have been more pleasant), but is really informative.
 
 * No sign of normal distribution
-* For some metabolites M and F are really differnt ... and for 12(13)Ep-9-KODE the trend is really interesting.
+* For some metabolites M and F are really different ... and for 12(13)Ep-9-KODE the trend is really interesting.
 
 
 ```{r fig.height=3, fig.width=8}

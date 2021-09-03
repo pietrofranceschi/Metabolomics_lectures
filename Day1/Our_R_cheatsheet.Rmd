@@ -42,7 +42,7 @@ This way of programming is particularly efficient when you want to do "data carp
 
 ## Tibbles 
 
-Tibbles are the new version of R "data.frames". If you are not an expert you can think to them as the analogous of Excel tables. Tibbles are the workhorse of the data analyst since almost all the data we will be digesting are organized as tables.
+Tibbles are the new version of R "data.frames". You can think to them as the analogous of Excel tables. Tibbles are the workhorse of the data analyst since almost all the data we will be digesting are organized as tables.
 
 An interesting feature of tibbles is that they can contain columns of tables. The advantage of that will be clear during the demos. Just as an appetizer
 
@@ -60,8 +60,16 @@ my_first_tibble
 and now I add a column of tables ...
 
 ```{r}
-a_table <- matrix(1:4, nrow = 2)
-my_first_tibble$tables <- list(a_table,a_table)
+## this is a dummy matrix to be used just as an example
+a_matrix <- matrix(1:4, nrow = 2)
+
+## I'm adding here a 2 element column which combines twice the matrix
+my_first_tibble$tables <- list(a_matrix,a_matrix)
+
+## I'm doing that with the data carpentry machinery
+my_first_tibble <- my_first_tibble %>% 
+  add_column(other_tables = list(a_matrix,a_matrix))
+
 
 my_first_tibble
 
@@ -74,19 +82,23 @@ Now you see that my table contains a column made of matrices
 The `purrr` package (which is part of `tidyverse` ) allows you to recursively apply operations to data stored in tabular form.
 Suppose, for example, that we want to calculate the determinant of the previous matrices
 
-This can be done in a very compact and clear way as follows
+```{r}
+## in R there is a specifica function called determinat to do that
+?determinant
+```
+
+
+If my data are organized in tabular form ...the determinant of the two matrices can be 
+calculated in a very efficient and organized way as follows
 
 ```{r}
 my_first_tibble <- 
   my_first_tibble %>% 
-  mutate(determinant = map(tables, ~.x[1,1]))
-  
-  
-  
-  mutate(determinant = map(tables, ~determinant(.x)))
+  mutate(determinant = map(tables, function(x) determinant(x)))
 
 my_first_tibble
 ```
+In words ...
 
 1. take `my_first_tibble`
 2. pipe it to a function called `mutate`, which creates a new column called _determinant_.
@@ -94,6 +106,10 @@ my_first_tibble
 
 
 
+```{r}
+## this is the determinant of the first matrix
+my_first_tibble$determinant[[1]]
+```
 
 
 

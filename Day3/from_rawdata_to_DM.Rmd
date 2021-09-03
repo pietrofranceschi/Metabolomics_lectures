@@ -1,8 +1,9 @@
 ---
 title: "LC-MS: from raw data to DM"
 author: "Pietro Franceschi"
-date: "12/3/2020"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -13,28 +14,6 @@ library(MASS)
 ```
 
 
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: black;
-}
-
-```
 ## Starting Ideas {#notes }
 
 >1. Metabolites shows up as peaks in the rt/mz space
@@ -42,21 +21,38 @@ strong {
 >3. The peaks of the same compounds are slightly shifted in the  different samples
 
 
-## Fragmentation
+## Fragmentation {.smaller}
 
 During ionization chemical structures ~~fragment~~ in different ions
 
-```{r fig.align="center", out.width="100%"}
+```{r fig.align="center", out.width="90%"}
 include_graphics("../images/LCMS.png")
 ```
 
+A metabolite **produce several peaks on the mz-rt plane**
+
+
+## Extracted Ion Traces  {.smaller}
+The chromatograms of the ions coming from the same metabolite are locally correlated
+
+```{r fig.align="center", out.width="90%"}
+include_graphics("../images/LCMS.png")
+```
+
+but the ~~same ion can come from different metabolites!~~ 
+
+---
+
+```{r fig.align="center", out.width="70%"}
+include_graphics("../images/peaks_plane.png")
+```
 
 ## Pre processing workflow
 
-0. Get out the raw data
+0. Get out the raw data from the proprietary format
 1. Reliably find peaks in the 2D plane for each sample
-2. Align the different peak lists 
-3. Match the peak lists across the samples
+2. Align the different peak lists correcting for chromatographic drifts
+3. Match the peak lists across the samples find a consensus list of ~~features~~
 4. Select a good measure of intensity and arrange everything in a data matrix
 
 
@@ -69,11 +65,12 @@ include_graphics("../images/LCMS.png")
 - Inspecting and checking the quality of each step
 - Checking the outcomes of the statistical analysis
 
+<br>
+<br>
+
 <hr>
-
-
-~~A result should be visible in the raw data ...~~
-
+~~A result should be always visible in the raw data ...~~
+<hr>
 
 
 ## 0. Get the raw data
@@ -182,7 +179,7 @@ The ~~area~~ is often more robust, but can give erratic results if the peak is n
 include_graphics("../images/maxointo.png")
 ```
 
-
+## Missing Features
 
 
 

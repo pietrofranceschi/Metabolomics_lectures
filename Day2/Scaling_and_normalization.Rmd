@@ -1,8 +1,9 @@
 ---
 title: "Scaling and Normalization"
 author: "Pietro Franceschi"
-date: "12/3/2020"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -13,19 +14,6 @@ library(MASS)
 ```
 
 
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-```
 ## Variable Scale
 
 Metabolomics aims at measuring the concentration of :
@@ -33,16 +21,17 @@ Metabolomics aims at measuring the concentration of :
 1. The larger (as possible) number of metabolites 
 2. ... over the larger (as possible) range of concentration
 
+<br>
 <hr>
+<br>
 
-**We typically are dealing with huge differences in signal across the different variables**
+~~We typically are dealing with huge differences in signal across the different variables~~
 
 - potential issues in the reliability of some measurement
 - no direct effect on a univariate analysis 
 - strong effect on multivariate analysis 
 
 ## Same data different scales
-
 
 ```{r fig.height=5, fig.width=7, out.width="80%", fig.align='center'}
 par(pty="s")
@@ -52,24 +41,26 @@ sigma <- matrix(c(0.1,0, 0, 10), 2)  # Covariance matrix
 dummy <- rbind(mvrnorm(20, mu = mu1, Sigma = sigma),
               mvrnorm(20, mu = mu2, Sigma = sigma))
 
-
 par(mfrow = c(1,2))
 
-plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-8,8), main = "Larger variability in var b")
+plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), 
+     xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-8,8), main = "Larger variability in var b")
 
-plot(scale(dummy), pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-8,8), , main = "Larger variability in var a")
+plot(scale(dummy), pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), 
+     xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-8,8), main = "Larger variability in var a")
 
 
 ```
 
+
 ## Take home {#notes}
 
-> - In the multivariate space the "shape" of the sample distribution depends on the absolute scale of the variables
+> - In the multivariate space the "shape" of the sample cloud depends on the absolute scale of the variables
 > - All multivariate methods based on the distance in that space will be affected by the variable scale (e.g. PCA, Clustering, PCoA, ...)
 
 ## How to correct for that
 
-- Variable transfrmation (_e.g. log or sqrt_)
+- Variable transformation (_e.g. log or sqrt_)
 - Variable scaling (_e.g. unit variance_)
 
 
@@ -97,21 +88,24 @@ segments(0,log10(80),80,log10(80), lwd = 1, col = "gray", lty = 2)
 2. Increasing the weight of small signal is not always the best option 
    * low signals are less reliable
    * missing values pop-up there
+3. Log transformation (and sqrt to a lower extent), often also correct for the non-normal distribution of data
 
-                                            -------------------------
+                                            
 
-## Sample Normalization 
+## Sample Normalization {.smaller}
 
-The overall metabolite concentration in one or more samples can be different from the others. The sample will show-up as an _outlier_.
+The overall metabolite concentration in one or more samples can be different from the others. The sample will show-up as an __outlier__.
 
- 1. There is a real differnce in that sample. **Good!**
- 2. The samples show different levels of dilution (e.g. urine). **Bad**
- 4. The signal is lower for "analytical" reasons. **Bad**
+ 1. There is a real difference in that sample. **Good!**
+ 2. The samples show different levels of dilution (e.g. urine). ~~Bad!~~
+ 4. The signal is lower for "analytical" reasons. ~~Bad!~~
     - lower extraction of metabolites
     - reduce response of the instrument (in particular for MS based techniques)
      - ...
 
+<br>
 <hr>
+<br>
 
 **Normalization** is used to compensate for the unwanted difference in sample response
 
@@ -128,9 +122,9 @@ The overall metabolite concentration in one or more samples can be different fro
 1. Use **chemical standards** to compensate for analytical issues
 2. Wisely plan (**randomize!**) your analytical sequence to avoid biases
 
+<br>
 <hr>
-
-If 
+<br>
 
 3. Normalize to the overall signal ... mmm   ... )-:
 4. Probabilistic Quotient Normalization (PQN)
@@ -138,7 +132,7 @@ If
 
 ## Compositional Data
 
-```{r}
+```{r fig.align='center'}
 compdf <- tibble(class = c("A","B"), Var1 = c(30,50), Var2 =  c(20,20)) %>% 
   pivot_longer(-class) %>%
   group_by(class) %>% 
@@ -179,7 +173,7 @@ This design simulates a drop in the response of my pipeline of a factor of 2 whi
 ---
 
 
-```{r}
+```{r fig.align='center'}
 s1 <- rnorm(100,200,10)
 s2 <- rnorm(100,200,10)
 s3 <- rnorm(100,200,10)
@@ -201,16 +195,19 @@ Let's take the first sample as reference ...
 
 ## Distribution of ratios
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, fig.align='center'}
 PQNratios <- apply(DM[2:4,],1,function(r) r/DM[1,]) %>% 
   as_tibble() %>% 
   pivot_longer(everything()) 
+
+med_pqn <- PQNratios %>% group_by(name) %>% summarise(median = median(value))
 
 
 PQNratios %>% 
   ggplot() + 
   geom_histogram(aes(x = value, fill = name), col  ="white") + 
   scale_fill_brewer(palette = "Set1", name = "Sample") + 
+  geom_vline(data = med_pqn,mapping = aes(xintercept = median), lty = 2) + 
   facet_wrap(~name, ncol = 1) + 
   theme_light() + 
   xlab("ratio") + 
@@ -220,8 +217,16 @@ PQNratios %>%
 ```
 
 
+## Code ...
 
+```{r echo=TRUE}
+PQNratios %>% 
+  group_by(name) %>% 
+  summarise(median = median(value))
+```
 
+* So to make S4 comparable to the others I should divide the signal by roughtly 0.5
+* The use of the ~~median~~ ensures that the sistem will work also in presence of a few biomarkers
 
 
 

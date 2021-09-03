@@ -1,8 +1,9 @@
 ---
 title: "Untargeted Metabolomics Data Matrix"
 author: "Pietro Franceschi"
-date: "12/3/2020"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -12,29 +13,6 @@ library(tidyverse)
 library(MASS)
 ```
 
-
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: #404040;
-}
-
-```
 ## Starting Ideas {#notes }
 
 >1. The data matrix will be **FAT**
@@ -64,15 +42,40 @@ include_graphics("../images/Liquid_chromatography_MS_spectrum_3D_analysis.png")
 
 - Dimension 1: separation time (in sec or minutes)
 - Dimension 2: "weight of the molecule" (measured as mass/charge, _m/z_)
+
+<br>
+<hr>
+<br>
+
 - The intensity of the different ions coming from the same molecule are highly correlated
 - Due to analytical variability retention time and m/z slightly drift over time
 - Relative quantification
+
+
+## Ion Mobility
+
+```{r out.width="80%", fig.align= "center"}
+include_graphics("../images/ion_mobility.png")
+```
+
+
+* The ions coming from the ionization interface are further separated on the base of their "structure"
+* Ion mobility does not help in controlling the matrix effect
+
+## Direct Infusion (DIMS)
+
+* The chromatographic separation is removed
+* The sample is directly ionized in the interface
+* High speed
+* Huge ~~matrix effect~~
+
+
 
 ## NMR
 
 **One dimensional data**
 
-NMR measures the a specific physical property of atomic nuclei in presence of magnetic field (their frequency of resonance). The measured frequency of resonance depends on the chemical environment, i.e. on the structure of the molecule which contains an active NMR nucleus 
+NMR measures a physical property (their frequency of resonance) of atomic nuclei in presence of a magnetic field. The **measured frequency of resonance depends on the chemical environment**, i.e. on the structure of the molecule which contains an active NMR nucleus 
 
 1. No separation in time is (generally) needed
 2. Each molecule/metabolite produces more than one NMR peak
@@ -87,13 +90,13 @@ include_graphics("../images/nmr_spectroscopy.png")
 
 * More peaks per molecule
 * functional groups from different molecules can add-up
-* intensity is proportional to the number of molecules
+* intensity is proportional to the number of molecules so NMR is ~~inherently quantitative~~
 
 ## NMR: what we measure
 
 - Dimension 1: shift in frequency to a reference in **ppm**
 - The intensity of the different peaks coming from the same molecule are highly correlated
-- In metabolomics, the ppm scale is __binned__ to account for slight misalignments 
+- In metabolomics, the ppm scale is *binned* (*bucketing*) to account for slight misalignments 
 
 
 

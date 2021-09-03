@@ -1,8 +1,9 @@
 ---
 title: "PCA"
 author: "Pietro Franceschi"
-date: "12/3/2020"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -10,16 +11,6 @@ knitr::opts_chunk$set(echo = FALSE)
 library(knitr)
 library(tidyverse)
 library(MASS)
-```
-
-
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-  }
-
 ```
 
 
@@ -41,17 +32,19 @@ text(3,5, cex = 1.5, expression(X[ij]))
 
 The element $X_{ij}$ contains the value of variable `j` in the sample `i`
 
-## Key ides
+## Key ides {#notes}
 
 > 1. Each sample is a point in the _n_ dimensional space of the measured variables.
 > 2. The measured variables are often redundant
-> 3. It make sense to **project** the samples in alower dimensional space
+> 3. To "see" what happens in the large space a clever idea is to **project** the samples in alower dimensional space
+> 4. Projection will always show us a part of the reality
+> 5. There is always an ~~error~~ associated to a projection
 
 
 ## Intrinsec Dimensionality
 
 In presence of correlation among the variables, the samples actually occupy only a "fraction" of the potential
-multidimensional space
+multidimensional space. Here a projection is highly informative
 
 <hr>
 
@@ -75,9 +68,9 @@ scatter3D(xp, yp, zp, colvar = NULL, col = "#4682B480", pch = 19, main = "Intrin
 
 ## Latent Variable
 
-(Mathematical combination of several variables. 
+~~Mathematical combination of several variables~~ 
 
-Looking to the data along **specific latent variables**, we highlight some desired property of the data
+Projecting the data along **specific latent variables**, we highlight some desired property of the data. In a more broad sense, the latent variables can also be seen as the mathematical representation of the ~~hidden rules~~ which determine the sample behavior
 
 <hr>
 
@@ -94,6 +87,7 @@ This representation is constructed "projecting" the samples on the LVs
 
 <hr>
 
+~~Each projection will result in:~~
 * **Scores**: the representation of the samples in the LV space (_the new coordinates_)
 * **Loadings**: the "weight" of the original variables on the single LVs (_the recipe to construct the new variables from the measured ones)
 
@@ -110,7 +104,8 @@ dummy <- rbind(mvrnorm(20, mu = mu1, Sigma = sigma),
 plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-3,3))
 ```
 
-> What LV will separate the two groups?
+> What LV will maximize the separation between the two groups? 
+> Can you guess something about the loadings?
 
 ## LV for class discrimination (LDA) {.smaller}
 
@@ -151,7 +146,7 @@ The aim of PCA is dimension reduction and PCA is the most frequently applied met
 
 The transformation is defined in such a way way that the first principal component has the **largest possible variance** (that is, accounts for as much of the variability in the data as possible), and each succeeding component in turn has the highest variance possible under the constraint that it is **orthogonal** to the preceding components.
 
-* In PCA the “objective” of the projection is to maximize variance
+* In PCA the “objective” of the projection is to maximize variance (spread of the point cloud)
 * PCA “view” will enhance the spread of the data
 * The key idea is that **variability means information** 
 
@@ -205,6 +200,13 @@ The loadings represent the weight of the initial variables along PC1
 * `Var a`: `r abs(pcadirection[1])`
 * `Var b`: `r abs(pcadirection[2])`
 
+## LDA and PCA {#notes}
+
+* The latent variable are different!
+* They try to highlight different aspect of the data
+* PCA does not known anything about the groups (technically is _unsupervised_)
+
+
 ## PCA uses
 
 * Visualization of multivariate data by scatter plots
@@ -213,10 +215,22 @@ The loadings represent the weight of the initial variables along PC1
 * Combination of several variables that characterize a chemical-technological-biological process into a single or a few "characteristic" variables
 * Make the “latent properties” actually measurable
 
-## PCA is sensitive to scaling and centering
+## Scaling and centering {.smaller}
 
-```{r fig.height=6, fig.width=8, fig.align='center'}
+```{r fig.height=6, fig.width=8, fig.align='center', out.width="60%"}
 par(pty="s", mfrow = c(1,2))
+
+# Simulate bivariate normal data
+mu <- c(5,6)                         # Mean
+Sigma <- matrix(c(2,2, 2, 5), 2)  # Covariance matrix
+# > Sigma
+# [,1] [,2]
+# [1,]  1.0  0.1
+# [2,]  0.1  1.0
+ 
+# Generate sample from N(mu, Sigma)
+bivn <- mvrnorm(100, mu = mu, Sigma = Sigma )
+
 
 ## non mean centered and non scaled
 myPCA1 <- prcomp(x = bivn)
@@ -245,7 +259,10 @@ abline(h = 0, lty = 2)
 
 ```
 
-## PCA is sensitive to outliers
+* To point in the direction of maximum variance the data ~~have to be centered~~
+* The spread of the projection depends on the scaling
+
+## Outliers
 
 ```{r fig.height=6, fig.width=8, fig.align='center'}
 par(pty="s", mfrow = c(1,2))
@@ -275,13 +292,74 @@ abline(h = 0, lty = 2)
 
 ```
 
-## Notes
+## Notes {#notes}
 
 * Sensitivity to outliers is useful if PCA is used to spot them ;-)
 * *robust* versions of PCA are available to keep all data in
 * PCA show the big “structure” of my data and this can help in interpretation
 * PCA will change if you add points !!!
 * The loadings are not always easy to interpret
+
+## A projection can be non flat ... 
+
+ * All the projection methods discussed so far are based on *linear algebra* 
+ * Projection subspaces are then **flat** (lines, planes, hyperplanes, ...)
+ * Flat projections could fail to capture the overall structure of the dataset
+ * The challenge would be to ~~capture at the same time the large scale and small scale structure~~ of the data.
+ 
+ 
+ 
+## Possible appraoches {#notes}
+
+* t-SNE
+* UMAP
+
+
+## 10 normal groups, 3D | PCA
+ 
+```{r}
+
+set.seed(123)
+
+## Create 10 groups in 3 dimensions
+Sigma <- matrix(c(0.0005,0,0, 
+                  0,0.0005,0,
+                  0,0,0005), nrow = 3, byrow = TRUE)
+
+multigroup <- tibble(group = paste0("g",1:10)) %>% 
+  mutate(coord = map(group, ~mvrnorm(50, 
+                                     mu = c(runif(1),runif(1), runif(1)), 
+                                     Sigma = Sigma))) %>% 
+  unnest(coord) 
+
+## do a flat PCA projection 
+myPCA4 <- prcomp(x = scale(multigroup[,2]))
+
+
+cbind.data.frame(group = multigroup$group, myPCA4$x) %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = group)) + 
+  theme_light() + 
+  theme(aspect.ratio = 1)
+
+```
+ 
+## 10 normal groups, 3D | t-SNE
+ 
+```{r}
+library(Rtsne)
+
+mytsne <- Rtsne(scale(multigroup[,2]), perplexity = 5)
+
+cbind.data.frame(group = multigroup$group, dir1 = mytsne$Y[,1], dir2 = mytsne$Y[,2]) %>% 
+  ggplot() + 
+  geom_point(aes(x = dir1, y = dir2, col = group)) + 
+  theme_light() + 
+  theme(aspect.ratio = 1)
+```
+ 
+ 
+## Distance based approaches
 
 
 
