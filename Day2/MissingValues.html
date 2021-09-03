@@ -95,7 +95,7 @@ slide:not(.current) .plotly.html-widget{
             
   </style>
 
-  <link rel="stylesheet" href="data:text/css,slides%20%3E%20slide%20%7B%0Abackground%3A%20linear%2Dgradient%28%23ffffff%2C%20%23ffffff%2085%25%2C%20%23ffffff%29%3B%0Abackground%2Dcolor%3A%20white%3B%0A%7D%0A%23notes%20%7B%0Acolor%3A%20%234682b4%3B%0A%7D%0A%23highlights%20%7B%0Acolor%3A%20%23cb4154%3B%0A%7D%0Adel%20%7B%0Acolor%3A%20%23cb4154%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Astrong%20%7B%0Acolor%3A%20%23404040%3B%0A%7D%0A" type="text/css" />
+  <link rel="stylesheet" href="data:text/css,slides%20%3E%20slide%20%7B%0Abackground%3A%20linear%2Dgradient%28%23ffffff%2C%20%23ffffff%2085%25%2C%20%23ffffff%29%3B%0Abackground%2Dcolor%3A%20white%3B%0A%7D%0A%23notes%20%7B%0Acolor%3A%20%23377eb8%3B%0A%7D%0A%23highlights%20%7B%0Acolor%3A%20%23e41a1c%3B%0A%7D%0Adel%20%7B%0Acolor%3A%20%23e41a1c%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Astrong%20%7B%0Acolor%3A%20%23377eb8%3B%0A%7D%0A" type="text/css" />
 
 </head>
 
@@ -184,7 +184,7 @@ slide:not(.current) .plotly.html-widget{
 <p><strong>Imputation</strong> is the process of substituting a missing value with a reasonable number:</p>
 
 <ol class = 'build'>
-<li>multivariate imputation uses the value of &ldquo;close&rdquo; samples to select a good number (<code>missMDA</code> package, KNN imputation )</li>
+<li>multivariate imputation uses the value of samples whicha are close in the multivariate space to select a good number (<code>missMDA</code> package, KNN imputation, … ). This works well if data are missing at random …</li>
 <li>a reasonable number can be chosen on the bases of analytical considerations (e.g. a random number between zero and the detection limit)</li>
 <li>the imputation strategy should be not &ldquo;aware&rdquo; of the design of the study</li>
 </ol>
