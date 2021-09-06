@@ -1,7 +1,9 @@
 ---
 title: "Statistical Testing and Effect Size"
 author: "Pietro Franceschi" 
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -11,29 +13,6 @@ library(tidyverse)
 library(MASS)
 ```
 
-
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: #404040;
-}
-
-```
 
 
 ## The BIG question
