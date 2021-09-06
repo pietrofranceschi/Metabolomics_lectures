@@ -8,7 +8,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
-
 Load the package and the data
 
 ```{r}
