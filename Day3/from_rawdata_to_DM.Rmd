@@ -36,7 +36,7 @@ A metabolite **produce several peaks on the mz-rt plane**
 The chromatograms of the ions coming from the same metabolite are locally correlated
 
 ```{r fig.align="center", out.width="90%"}
-include_graphics("../images/LCMS.png")
+include_graphics("../images/EIC.png")
 ```
 
 but the ~~same ion can come from different metabolites!~~ 
@@ -51,7 +51,7 @@ include_graphics("../images/peaks_plane.png")
 
 0. Get out the raw data from the proprietary format
 1. Reliably find peaks in the 2D plane for each sample
-2. Align the different peak lists correcting for chromatographic drifts
+2. Align the different peak lists correcting for **chromatographic drifts**
 3. Match the peak lists across the samples find a consensus list of ~~features~~
 4. Select a good measure of intensity and arrange everything in a data matrix
 
@@ -72,10 +72,18 @@ include_graphics("../images/peaks_plane.png")
 ~~A result should be always visible in the raw data ...~~
 <hr>
 
+## On Instrumental drifts
 
-## 0. Get the raw data
+* M/z value change because everything we measure changes ... 
+* **Mass accuracy** (instrument property) defines the limits of m/z "drift"
+* Chromatographic drifts are **less predictable** (at least for LC)
+* Chromatographic drifts have various origin (time, age of the column, type of sample, ...)
+* The ~~efficiency of the spectrometer degrades with time~~ (the instrument gets dirty) 
 
-Raw LC/Gc-MS are saved in **proprietary** format by the acquisition equipment (Bruker, Agilent, thermo, Waters, ...). 
+
+## 0. Get the raw data {.smaller}
+
+Raw LC/Gc-MS are saved in **proprietary** format by the acquisition equipment (Bruker, Agilent, Thermo, Waters, ...). 
 
 Before the analysis the raw data have to be **converted** into _open source_ formats:
 
@@ -84,11 +92,14 @@ Before the analysis the raw data have to be **converted** into _open source_ for
 - mzXML
 - **mzML** , more recent and recommended
 
+<br>
 <hr>
+<br>
 
-Conversion tool
+Conversion tools
 
-[_proteowizard_](http://proteowizard.sourceforge.net/)
+* ### Instrument software
+* [_proteowizard_](http://proteowizard.sourceforge.net/)
 
 
 
@@ -96,10 +107,17 @@ Conversion tool
 
 ## General Ideas
 
+**Look for peaks in the mz-rt plane**
+
+<br>
+<hr>
+<br>
+
+
 Almost all software for the analysis of untargeted metabolomics data will propose different algorithms to perform peak picking:
 
 * None of the algorithms is perfect
-* There are a lot of parameters to tweak
+* There are a lot of ~~parameters~~ to tweak
 * The practice (and **the awareness**) makes the master
 
 
@@ -113,7 +131,7 @@ include_graphics("../images/matchedFilter.png")
 
 ## Cent-Wave
 
-```{r fig.align="center", out.width="60%"}
+```{r fig.align="center", out.width="55%"}
 include_graphics("../images/cent_wave.png")
 ```
 
@@ -123,34 +141,46 @@ include_graphics("../images/cent_wave.png")
 * Look for molecules ~~you know~~ should be there
 * ~~Visually Check~~ your output
 * Do no look for _perfection_
+* Automatic solutions (reduce variability among the QC)
 
 # 2. Alignment
 
 ## General Ideas
+
+**The objective of alignment is to ~~compensate~~ the analytical drifts, without putting together things that should not be aligned**
+
+<br>
+<hr>
+<br>
+
 
 In a multi sample experiment ~~peak lists~~ are
 
 * different even if we analyze the same sample twice
 * they are different for analytical/instrumental reasons
 * they are different for biological reasons.
+* in high rsolution experiments, `xcms` relies on [**obiwarp**](http://obi-warp.sourceforge.net/tutorials/mass_spectrometry_alignment_example.html)
 
-<hr>
-
-The objective of alignment is to **compensate** the analytical drifts, without putting together things that should not be aligned
 
 # 3. Correspondance
 
 ## General Ideas
 
-The last step is to find a consensus list of variable across the different samples. After alignment, the list of peaks is now aligned in retention time but:
+**The last step is to find a consensus list of variable across the different samples**
+
+<br>
+<hr>
+<br>
+
+After alignment, the list of peaks is now aligned in retention time but:
 
 * peak lists are still separated per sample
 * a peak could be present only in a group of samples (because a metabolite is missing there)
 * a peak could be missing because it was not correctly identified
 
-## Density Based Grouping
+---
 
-```{r fig.align="center", out.width="80%"}
+```{r fig.align="center", out.width="60%"}
 include_graphics("../images/grouping.png")
 ```
 
@@ -179,9 +209,49 @@ The ~~area~~ is often more robust, but can give erratic results if the peak is n
 include_graphics("../images/maxointo.png")
 ```
 
-## Missing Features
+## Missing Features 
+
+Even if aligned the typical DM will be full of **missing values**
+
+<br>
+<hr>
+<br>
+
+> * error in peak picking
+> * error in alignment
+> * compound missing in one or more samples
 
 
+## Imputation {.smaller}
+
+* Remove the features with too many NAs
+* The detection limit is unknown!
+* Something related to the minimum intensity for each feature
+* Something related to our knowledge of the instrument (noise)
+
+
+<br>
+<hr>
+<br>
+
+**`xcms` implements a `fillPeaks()` function which will integrate the raw ms signal in the area of the peak in all missing samples** 
+
+* if the peak was missed the signal will be there
+* if nothing was there only the noise will be integrated
+
+
+## Feature filtering
+
+**Some of the features will be measured in an unreliable way and should be discarded**
+
+<br>
+<hr>
+<br>
+
+
+* features with too many missing values in the samples
+* features showing an higher variability in the QC samples (high variability in QC than in true samples)
+* ...
 
 
 

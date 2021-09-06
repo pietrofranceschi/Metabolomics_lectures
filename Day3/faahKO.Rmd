@@ -1,7 +1,6 @@
 ---
 title: "LCMS with xcms"
 author: "Pietro Franceschi"
-date: "12/7/2020"
 output: html_document
 ---
 
@@ -17,6 +16,7 @@ library(RColorBrewer) ## nicer color schemes
 library(xcms)         ## the package doing the job
 library(tidyverse)    ## potentially useful 
 library(knitr)
+library(plotly)
 ```
 
 
@@ -30,7 +30,7 @@ library(faahKO)
 we will analyze a subset of the data from in which the metabolic consequences of knocking out the fatty acid amide hydrolase (FAAH) gene in mice was investigated. The raw data files (in NetCDF format) are provided with the faahKO data package. The data set consists of samples from the spinal cords of 6 knock-out and 6 wild-type mice. Each file contains data in centroid mode acquired in positive ion mode form 200-600 m/z and 2500-4500 seconds. To speed up processing of this vignette we will restrict the analysis to only 8 files and to the retention time range from 2500 to 3500 seconds.
 
 
-**Note** A large parte of this tutorial is taken from the official vignette of [`xcms`](https://bioconductor.org/packages/release/bioc/vignettes/xcms/inst/doc/xcms.html). Many thanks to Steffen Neumann and Juhannes Rainer! 
+**Note** A large part of this tutorial is taken from the official vignette of [`xcms`](https://bioconductor.org/packages/release/bioc/vignettes/xcms/inst/doc/xcms.html). Many thanks to Steffen Neumann and Juhannes Rainer! 
 
 
 # Part 1
@@ -51,9 +51,9 @@ As you can see we have four injections belonging to two classes, ko and wt.
 
 In the last few years the `xcms` developer has been making a big effort to make their package coherent with a general framework for the handling of MS data in R (metabolomics, proteomics, ...)
 
-all this goes beyond the scope of our course, for us is sufficient to know that this infrastructure allows to store sample "metadata" (e.g. treatment class, time point, etc) together with the raw experimental data.
+All this goes beyond the scope of our course, for us is sufficient to know that this infrastructure allows to store sample "metadata" (e.g. treatment class, time point, etc) together with the raw experimental data.
 
-In our specific case, the tibble with the phenotypic data could be designed as follow
+In our specific case, the tibble with the phenotype data could be designed as follow
 
 ```{r}
 phenodata <- tibble(sample_name = sub(basename(cdfs), pattern = ".CDF",
@@ -62,13 +62,16 @@ phenodata <- tibble(sample_name = sub(basename(cdfs), pattern = ".CDF",
 phenodata
 ```
 
-Up to now nothing has been actually loaded into R. To do that 
+Up to now nothing has been actually loaded into R. To do that.
 
 ```{r}
 raw_data <- readMSData(files = cdfs, 
                        pdata = new("NAnnotatedDataFrame", phenodata), ## this is the structure of xcms holding phenotypic data
-                       mode = "onDisk")
+                       mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
+
+Loading the full dataset into RAM can be problematic for large studies (we will see this in the specific demo) so with this specific `on disk` mode the raw data are still staying on the disk
+
 
 We next restrict the data set to the retention time range from 2500 to 3500 seconds, just to spare some time ...
 
@@ -78,6 +81,8 @@ raw_data <- filterRt(raw_data, c(2500, 3500))
 
 
 ## Data Visualization
+
+In  the general presentation we have clearly stated that one should be able to visualize the raw data, so let's give a look to the structure of the r object we created
 
 The raw_data object contains the full set of 2D data collected in all my 8 samples. The "raw" values can be extracted by using 
 
@@ -108,8 +113,6 @@ length(rt)
 ```
 
 
-
-
 Where we see the increasing time scale for each file.
 
 `mz` and `I` holds the mass spectra collected at each scantime ... for this reason the two objects are lists and not vectors. Remember our data are 2d. For each  scantime we have a complete mass spectrum
@@ -130,21 +133,51 @@ We can plot a complete spectrum (here the first scan of the first sample ...)
 plot(mz$F1.S0130,I$F1.S0130, type = "h", main = names(mz)[1])
 ```
 
+`xcms` provides tools to visualize and play with the raw data, in a more direct way
+
+```{r}
+## the size of our raw data
+length(raw_data)
+```
+
+Is exactly the number of scans and
+
+```{r}
+raw_data[[1]]
+```
+
+is indeed a spectrum, which has a `plot`method
+
+```{r}
+plot(raw_data[[1]])
+```
+
+This is a sort of gg stuff so if we want an interactive stuff we can rely on the `plotly` package, and also change some of the characteristics of the graphicla layout
+
+```{r}
+ggplotly((plot(raw_data[[1]])))
+```
+
 Ok, working with all files together is not the best ... for visualization and handling. To facilitate the "cutting" by file, xcms is provided with a `split()` function which can be combined with a `fromFile` function to create a list with the content separate by file
 
 ```{r}
-by_file_mz <- split(mz, fromFile(raw_data))
-by_file_rt <- split(rt, fromFile(raw_data))
-by_file_I <- split(I, fromFile(raw_data))
-length(by_file_mz)
+single_raw <- split(raw_data, fromFile(raw_data))
 ```
 
- As we discussed, metabolites are visible as peaks ia 2d mz/rt plane ...
+and each element of the list is now a single raw data
+
+```{r}
+single_raw[[1]]
+```
+
+As we discussed, metabolites are visible as peaks ia 2d mz/rt plane ...
  
 ```{r}
-mytibble <- tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]])
+mytibble <- tibble(rt = rtime(single_raw[[1]]), mz = mz(single_raw[[1]]), I = intensity(single_raw[[1]]))
 mytibble
 ```
+ 
+ And now a fancy plot ....
  
 ```{r}
 
@@ -153,35 +186,48 @@ jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F"
 test <- mytibble %>% 
   unnest(c("mz","I")) %>% 
   ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = log10(I)), size = 0.7) + 
+  geom_point(aes(x = rt, y = mz, col = log10(I)), size = 1) + 
   scale_color_gradientn(colours = jet.colors(7)) + 
-  xlim(2600,2700) + 
-  ylim(380,390) + 
   theme_light()
 
 test
 
 ```
 
-Let's try a rd plot with plotly
-
 ```{r}
-mytibble %>% 
-  unnest(c("mz","I")) %>% 
-  filter(mz > 380 & mz < 390) %>% 
-  filter(rt > 2600 & mz < 2800) %>% 
-  plot_ly() %>%
-  add_markers(x = ~mz, y = ~rt, z = ~I, color = ~I, marker = list(size = 1))
+test + 
+  xlim(2500,2750) + 
+  ylim(350,400)
 ```
 
 
+1. A mass spectrum can be seen as a vertical cut of the previous map 
+2. We see the accuracy of the mass and also the phenomenon used by CentWave
+3. Some of the "peaks" are organized in vertical groups, these are the ions coming from the same metabolite
+
+The second thing we would like to visualize is the Extracted ion trace
+
+```{r}
+## Define the rt and m/z range of the peak area
+rtr <- c(2700, 2900)
+mzr <- c(334.9, 335.1)
+## extract the chromatogram
+chr_raw <- chromatogram(raw_data, mz = mzr, rt = rtr)
+```
 
 
-1. A mass spectrum can be seen as a vertical cut of the previous map ... 
-2. Some of the "peaks" are organized in vertical groups ... these are the ions coming from the same metabolite ...
+```{r}
+plot(chr_raw)
+```
+
+So we are able to actually see the chromatographic peak of the m/z 335
 
 
-In the first phase of the inspection is useful to visualize the "total" chromatograpic current ...
+
+## Data Inspection
+
+When one is dealing with the initial investigation of the data the first thing to do is to look to the total ion current of each chromatogram or to the base peak ion chromatogram
+
 
 ```{r}
 ## Get the total ion chromatograms. This reads data from the files.
@@ -198,7 +244,7 @@ plot(tics, col = group_colors[raw_data$sample_group])
 ```
 
 
-As you can see, nothing happens after 4200 seconds ... we also appreciate the variability of the results.
+As you can see, the results are different with common look and feel
 
 This visualization already shows you how it will be tricky to "match" the different samples. Some of the peaks are present everywhere, but others show-up only in specific samples ...
 
@@ -214,8 +260,8 @@ plot(total_I, col = factor(raw_data$sample_group), pch = 19, cex = 2)
 
 ```
 
-Here the response is comparable, but if this would be the injection order, we should highlight the absence of a proper randomization of the samples!
-
+Here the response is comparable, but if this would be the injection order, we should highlight the absence of a proper randomization of the samples! 
+An important  things to look at here is the TIC of QCs, they should be comparable!
 
 I know that a specific metabolite present in my samples yields an ion @mz335 ... let's look to the profile of this ion signal over the chromatographic time
 
@@ -238,7 +284,7 @@ The previous plot is important. It is telling us that the _metabolite_I_know_ is
 
 1. Play around with the faahKO dataset, looking for potentially interesting idea to check the data quality
   - boxplot showing the tics and not only their sum ...
-  - correlation between the different tics (Note: to do that you need to make the time scale uniform with binning ... you can      do it manually or using the function `bin` - see `?bin` for details)
+  - correlation between the different tics (Note: to do that you need to make the time scale uniform with binning ... you can do it manually or using the function `bin` - see `?bin` for details)
   - ...
 
 
@@ -249,13 +295,13 @@ The previous plot is important. It is telling us that the _metabolite_I_know_ is
 
 The "older" and most sounding way of finding peaks implemented in `xcms` is the `matched filter` algorithm.
 
-A full description of the parametrs of the algorithm can be found in the `xcms` manual, here we focus on
+A full description of the parameters of the algorithm can be found in the `xcms` manual, here we focus on
 
 * binSize: the "width" of the m/z bins used to find the peaks
 * fwhm : the "expected" size of the peak
 * snthresh :the signal/to noise ratio of the peak
 
-In xcms the parameters of the algorithm are stored into aspecific object
+In xcms the parameters of the algorithm are stored into a specific object
 
 ```{r}
 mf <- MatchedFilterParam(binSize = 0.1, 
@@ -269,12 +315,7 @@ Now I can use the previous parameters to find the peaks in **one** sample
 
 
 ```{r}
-
-first_file <- readMSData(files = cdfs[1], 
-                       mode = "onDisk") %>% 
-  filterRt(c(2500, 3500))
-
-first_peaks <- findChromPeaks(first_file,param = mf)
+first_peaks <- findChromPeaks(single_raw[[1]],param = mf)
 ```
 
 The actual list of peaks can be extracted from the previous object by the method `chromPeaks`
@@ -297,7 +338,6 @@ The help of xcms describes the most relevant columns of the table
 __"mz" (intensity-weighted mean of mz values of the peak across scans/retention times), "mzmin" (minimal mz value), "mzmax" (maximal mz value), "rt" (retention time of the peak apex), "rtmin" (minimal retention time), "rtmax" (maximal retention time), "into" (integrated, original, intensity of the peak), "maxo" (maximum intensity of the peak), "sample" (sample index in which the peak was identified)__
 
 
-
 This is the map of the identified peaks superimposed to the "real" experimental data
 
 ```{r}
@@ -305,7 +345,7 @@ This is the map of the identified peaks superimposed to the "real" experimental 
 peaks_tibble <- as_tibble(first_peak_table)
 
 
-tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>% 
+tibble(rt = rtime(single_raw[[1]]), mz = mz(single_raw[[1]]), I = intensity(single_raw[[1]])) %>% 
   unnest(c("mz","I")) %>% 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = log10(I)), size = 0.1) + 
@@ -315,10 +355,10 @@ tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>%
 ```
 
 - we have a lot of peaks!
-- in some cases peaks are arranged in vertical stripes ... these are the signatures that on emetabolite is giving you more than one ion ... but all these ions are coming out at the same retention time
+- in some cases peaks are arranged in vertical stripes,these are the signatures that one metabolite is giving you more than one ion ... but all these ions are coming out at the same retention time
 
 
-Peak picking can also be performed with another algorithm ... CentWave ...
+Peak picking can also be performed with another algorithm: `CentWave`
 
 ```{r}
 cwp <- CentWaveParam(peakwidth = c(20, 80), 
@@ -338,7 +378,7 @@ Also here many parameters (and others are not mentioned). I highlight here some 
 If we run the peak picking with this new algorithm ...
 
 ```{r}
-first_peaks_cw <- findChromPeaks(first_file,param = cwp)
+first_peaks_cw <- findChromPeaks(single_raw[[1]],param = cwp)
 ```
 
 
@@ -357,7 +397,7 @@ As you see the number of columns is different, but the key infos are there. Rema
 peaks_tibble_cw <- as_tibble(first_peak_table_cw)
 
 
-tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>% 
+tibble(rt = rtime(single_raw[[1]]), mz = mz(single_raw[[1]]), I = intensity(single_raw[[1]])) %>% 
   unnest(c("mz","I")) %>% 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = log10(I)), size = 0.1) + 
@@ -369,7 +409,7 @@ tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>%
 If we superimpose them ...
 
 ```{r}
-tibble(rt = by_file_rt[[1]], mz = by_file_mz[[1]], I = by_file_I[[1]]) %>% 
+tibble(rt = rtime(single_raw[[1]]), mz = mz(single_raw[[1]]), I = intensity(single_raw[[1]])) %>% 
   unnest(c("mz","I")) %>% 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = sqrt(I)), size = 0.1, alpha = 0.5) + 
@@ -397,11 +437,9 @@ xdata <- findChromPeaks(raw_data, param = cwp)
 
 Here a table of the peaks found in all files
 
-
 ```{r}
 table(chromPeaks(xdata)[,"sample"])
 ```
-
 
 An overall representation of their distribution in the plane is extremely interesting
 
@@ -410,14 +448,14 @@ An overall representation of their distribution in the plane is extremely intere
 chromPeaks(xdata) %>% 
   as_tibble() %>% 
   ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = into), siaze = 0.3) + 
+  geom_point(aes(x = rt, y = mz, col = into), size = 0.3) + 
   facet_wrap(~sample) + 
   theme_light()
 ```
 
 As you can see the samples are different, but the overall "look and feel" is coherent. This is telling us that the overall analytical run was good. 
 
-I was metioning retention time shifts ... 
+I was mentioning retention time shifts ... 
 
 ```{r}
 chromPeaks(xdata) %>% 
@@ -429,7 +467,7 @@ chromPeaks(xdata) %>%
   theme_light()
 ```
 
-... The shift is clear! It is small, but it is visible. the shift is responsible of a difference in the samples coming from the analysis and not the biology. This shift has to be corrected to avoid biased results
+The shift is clear! It is small, but it is visible. the shift is responsible of a difference in the samples coming from the analysis and not the biology. This shift has to be corrected to avoid biased results
 
 `xcms` can do much more to browse and characterize the peaks, but here we want to focus on the key ideas.
 
@@ -439,8 +477,6 @@ In summary:
 * they are different even if we analyze the same sample twice
 * they are different for analytical/instrumental reasons
 * they are different for biological reasons.
-
-
 
 ## Alignment
 
@@ -482,12 +518,12 @@ chromPeaks(xdata) %>%
   theme_light()
 ```
 
-As you can see the situation has improved and some of the verticl stripes are now well aligned.
+As you can see the situation has improved and some of the vertical stripes are now well aligned.
 
 
 ## Correspondence
 
-The last step is to find a consensus list of variable across the different samples. The list of peaks is now aligned in retention time but:
+The last step is to find a consensus list of variable across the different samples, **these will be the features which will. The list of peaks is now aligned in retention time but:
 
 * peaks are still separated per sample
 * a peak could be present only in a group of samples (because a metabolite is missing there)
@@ -556,6 +592,7 @@ The (almost) final untargeted data matrix can be extracted from the same object 
 ```{r}
 DM <- featureValues(xdata, value = "into")
 dim(DM)
+head(DM)
 ```
 
 The intensity used to build the data matrix is normally chosen as
@@ -564,7 +601,7 @@ The intensity used to build the data matrix is normally chosen as
 * `maxo`: maximum intensity of the peak
 
 
-In our simple example we have 233 variables measured over 8 samples
+In our simple example we have 309 variables measured over 8 samples
 
 ```{r}
 head(DM)
@@ -608,6 +645,8 @@ head(DM_f)
 
 A clear improvement, isn't it ? :-)
 
+
+This data matrix will be the starting point of our statistical analysis ...
 
 
 
