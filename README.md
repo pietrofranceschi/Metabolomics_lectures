@@ -1,4 +1,16 @@
-# Physalia Metabolomics Course 2020
+# Metabolomics Lectures
+
+This repository contains material for a full metabolomics course ideally organized in four days.
+The material (which is growing!) covers: the following topics:
+
+* General Introduction to metabolomics and study design
+* General analyttical considerations
+* Analysis of a targeted metabolomics data matrix
+* Pre processing of Untargeted LC-MS data by xcms
+* NMR
+* Introduction to machine learning and multivariate tools
+* Statistical analysis of metabolomics data by univariate tools
+
 
 ## Day One
 
