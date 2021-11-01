@@ -1,39 +1,15 @@
 ---
 title: "Experimental Design"
 author: "Pietro Franceschi"
-output:
-  ioslides_presentation: default
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(knitr)
 ```
-
-
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: #404040;
-}
-
-```
-
 
 
 ## Statistics

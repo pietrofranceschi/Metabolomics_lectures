@@ -22,7 +22,7 @@ library(readxl)
 
 Mouse knockouts facilitate the study of gene functions. Often, multiple abnormal phenotypes are induced when a gene is inactivated. The International Mouse Phenotyping Consortium (IMPC) has generated thousands of mouse knockouts and cataloged their phenotype data. We have acquired metabolomics data from 220 plasma samples from 30 unique mouse gene knockouts and corresponding wild-type mice from the IMPC. To acquire comprehensive metabolomics data, we have used liquid chromatography (LC) combined with mass spectrometry (MS) for detecting polar and lipophilic compounds in an untargeted approach. We have also used targeted methods to measure bile acids, steroids and oxylipins. In addition, we have used gas chromatography GC-TOFMS for measuring primary metabolites. The metabolomics dataset reports 832 unique structurally identified metabolites from 124 chemical classes as determined by ChemRICH software
 
-In this themo we will use only the metabolites quantified in the targeted assays. The belong to the chemical classes of _bile acids, steroids and oxylipins_
+In this demo we will use only the metabolites quantified in the targeted assays. The belong to the chemical classes of _bile acids, steroids and oxylipins_
 
 
 Here we get the data
@@ -88,7 +88,6 @@ head(DM[,1:20])
 * it is switched compared to the "standard" shape. This is often done because the number of variables is larger then the number of samples. Since R wants the reverse we transpose ...
 
 Since our mouse ID is a number without the leading "KOMP_" we fix this on the fly
-
 
 
 ```{r}

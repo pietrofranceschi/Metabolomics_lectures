@@ -45,7 +45,7 @@ mypop %>%
   theme_light()
 ```
 
-Ok, we see what we expect, the two groups are different, and there is an unbalancing of the two subpopulations.
+Ok, we see what we expect, the two groups are different, and there is an unbalancing.
 
 
 
@@ -119,7 +119,7 @@ x %>%
 ```
 
 
-As we can see, the estimate has variance (:-P), and it is centered around the correct value for the population mean. It is also normally distributed, but this is something we will touch later today.
+As we can see, the estimate has variance (:-P), and it is centered around the correct value for the population mean. It is also normally distributed, but this you already know from the previous practical ...
 
 ## Stratified sampling
 
@@ -136,7 +136,7 @@ subfractions <- ceiling((table(mypop$gender)/nrow(mypop))*nsamp)
 
 
 
-## just to show
+## just to show how much easy to read is the coding with pipes
 library(magrittr)
 
 another_subfraction <- mypop$gender %>% 
@@ -197,8 +197,8 @@ This is true for all the tings you would like to estimate from your sample. If y
 
 **Something for You**
 
-* Could you check what happens to the two types of sampling if you change the unbalancing in the population? 
-* Could you check what happens to the two types of sampling if you change the size of the sample (here 30)?
+* Check what happens to the two types of sampling if you change the unbalancing in the population? 
+* Check what happens to the two types of sampling if you change the size of the sample (here 30)?
 
 
 

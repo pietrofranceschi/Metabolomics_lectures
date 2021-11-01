@@ -1,7 +1,9 @@
 ---
 title: "Group Activity!"
 author: "Pietro Franceschi"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -11,28 +13,7 @@ library(DiagrammeR)
 ```
 
 
-```{css}
 
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: #404040;
-}
-
-```
 ## Design your Study
 
 * define the question
@@ -46,17 +27,17 @@ For each one of the previous points identify potential **challenges**
 
 ## Scenario 1
 
-We would like to present a research project for a forthcoming EU call with the objective of studying what are the effects of global warming and pollution (zinc concentration) on the metabolism of the mediterranean mussel (_Mytilus galloprovincialis_)
+We would like to present a research project for a forthcoming EU call with the objective of studying what are the effects of global warming and pollution (zinc concentration) on the metabolism of the Mediterranean mussel (_Mytilus galloprovincialis_)
 
 ## Scenario 2
 
-Our research institute is interested in developing new varieties of grapevine, which are able to better withstand _Plasmopara viticola_ infection. The reduction of the use of chemicals is indeed one of the priorities of the new european regulations. 
+Our research institute is interested in developing new varieties of grapevine, which are able to better withstand _Plasmopara viticola_ infection. The reduction of the use of chemicals is indeed one of the priorities of the new European regulations. 
 Our colleagues has been setting up an extensive breeding program, but we would like to use metabolomics to perform an early screening of the potential genetic traits which are responsible of the resistance.
 
 
 ## Scenario 3
 
-After hundreds of years, we would like to finally give a scientific support to the old belief that "eating carrots improves vision". Metabolomics could definitively help, both in the characterization of the carrots and in their effects on humans ...
+After hundreds of years, we would like to finally give a scientific support to the old belief that "An apple a day keeps the doctor away". Metabolomics could definitively help, both in the characterization of the apples and in their effects on humans ...
 
 
 

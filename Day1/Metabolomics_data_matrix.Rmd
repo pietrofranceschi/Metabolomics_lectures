@@ -23,9 +23,9 @@ As in all _omic_ experiments, a metabolomic assay allows to measure a large numb
 
 ~~... what are the variables ...~~
 
-> 1. In a targeted metabolomics investigation
-> 2. In an untargeted MS based metabolomics analysis
-> 3. In an untargeted NMR based metabolomics assay
+> 1. In a targeted metabolomics investigation?
+> 2. In an untargeted MS based metabolomics analysis? 
+> 3. In an untargeted NMR based metabolomics assay?
 
 	
 ## Number of variables | place your guess {.build}

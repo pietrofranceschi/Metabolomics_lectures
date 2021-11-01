@@ -21,7 +21,7 @@ library(MASS)
 
 ## LC/GC MS
 
-**TWO dimensional data**
+**THREE dimensional data**
 
 1. Neutral molecules are separated "in time" on the bases of their chemical properties
 2. The separated molecules are ionized and then weighted in the mass spectrometer

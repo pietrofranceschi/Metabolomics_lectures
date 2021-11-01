@@ -129,7 +129,7 @@ glimpse(I[1:20])
 We can plot a complete spectrum (here the first scan of the first sample ...)
 
 ```{r}
-plot(mz$F1.S0130,I$F1.S0130, type = "h", main = names(mz)[1])
+plot(x = mz$F1.S0001,I$F1.S0001, type = "h", main = names(mz)[1])
 ```
 
 `xcms` provides tools to visualize and play with the raw data, in a more direct way
@@ -148,7 +148,9 @@ raw_data[[1]]
 is indeed a spectrum, which has a `plot`method
 
 ```{r}
-plot(raw_data[[1]])
+plot(raw_data[[1]]) + 
+  scale_y_sqrt() +
+  theme_light()
 ```
 
 This is a sort of gg stuff so if we want an interactive stuff we can rely on the `plotly` package, and also change some of the characteristics of the graphicla layout
@@ -196,7 +198,7 @@ test
 ```{r}
 test + 
   xlim(2500,2750) + 
-  ylim(350,400)
+  ylim(355,380)
 ```
 
 
@@ -541,7 +543,7 @@ As before, the parameters of this step are included in a specific object
 pdp <- PeakDensityParam(sampleGroups = xdata$sample_group,
                         minFraction = 0.5, 
                         bw = 30,
-                        binSize = 0.1)
+                        binSize = 0.3)
 ```
 
 A set of peaks will be considered a candidate to become a "valid" group if it contains peaks coming from at least a `minFraction` of samples belonging to one of the `sampleGroups`.
