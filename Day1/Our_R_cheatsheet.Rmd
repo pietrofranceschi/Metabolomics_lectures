@@ -129,14 +129,16 @@ your_tibble
 
 ```{r}
 your_tibble <- your_tibble %>% 
-  mutate(random = map(sample, function(x) runif(1000)))
+  mutate(random = map(sample, function(x) runif(10)))
 
 your_tibble
 ```
 
 ```{r}
 your_tibble <- your_tibble %>% 
-  mutate(means = map_dbl(random, function(l) mean(l)))
+  mutate(means = map_dbl(random, function(pippo) mean(pippo)))
+
+your_tibble
 ```
 
 

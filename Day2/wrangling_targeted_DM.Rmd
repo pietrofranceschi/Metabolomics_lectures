@@ -97,7 +97,7 @@ DM <- DM %>%
   t(.) %>% 
   as_tibble(rownames = "Sampname") %>% 
   separate(Sampname, c("One","MouseID"),"_") %>% ## split the column
-  select(-One) %>%   ## remov the first piece
+  dplyr::select(-One) %>%   ## remove the first piece
   mutate(MouseID = as.numeric(MouseID))
   
 ```
@@ -124,7 +124,7 @@ DM_nest <- DM %>%
   nest()
 ```
 
-This data structure highlights the reole of each metabolite 
+This data structure highlights the role of each metabolite 
 
 ```{r}
 head(DM_nest)
@@ -145,7 +145,7 @@ For example, the number of NAs in relation of the median intensity can be visual
 
 ```{r}
 DM_nest %>% 
-  mutate(nnas = map_dbl(data,~sum(is.na(.x$I))),                  ## calculate the univariate statistics "on the fly"
+  mutate(nnas = map_dbl(data,function(x) sum(is.na(x$I))),                  ## calculate the univariate statistics "on the fly"
          medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
   filter(nnas > 0) %>% ## we keep only features with at leas on NA!
   ggplot() +   ## plot them
@@ -187,7 +187,7 @@ DM_nest %>%
   filter(nnas > 0) %>% ## we keep only features with at leas on NA!
   ggplot(aes(x = medI, y = nnas, col = Assay)) +   ## plot them
   geom_point(size = 2) + 
-   geom_text(aes(label=ifelse(nnas>50,CompoundName,'')), size = 4, nudge_y = -3) + 
+  geom_text(aes(label=ifelse(nnas>50,CompoundName,'')), size = 4, nudge_y = -3) + 
   scale_x_log10() + 
   scale_color_brewer(palette = "Set2") + 
   theme_light()
@@ -224,7 +224,7 @@ And I recursively apply it to the nested data tibbles ...
 
 ```{r}
 DM_nest <- DM_nest %>%
-  left_join(metabolite_meta %>% select(CompoundID,CompoundName)) %>% 
+  left_join(metabolite_meta %>% dplyr::select(CompoundID,CompoundName)) %>% 
   mutate(rawplots = map2(data,CompoundName, ~myplot(.x,.y)))
 ```
 
@@ -232,7 +232,7 @@ DM_nest <- DM_nest %>%
 Now I can visualize (or save) the plot I want ...
 
 
-This one, in particular show the trend of one of the features with a large fractio of NAs
+This one, in particular show the trend of one of the features with a large fraction of NAs
 ```{r fig.height=3, fig.width=8}
 DM_nest$rawplots[[5]]
 ```
@@ -275,11 +275,11 @@ An alternative could be to `unnest` the data and rely on faceting ...
 ```{r fig.height=14, fig.width=8}
 DM_nest %>% 
   ungroup() %>% 
-  select(CompoundName,data) %>% 
+  dplyr::select(CompoundName,data) %>% 
   unnest(data) %>% 
   ggplot(aes(sample = I)) +
   stat_qq(aes(col = Gender, shape = Zygosity)) + 
-   scale_color_brewer(palette = "Set1") + 
+  scale_color_brewer(palette = "Set1") + 
   stat_qq_line() + 
   facet_wrap(~CompoundName, scales = "free_y", ncol = 5) +
   theme_light() + 
@@ -305,7 +305,7 @@ Let's look to the global effect of a log transformation on the q-q plots
 ```{r fig.height=14, fig.width=8}
 DM_nest %>% 
   ungroup() %>% 
-  select(CompoundName,data) %>% 
+  dplyr::select(CompoundName,data) %>% 
   unnest(data) %>% 
   ggplot(aes(sample = log10(I))) +
   stat_qq(aes(col = Gender, shape = Zygosity)) + 
@@ -351,11 +351,11 @@ First of all I need a function to perform the imputation of a vector
 
 ```{r}
 myimputer <- function(v){
-  if (sum(is.na(v)) == 0) {
+  if (sum(is.na(v)) == 0) {  ## If I do not have NAs please leave the vector unchanged
     return(v)
   } else {
-    napos <- which(is.na(v))
-    newval <- runif(length(napos),0,min(v, na.rm = TRUE))
+    napos <- which(is.na(v))  ## position of the NAs in the vector
+    newval <- runif(length(napos),0,min(v, na.rm = TRUE))  ## calculate the random numbers I should put in place of the NAs
     out <- v
     out[napos] <- newval
     return(out)
@@ -388,7 +388,7 @@ library(factoextra)
 ```
 
 ```{r}
-myPCA <- PCA(DM_i %>% select(starts_with("CPD")), graph = FALSE)
+myPCA <- PCA(DM_i %>% dplyr::select(starts_with("CPD")), graph = FALSE)
 ```
 
 
@@ -400,7 +400,7 @@ fviz_pca_ind(myPCA,
              axes = c(1,2)) + 
   scale_color_brewer(palette = "Set1")
 ```
-Even if the amount of variability captured in this representation is 0only the 30%, the previous plot shows the presence of a separation between males and females.
+Even if the amount of variability captured in this representation is only the 30%, the previous plot shows the presence of a separation between males and females.
 
 This is not unexpected considering the results of our univariate investigation
 
@@ -460,7 +460,7 @@ Suppose, for example, that you would like to construct a more informative variab
 ```{r fig.height=8, fig.width=6}
 facto_summarize(myPCA, "var", axes = 1) %>% 
   as_tibble() %>% 
-  select(name, `Dim.1`) %>% 
+  dplyr::select(name, `Dim.1`) %>% 
   left_join(metabolite_meta, by = c("name" = "CompoundID")) %>% 
   arrange(`Dim.1`) %>% 
   mutate(CompoundName = factor(CompoundName, levels = CompoundName)) %>% 
@@ -621,7 +621,7 @@ names(mypalette) <- unique(sample_meta_data$Gender)
 par(pty="s")
 
 DM_i %>% 
-  select(all_of(focuscp)) %>% 
+  dplyr::select(all_of(focuscp)) %>% 
   as.matrix(.) %>% 
   pairs(., col = mypalette[sample_meta_data$Gender], pch = 19)
 

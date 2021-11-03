@@ -17,9 +17,9 @@ library(readr)
 
 ## Load the NMR data
 ```{r}
-DM <- read_excel("data/MTBLS1/ADG_transformed_data.xlsx")
+DM <- read_excel("../data/MTBLS1/ADG_transformed_data.xlsx")
 
-sample_meta <- read_delim("data/MTBLS1/s_MTBLS1.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
+sample_meta <- read_delim("../data/MTBLS1/s_MTBLS1.txt", "\t", escape_double = FALSE, trim_ws = TRUE)
 ```
 
 Let's now give a look
@@ -89,10 +89,21 @@ We set_up the data for RF
 
 ```{r}
 DM_rf <- DM_i %>%
-  left_join(sample_meta %>% select(`Source Name`, `Factor Value[Metabolic syndrome]`)) %>% 
-  select(-`Source Name`) %>% 
+  left_join(sample_meta %>% select(`Sample Name`, `Factor Value[Metabolic syndrome]`), by = c("Primary ID" = "Sample Name")) %>% 
+  select(-`Primary ID`) %>% 
   mutate(`Factor Value[Metabolic syndrome]` = factor(`Factor Value[Metabolic syndrome]`)) %>% 
-  filter(!is.na(`Factor Value[Metabolic syndrome]`))
+  filter(!is.na(`Factor Value[Metabolic syndrome]`)) %>% 
+  as.data.frame()
+```
+
+
+```{r}
+dim(DM_rf)
+
+newnames <- paste0("buck",1:189)
+newnames[189] <- colnames(DM_rf)[189]
+colnames(DM_rf) <- newnames
+
 ```
 
 
