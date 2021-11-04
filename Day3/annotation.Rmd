@@ -22,6 +22,15 @@ library(knitr)
 2. Poor standardization of chromatography (in particular LC)
 3. Bioinformatic infrastructures (_databases,workflows, ..._)
 
+
+## Annotation Levels
+
+```{r out.width="60%", fig.align="center"}
+include_graphics("../images/annotation_levels.png")
+```
+
+
+
 ## The tools for the trade
 
 In the case of MS based experiments, the process of annotation requires the interpretation of the ionization pattern of each molecule and the additional information which can be derived from chromatography and fragmentation experiments
@@ -32,9 +41,30 @@ In the case of MS based experiments, the process of annotation requires the inte
 4. Chemoinformatics and predictive models
 
 
+## Fragmentation Experiments
+
+```{r out.width="80%", fig.align="center"}
+include_graphics("../images/tandemMS.jpg")
+```
+
+* Fragmentation patterns are sensitive to the chemical structure
+* MS/MS can be matched with databases of standards
 
 
+## Databases of Standards
 
+* Buy a chemical standard, analyze it with your instrument (~~MS, MS-MS, retention time~~)
+* [PubChem](https://pubchem.ncbi.nlm.nih.gov/)
+* [MassBank](https://massbank.eu/MassBank/)
+* [Human Metabolome Database](https://hmdb.ca/)
+* [Meltin](https://metlin.scripps.edu/landing_page.php?pgcontent=mainPage)
+* ...
+
+
+## Chemoinformatics and predictive models
+
+* [Sirius](https://bio.informatik.uni-jena.de/software/sirius/)
+* [Metfrag](https://ipb-halle.github.io/MetFrag/)
 
 
 

@@ -1,7 +1,9 @@
 ---
 title: "Machine Learning: a gentle introduction"
 author: "Pietro Franceschi"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -12,28 +14,7 @@ library(MASS)
 ```
 
 
-```{css}
 
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: black;
-}
-
-```
 ## Machine Learning
 
 _Machine learning (ML) is the study of ~~computer algorithms~~ that improve automatically through ~~experience~~. It is seen as a subset of artificial intelligence. Machine learning algorithms build a ~~model~~ based on sample data, known as "training data", in order to make ~~predictions or decisions~~ without being explicitly programmed to do so_
@@ -72,7 +53,7 @@ _Our Working example: fit a line through a group of points_
 
 ## Loss Function {.smaller}
 
-```{r out.width="100%", fig.align= "center"}
+```{r out.width="80%", fig.align= "center"}
 include_graphics("../images/linefit.png")
 ```
 1. The (square) sum of the green lines is our loss function
@@ -81,7 +62,7 @@ include_graphics("../images/linefit.png")
 
 ## Overfitting {.smaller}
 
-```{r out.width="100%", fig.align= "center"}
+```{r out.width="80%", fig.align= "center"}
 include_graphics("../images/overfitting.png")
 ```
 
@@ -104,7 +85,6 @@ Given a model the loss function will allow me to best fit that model to my data
 ## The _bias_, _variance_ tradeoff
 
 **Bias** is the difference between the prediction of our model and the correct value which we are trying to predict. Models with high bias are oversimplified and they lead high errors also on training data.
-
 
 **Variance** is the variability of model prediction. Models with high variance pays a lot of attention to training data and does not generalize on the data which it hasn’t seen before. As a result, such models perform very well on training data but has high error rates on test data.
 

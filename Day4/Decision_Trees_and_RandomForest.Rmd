@@ -1,7 +1,9 @@
 ---
 title: "Trees and Forests"
 author: "Pietro Franceschi"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -11,29 +13,25 @@ library(tidyverse)
 ```
 
 
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
+# Decision Trees
 
 
-#notes {
-  color: blue;
-}
+## Titanic Data {.smaller}
 
-del {
-  color: red;
-  text-decoration: none;
-}
+A tibble containing the passenger of the TItanic along with their fate during the accident
 
-strong {
-  color: #404040;
-}
+
+```{r, message=TRUE}
+train_titanic <- read_csv("../data/train_titanic.csv") %>% 
+  dplyr::select(Survived, Sex, Age) %>% 
+  na.omit() %>% 
+  mutate(Survived = ifelse(Survived == 1, "survived","died"))
+
 
 ```
-# Decision Trees
+
+
+
 
 ## Decision Trees {.smaller}
 
@@ -46,15 +44,8 @@ library(rpart.plot)
 Titanic survival _decision tree_
 
 
-```{r}
-train_titanic <- read_csv("../data/train_titanic.csv") %>% 
-  dplyr::select(Survived, Sex, Age) %>% 
-  na.omit() %>% 
-  mutate(Survived = ifelse(Survived == 1, "survived","died"))
-```
 
-
-```{r out.width= "70%", fig.align="center"}
+```{r out.width= "60%", fig.align="center"}
 fit <- rpart(Survived~., data = train_titanic, method = "class")
 rpart.plot(fit, type = 2, extra = 103)
 ```
@@ -115,7 +106,7 @@ _As we discussed, decision trees have many good properties but show high varianc
 
 A good idea to circumvent this limitation could be to construct a large set of trees (build a Forest!) and to average their predictions to reduce variability.
 
-To do that we need to somehow ~~perturb~~ our dataset, because building differnt trees on the same data will not change the results
+To do that we need to somehow ~~perturb~~ our dataset, because building different trees on the same data will not change the results
 
 * perturb the dataset by **bootstrapping**
 * use only a **subset of the variables** at each split

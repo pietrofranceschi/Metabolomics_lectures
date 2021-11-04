@@ -280,7 +280,7 @@ full_model$importance %>%
   
 ```
 
-Which givs a picture slightly different from PCA. Remember, however, that RF is a supervised classifier wile PCA is not
+Which gives a picture slightly different from our old univariate analysis. Remember, however, that RF is a supervised multivariate classifier, not a univariate approach ...
 
 
 
