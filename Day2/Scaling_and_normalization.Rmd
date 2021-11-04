@@ -225,8 +225,8 @@ PQNratios %>%
   summarise(median = median(value))
 ```
 
-* So to make S4 comparable to the others I should divide the signal by roughtly 0.5
-* The use of the ~~median~~ ensures that the sistem will work also in presence of a few biomarkers
+* So to make S4 comparable to the others I should divide the signal by roughly 0.5
+* The use of the ~~median~~ ensures that the system will work also in presence of a few biomarkers
 
 
 

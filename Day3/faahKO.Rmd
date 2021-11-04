@@ -649,8 +649,36 @@ A clear improvement, isn't it ? :-)
 
 This data matrix will be the starting point of our statistical analysis ...
 
+## Visually inspect the results ...
+
+Furthermore, we can also manually check its peak shape, as well as the integrated area. Within xcms there is the function `featureChromatograms()` which allows to visualize the EIC of an specific feature, displaying the area integrated by the algorithm:
+
+```{r, fig.width=10}
+sample_colors <- group_colors[xdata$sample_group]
 
 
+ft_chr1 <- featureChromatograms(xdata, features = rownames(DM)[10], 
+                               expandRt = 15, filled = FALSE)
+ft_chr2 <- featureChromatograms(xdata, features = rownames(DM)[10], 
+                               expandRt = 15, filled = TRUE)
+par(mfrow = c(1, 2))
+plot(ft_chr1, col = group_colors[xdata$sample_group],
+     peakBg = sample_colors[chromPeaks(ft_chr1)[, "sample"]])
+plot(ft_chr2, col = group_colors[xdata$sample_group],
+     peakBg = sample_colors[chromPeaks(ft_chr2)[, "sample"]])
+legend("topright", col = gsub("60", "", group_colors), 
+       legend = names(group_colors), pch = 19)
+```
+
+Another way to check the feature of interest is using the function `plotChromPeakDensity()`:
+
+```{r}
+chr_mzr <- chromatogram(xdata, mz = myfeatures$mzmed[10] + 0.01 * c(-1, 1))
+plotChromPeakDensity(chr_mzr, col = group_colors, param = pdp,
+                     peakBg = sample_colors[chromPeaks(chr_mzr)[, "sample"]],
+                     peakCol = sample_colors[chromPeaks(chr_mzr)[, "sample"]],
+                     peakPch = 16)
+```
 
 
 

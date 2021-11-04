@@ -1,0 +1,873 @@
+---
+title: "Analyze the grapes!"
+author: "Pietro Franceschi, Mar Garcia-Aloy"
+output: 
+  html_document:
+    toc: true
+    number_sections: false
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+Load required packages:
+
+```{r}
+library(RColorBrewer) ## nicer color schemes
+library(xcms)         ## the package doing the job
+library(tidyverse)    ## potentially useful 
+library(knitr)
+library(plotly)
+library(FactoMineR)
+library(factoextra)
+library(effectsize)
+```
+
+
+We will analyze a subset of the data from UPLC-QTof MS untargeted analysis of Vitis vinifera L. leaves, collected in Italy and Germany from two fungus-resistant grape varieties: Regent and Phoenix. 
+For this tutorial, we will focus on the quest of metabolic "biomarkers" for the geographical origin within Phoenix samples,   
+The raw data files (both in mzML and CDF format) are available from the [MetaboLights repository](https://www.ebi.ac.uk/metabolights/MTBLS137). To speed up processing of this exercise  we will restrict the analysis to the following subset of study files:  
+
+* **QC**:  
+- L011_QC_RP_pos01.CDF  
+- L003_QC_RP_pos01.CDF  
+- L018_QC_RP_pos01.CDF  
+
+* **Italy Phoenix**:  
+- L015_010_LPIi_RP_pos01.CDF  
+- L006_002_LPIh_RP_pos01.CDF  
+- L026_019_LPIc_RP_pos01.CDF
+
+* **Germany Phoenix**:   
+- L023_017_LPGc_RP_pos01.CDF  
+- L037_029_LPGe_RP_pos01.CDF  
+- L047_037_LPGa_RP_pos01.CDF
+
+You have to download them (in `.CDF` format) and save them on your PC in the same directory as this `.Rmd` file. Each file contains data in centroid mode acquired in positive ESI mode over a mass range from 50 to 2000 Da by using a chromatography of 28 minutes.   
+
+**Note** A large part of this tutorial is taken from the official [vignette of `xcms`](https://bioconductor.org/packages/release/bioc/vignettes/xcms/inst/doc/xcms.html). Many thanks to Steffen Neumann and Johannes Rainer! 
+
+## Data Loading
+
+We start getting the raw data into R: 
+
+```{r}
+## Get the full path to the CDF files
+cdfs <- list.files("../data/cdfs_grape/", full.names = TRUE)
+cdfs <- cdfs[grepl("CDF", cdfs)]
+cdfs
+```
+
+In the last few years the `xcms` developers have been making a big effort to make their package coherent with a general framework for the handling of MS data in R (metabolomics, proteomics ...). All this goes beyond the scope of our course, for us is sufficient to know that this infrastructure allows to store sample "metadata" (e.g. treatment class, time point, etc) together with the raw experimental data.
+
+In our specific case, the data frame with the phenotipic data could be designed as follow:
+
+```{r}
+phenodata <- tibble(matrix(ncol = 5, nrow = length(cdfs)))
+colnames(phenodata) <- c("filename", "type", "country", "variety", "class")
+phenodata$filename <- cdfs
+phenodata$type <- "leaves"
+phenodata$type[grep("QC", cdfs)] <- "QC"
+phenodata$country <- "QC"
+phenodata$country[grep("I", cdfs)] <- "italy"
+phenodata$country[grep("G", cdfs)] <- "germany"
+phenodata$variety <- "QC"
+phenodata$variety[grep("LP", cdfs)] <- "phoenix"
+phenodata$class <- paste(phenodata$country, phenodata$variety, sep = "_")
+phenodata$class <- gsub("QC_QC", "QC", phenodata$class)
+
+phenodata
+```
+
+Below we restrict the `phenodata` matrix to our samples of interest (in this case, for the tutorial part QC samples and all samples from the variety `Phoenix`):
+
+
+Up to now nothing has been actually loaded into R. To do that:
+
+```{r}
+## As you can see the data frame with the phenotypic data is included inside the object holding the raw data
+raw_data <- readMSData(
+  files = phenodata$filename, 
+  pdata = new("NAnnotatedDataFrame", 
+              phenodata), ## this is the structure of xcms holding phenotypic data
+  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+```
+
+Loading the full dataset into RAM can be problematic for large studies so with this specific `on disk` mode the raw data are still staying on the disk.
+
+
+We next restrict the data set to the retention time range from 800 to 1000 seconds and to the mass-to-charge ratio range from 50 to 1000, just to save some processing time ...
+
+```{r}
+## These two xcms functions are used to subset the raw data
+raw_data <- filterRt(raw_data, c(800, 1000))
+raw_data <- filterMz(raw_data, c(50, 1000))
+```
+
+
+## Data Visualization
+
+It is important that along the process one can be able to visualize the raw data, so let's give a look to the structure of the R object we created.
+
+The `raw_data` object contains the full set of 3D data collected in all our samples. The "raw" values can be extracted by using:   
+
+```{r}
+rt <- rtime(raw_data)
+mz <- mz(raw_data)
+I <- intensity(raw_data)
+```
+
+
+Let's look to the structure of these three objects:
+
+```{r}
+glimpse(rt)
+```
+
+These are the retention times in seconds for the chromatography of all loaded files. 
+For example, ``r names(rt[1])`` stands for File1, scan number `r gsub(".*S", "", names(rt[1]))` and it was recorded at `r round(rt[1])` seconds.
+
+Another way to see that: 
+
+```{r}
+plot(rt)
+```
+
+```{r}
+## The full number of scans for the set of 9 files
+length(rt)
+```
+
+Here the individual lines highlight the increasing time scale for each file.
+
+`mz` and `I` holds the mass spectra collected at each scantime ... for this reason the two objects are lists and not vectors. Remember our data are 3D. For each  scantime we have a complete mass spectrum.  
+
+```{r}
+## only the first 20
+glimpse(mz[1:10])
+```
+
+```{r}
+## only the first 20
+glimpse(I[1:10])
+```
+
+We can plot a complete spectrum (here the first scan of the first sample ...):
+
+```{r}
+plot(mz[[1]], I[[1]], type = "h", 
+     main = names(mz)[1], xlab = "m/z", ylab = "intensity")
+```
+
+`xcms` provides tools to visualize and play with the raw data, in a more direct way:
+
+```{r}
+## the size of our raw data
+length(raw_data)
+```
+
+is exactly the number of scans, and:
+
+```{r}
+raw_data[[1]]
+```
+
+is indeed a spectrum, which has a `plot` method:
+
+```{r}
+plot(raw_data[[1]])
+```
+
+This is a sort of gg stuff so if we want an interactive stuff we can rely on the `plotly` package, and also change some of the characteristics of the graphical layout:
+
+```{r}
+ggplotly((plot(raw_data[[1]])))
+```
+
+Ok, working with all files together is not the best ... for visualization and handling. To facilitate the "cutting" by file, xcms is provided with a `split()` function which can be combined with a `fromFile` function to create a list with the content separate by file:
+
+```{r}
+single_raw <- split(raw_data, fromFile(raw_data))
+```
+
+and each element of the list is now a single raw data:
+
+```{r}
+single_raw[[1]]
+```
+
+As we discussed, metabolites are visible as peaks in 3D mz/rt/intensity plane ...  
+
+```{r}
+mytibble <- tibble(rt = rtime(single_raw[[1]]), 
+                   mz = mz(single_raw[[1]]), 
+                   I = intensity(single_raw[[1]]))
+mytibble
+```
+
+And now a fancy plot ....
+
+```{r}
+jet.colors <- colorRampPalette(
+  c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", 
+    "yellow", "#FF7F00", "red", "#7F0000"))
+mapplot <- mytibble %>% 
+  unnest(c("mz","I")) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = sqrt(I)), size = 0.5) + 
+  scale_color_gradientn(colours = jet.colors(7)) + 
+  theme_light()
+```
+
+```{r}
+mapplot + 
+  xlim(920, 970) + 
+  ylim(412, 420)
+```
+
+
+1. A mass spectrum can be seen as a vertical cut of the previous map 
+2. We see the accuracy of the mass and also the phenomenon used by CentWave
+3. Some of the "peaks" are organized in vertical groups, these are the ions coming from the same metabolite
+4. The vertical gaps are associated to the lockmass scans!
+
+The second thing we would like to visualize is one extracted ion trace:
+
+```{r}
+## Define the rt and m/z range of the peak area
+rtr <- 15.6*60
+mzr <- 413.1207
+## extract the chromatogram
+chr_raw <- chromatogram(raw_data, 
+                        mz = mzr + 0.1*c(-1, 1), 
+                        rt = rtr + 30*c(-1, 1))
+```
+
+
+```{r}
+plot(chr_raw)
+```
+
+So we are able to actually see the chromatographic peak of the m/z 413.
+
+
+## Data Inspection
+
+When one is dealing with the initial investigation of the data the first thing to do is to look to the total ion current of each chromatogram or to the base peak ion chromatogram:
+
+```{r}
+## Get the total ion chromatograms. This reads data from all files.
+tics <- chromatogram(raw_data, aggregationFun = "sum")
+## Define colors for the two groups:
+group_colors <- paste0(brewer.pal(3, "Set1"), "60")
+names(group_colors) <- c("QC", "italy", "germany")
+## Plot all chromatograms:
+plot(tics, col = group_colors[raw_data$country])
+## raw_data$country extracts the info on the phenotipic data inside the raw_data
+```
+
+
+As you can see, the results are different with a "common" look and feel. The large majority of peaks is there, even if the intensities are not always comparable. Red traces (QCs) are highly reproducible, speaking of an overall good reproducibility of the analytical pipeline.
+
+The overall integral of the signal in each sample is often used as a way to spot gross analytical drifts
+
+```{r}
+## here we rely on the old (and efficient) R style
+total_I <- sapply(tics, function(x) sum(intensity(x)))
+plot(total_I, col = gsub("60", "", group_colors[raw_data$country]), pch = 19, cex = 2)
+```
+
+We clearly see the overall difference between blue and green samples. This already indicate that the two classes of samples are strongly different. This is not really important at this point, but one should keep this in mind when we will perform the statistical analysis. In general, an important thing to look at here is the TIC of QCs: if the analytical performance of the sistem is optimal, they should be comparable.
+
+
+A second and often less general quality check of the experimental data rely on the inspection of the chromatographic trace of one (or more) known compounds. In the case at hand, we know that a specific metabolite present in my samples yields an ion @mz413... let's look to the profile of this ion signal over the chromatographic time:
+
+```{r}
+## here we get the traces ... compare the function with the one used for the TICs
+ion_I_know <- chromatogram(raw_data, mz = mzr + 0.1*c(-1, 1))
+```
+
+```{r}
+plot(ion_I_know, col = group_colors[raw_data$country])
+```
+
+The previous plot is important: it is telling us that the _metabolite_I_know_ is present in the samples and is released by the chromatographic column at around 935 sec ... There it is producing a peak in the signal of the _ion_I_know_ @mz413
+
+**To automatically find metabolites in my data I have to teach to the computer to look for peaks in the chromatographic traces of all possible ions.**
+
+
+## Peak Picking: one sample
+
+The "older" and most sounding way of finding peaks implemented in `xcms` is the `matched filter` algorithm.
+
+A full description of the parameters of the algorithm can be found in the [`xcms` manual](https://bioconductor.org/packages/release/bioc/manuals/xcms/man/xcms.pdf), here we focus on:
+
+* **binSize:** the "width" of the m/z bins used to find the peaks
+* **fwhm:** the "expected" size of the peak
+* **snthresh:** the signal/to noise ratio of the peak
+
+In xcms the parameters of the algorithm are stored into a specific object:
+
+```{r}
+mf <- MatchedFilterParam(binSize = 0.1, 
+                         fwhm = 6, 
+                         snthresh = 6) 
+mf
+```
+
+Now I can use the previous parameters to find the peaks in **one** sample:
+
+```{r}
+first_peaks <- findChromPeaks(single_raw[[1]], param = mf)
+```
+
+The actual list of peaks can be extracted from the previous object by the method `chromPeaks`.
+
+Let's look to the head of the output:
+
+```{r}
+first_peak_table <- chromPeaks(first_peaks) 
+dim(first_peak_table)
+head(first_peak_table, 5)
+```
+
+The first two numbers are telling us that with the setting we have been choosing we were able to find `r dim(first_peak_table)[1]` peaks.
+
+The help of xcms describes the most relevant columns of the table:
+
+__"mz" (intensity-weighted mean of mz values of the peak across scans/retention times), "mzmin" (minimal mz value), "mzmax" (maximal mz value), "rt" (retention time of the peak apex), "rtmin" (minimal retention time), "rtmax" (maximal retention time), "into" (integrated, original, intensity of the peak), "maxo" (maximum intensity of the peak), "sample" (sample index in which the peak was identified)__
+
+
+This is the map of the identified peaks 
+
+```{r}
+as_tibble(first_peak_table) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz), size = 2, alpha =1, pch = 21, fill = "orange") + 
+  theme_light()
+```
+
+- we have a lot of peaks!
+- in some cases peaks are arranged in vertical stripes, these are probably the signatures of a metabolite ... which is producing a different set of ions when it is introduced in the ionization interface.  
+
+
+Peak picking can also be performed with another algorithm: `CentWave`
+
+```{r}
+cwp <- CentWaveParam(peakwidth = c(5, 30), 
+                     ppm = 30,
+                     prefilter = c(3, 100))
+cwp
+```
+
+
+Also here many parameters (and others are not mentioned). I highlight here some of them:  
+
+* **peakwidth:** this is the expected range of the width of the chromatographic peaks. In this case from 5 to 30 seconds 
+* **ppm:** this is the expected mass shift of the signal of a "true" ion due to electric noise
+* **prefilter:** this is an initial filter which will consider valid only ion traces which are preserving a signal of more than 100 counts for at least 5 scans.
+
+
+If we run the peak picking with this new algorithm...
+
+```{r}
+first_peaks_cw <- findChromPeaks(single_raw[[1]], param = cwp)
+```
+
+
+```{r}
+first_peak_table_cw <- chromPeaks(first_peaks_cw) 
+dim(first_peak_table_cw)
+head(first_peak_table_cw, 5)
+```
+
+As you see the number of columns is different, but the key infos are there.
+
+
+```{r}
+as_tibble(first_peak_table_cw) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz), size = 2, alpha =1, pch = 21, fill = "orange") + 
+  theme_light()
+```
+
+
+If we superimpose them...
+
+```{r}
+
+t_mf <- as_tibble(first_peak_table)
+
+
+as_tibble(first_peak_table_cw) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz), size = 2, alpha =1, pch = 21, fill = "orange") + 
+  geom_point(data = t_mf, mapping = aes(x = rt, y = mz), size = 2, alpha =0.5, col = "steelblue") + 
+  theme_light()
+
+
+```
+
+The difference is striking!
+
+Obviously one could fiddle around with the parameters to look for a more coherent picture, but the difference is not unexpected considering the fact that we are dealing with two different approaches.
+
+
+## Peak Picking: all the dataset
+
+When we are satisfied with a set of peak picking parameters, the algorithm will be sequentially run on all the files of the dataset resulting in a large list of peaks assigned to the different samples.
+
+```{r}
+xdata <- findChromPeaks(raw_data, param = cwp)
+```
+
+Here a table of the peaks found in all files:
+
+```{r}
+table(chromPeaks(xdata)[, "sample"])
+```
+
+An overall representation of their distribution in the plane is extremely interesting:
+
+
+```{r}
+chromPeaks(xdata) %>% 
+  as_tibble() %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = into), size = 0.3) + 
+  facet_wrap(~sample) + 
+  theme_light()
+```
+
+As you can see the samples are different, but the overall "look and feel" is coherent. This is telling us that the overall analytical run was good.   
+
+Regarding the retention time shifts... 
+
+```{r}
+chromPeaks(xdata) %>% 
+  as_tibble() %>% 
+  filter(sample %in% c(1, 8)) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = factor(sample)), siaze = 0.3) + 
+  scale_color_brewer(palette = "Set1") + 
+  theme_light()
+```
+
+From the plot we can see a small but visible shift in RT. The shift is responsible of a difference in the samples coming from the analysis and not the biology and it has to be corrected to avoid biased results.  
+
+`xcms` can do much more to browse and characterize the peaks, but here we want to focus on the key ideas.
+
+In summary:
+
+* the list are always different
+* they are different even if we analyze the same sample twice
+* they are different for analytical/instrumental reasons
+* they are different for biological reasons.
+
+
+## Alignment
+
+The alignment step, also referred to as retention time correction, aims at adjusting this by shifting signals along the retention time axis to align the signals between different samples within an experiment.
+
+Also here a plethora of approaches is available. As usual, everything will work better if the chormatography is more reproducible (for GC, for example, retention time correction is often not necessary).
+
+In `xcms` the most used and reliable method for alignment of high resolution experiments is based on the **obiwarp** approach. The algorithm was developed for proteomics and is based on _dynamic time warping_.
+
+The alignment is performed directly on the profile-matrix and can hence be performed independently of the peak detection or peak grouping.    
+  
+If the samples look quiet different among them, it might be helpful to perform the alignment based on only QC samples (or another subset of samples) and use these to adjust the full data set.
+
+
+```{r}
+xdata <- adjustRtime(xdata, param = ObiwarpParam(
+  binSize = 0.2,
+  subset = which(xdata$type == "QC"),
+  subsetAdjust = "average"))
+```
+
+
+* **binSize** set the width of the slices of the m/z bins used to extract the traced which are then aligned
+
+It is of utmost importance to check the amount of correction since large time shifts are not reasonable. Below we plot the BPC before and after applying the RT correction, as well as the differences of the adjusted- to the raw retention times per sample.
+
+```{r}
+chr_raw <- chromatogram(xdata, aggregationFun = "max", 
+                        adjustedRtime = FALSE)
+chr_adj <- chromatogram(xdata, aggregationFun = "max")
+par(mfrow = c(3, 1), mar = c(2, 4.3, 2, 0.5))
+plot(chr_raw, peakType = "none", main = "BPC, raw", 
+     col = group_colors[xdata$country])
+plot(chr_adj, peakType = "none", main = "BPC, adjusted", 
+     col = group_colors[xdata$country])
+plotAdjustedRtime(xdata, col = group_colors[xdata$country])
+```
+
+As you can see the correction is never bigger than 2 seconds. With a chromatographic peak width of around 10 seconds this is more than acceptable and, another time it speaks of a overall good analytical reproducibility.
+
+`xdata` now still contains the list of the peaks for the different samples, but now they retention time should be less erratic...
+
+```{r}
+chromPeaks(xdata) %>% 
+  as_tibble() %>% 
+  filter(sample %in% c(1,8)) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = factor(sample)), siaze = 0.3) + 
+  scale_color_brewer(palette = "Set1") + 
+  theme_light()
+```
+
+As you can see the situation has improved and some of the vertical stripes are now well aligned.  
+
+
+## Correspondence
+
+The last step is to find a consensus list of variables across the different samples. These will be the features which will be used for the data analysis. The list of peaks is now aligned in retention time, but:
+
+* peaks are still separated per sample
+* a peak could be present only in a group of samples (because a metabolite is missing there)
+* a peak could be missing because it was not correctly identified
+
+
+The common way of doing this step in `xcms` relies in a density based approach.
+
+The algorithm combines chromatographic peaks depending on the density of peaks along the retention time axis (all peaks found in all samples together!) within small slices along the m/z dimension. 
+
+Care should be taken to account for the fact that a peak could be absent in a sample or in a set of samples and to avoid, in the meantime, to keep peaks found only in one sample.  
+
+As before, the parameters of this step are included in a specific object
+
+```{r}
+pdp <- PeakDensityParam(sampleGroups = xdata$country, 
+                        minFraction = 0.5, 
+                        bw = 30,
+                        binSize = 0.1)
+```
+
+A set of peaks will be considered a candidate to become a "valid" group if it contains peaks coming from at least a `minFraction` of samples belonging to one of the `sampleGroups`.
+
+An example will make this more clear. Suppose I have a dataset with two sample groups: one of 4 samples, the other of 6. 
+If I set `minFraction` to 0.5, a group of peaks will be considered a **feature** if it contains at least:
+
+* peaks coming from 2 samples of the first group
+* peaks coming from 3 samples of the second group
+
+... or more.
+
+* **binsize**: set the width in the m/z dimension to collect peaks from the different peaklists
+* **bw**: this is the bandwidth of the density estimate used to estimate the distribution of the peaks in the retention time dimension
+
+
+
+Grouping is finally performed with:
+
+```{r}
+xdata <- groupChromPeaks(xdata, param = pdp)
+```
+
+
+The **features** are now the variables which will show-up in the data matrix. Their definition has been added by the `groupChromPeaks` method to the `xdata` object (which also contains the definition of the peaks of the different samples).
+
+
+The definition can be extracted as a dataframe: 
+
+```{r}
+myfeatures <- featureDefinitions(xdata)
+head(myfeatures, 5)
+```
+
+
+The table contains:
+
+* the definition of the "position" of the feature in the mz/rt plane (`mzmed`,`mzmin`,`mzmax`,`rtmed`,`rtmin`,`rtmax`)
+* the number of peaks which were assigned to that feature `npeaks`
+* the number of samples (per group) which have peaks that have been joined in each feature
+* the index of the peaks grouped in each feature
+
+
+The (almost) final untargeted data matrix can be extracted from the same object with:
+
+```{r}
+DM <- featureValues(xdata, value = "into")
+dim(DM)
+```
+
+The intensity used to build the data matrix is normally chosen as:
+
+* `into`: integrated, original, intensity of the peak 
+* `maxo`: maximum intensity of the peak
+
+
+In our simple example we have `r nrow(DM)` variables measured over `r ncol(DM)` samples:
+
+```{r}
+head(DM)
+
+```
+
+
+Note that `DM` holds samples in columns and variables in rows, so it should be transposed to be ready for the standard analysis.
+
+
+## Handling NAs
+
+So we finally get there, we have our data matrix full of intensities, but (as usual) missing values are not absent...
+
+Another time:
+
+* in some cases NAs are there because that feature was not present (low concentration metabolites)
+* in other cases they are there because the long chain of steps we have made could have been leaking somewhere. Maybe one peak was showing a bad shape, or two peaks were not well separated...
+
+
+To go on we have to try to fill at least a part of the holes with a reasonable number. The function `fillChromPeaks()` integrates the signal found in the mz-rt region of the feature. The mz and rt ranges used by the algorithm are defined as the lower quartile of the `mzmin` and `rtmin` values of all detected peaks of the feature, and the upper quartile of the `mzmax` and `rtmax` values.
+
+* if the peak was missing for an error in the preprocessing, it will somehow be recovered by this procedure (obviously as far as the samples are aligned...)
+* if nothing is there, the algorithm will find electrical/chemical noise... and this number will be a reasonable estimate of the signal we get when something is undetectable.
+
+This smart approach (which works well in many cases, even if there are exceptions) is implemented in `xcms` with the `fillChromPeaks` function:
+
+
+```{r}
+xdata_filled <- fillChromPeaks(xdata)
+```
+
+Now our filled data matrix looks like this...
+
+
+```{r}
+DM_f <- featureValues(xdata_filled, value = "into")
+head(DM_f)
+```
+
+A clear improvement, isn't it ? :-)
+
+
+This data matrix will be the starting point of our statistical analysis...
+
+
+
+## Multivariate Visualization - PCA
+
+The subsequent step is to take a look at the multivariate structure of the data to spot larger scale patterns.   
+Remember that at the beginning of the tutorial we have filtered the data to the RT range 800-1000 seconds to be faster, but for this part of the session we are interested in keeping the information from all chromatograms. For that, we already have processed this data and now we are just going to upload it in the workspace.
+
+
+In order to be able to use the xdata stored in the file, the raw CDF should be organized as follows:
+
+
+--Folder_name
+    |
+    -- data
+    |    |-- cdfs_grape
+    |                |-- phoenix.Rdata, *.CDF
+    -- Grape_analysis
+                     |-- analyze_the_grape.Rmd
+
+If you put the raw data and the RData in a different folder you have to update the `xdata@processingData@files` putting thre the right path pointing to the correct files
+
+To check the actual path to the raw data stored in the `xdata` you can use 
+
+```{r}
+fileNames(xdata)
+```
+
+
+
+
+```{r}
+load("phoenix.RData")
+DM_f <- featureValues(xdata, value = "into")
+```
+
+
+In order to do a first PCA with the scope of getting a general overview of the data it is necessary to impute the data matrix, replacing `NAs` with meaningful numbers (it is important to keep in mind that even having applied the `fillChromPeaks()` function, there may still be some missing values in the data matrix):
+
+1. The number should have a variability
+2. The number should not know anything about the experimental design
+3. The number should have a reasonable analytical meaning
+
+_My choice here is to work variable wise and replace the NAs with a random number drawn from an uniform distribution spanning from 0 to half of the minimum value measured for that variable_
+
+The rationale behind this choice is that: 
+
+* a concentration is a positive number
+* everything I cannot measure is equally likely
+
+
+First of all I need a function to perform the imputation of a vector
+
+```{r}
+myimputer <- function(v){
+  if (sum(is.na(v)) == 0) {
+    return(v)
+  } else {
+    napos <- which(is.na(v))
+    newval <- runif(length(napos),0, min(v, na.rm = TRUE)/2)
+    out <- v
+    out[napos] <- newval
+    return(out)
+  }
+}
+```
+
+Now we apply it to the full set of columns
+
+```{r}
+DM_f <- t(DM_f)
+set.seed(123)
+DM_i <- apply(DM_f, 2, myimputer)
+```
+
+
+Below we apply log-transformation since usually the distribution of metabolomics data intensities is far from being normal. Additionally, in this case example, the number of samples for each group is extremely low.
+
+
+```{r}
+DM_i <- log10(DM_i)
+```
+
+And now PCA!
+
+```{r}
+myPCA <- PCA(DM_i, graph = FALSE)
+```
+
+
+```{r}
+fviz_pca_ind(myPCA, 
+             habillage = factor(xdata$country), 
+             geom = "point", 
+             pointsize = 2,
+             axes = c(1,2)) + 
+  scale_color_brewer(palette = "Set1")
+```
+
+The amount of variability captured in this representation is already the `r round(myPCA$eig[2,3])`%, and the plot shows the presence of a clear separation between sample classes.
+
+
+What about the variables?
+
+```{r}
+fviz_pca_biplot(myPCA, 
+                habillage = factor(xdata$country), 
+                geom = "point", 
+                pointsize = 2,
+                axes = c(1,2)) + 
+  scale_color_brewer(palette = "Set1")
+```
+
+The biplot here seems to suggest that Italian samples probably show higher levels for the large majority of signals. Even if the biplot here is not really useful to spot clera patterns ...
+
+## Biomarker Discovery
+
+What we did so far is called **exploratory data analysis**. To write the paper we should also find the variables which are showing a significant effect of the design factors. 
+
+**Notes**
+
+1. One could look for biomarkers with univariate and multivariate methods. 
+2. In a univariate perspective, to avoid the risks of non matching the assumptions of many statistical tests it would be safer to rely on non-parametric approaches.
+3. Unfortunately, non parametric approaches are not really useful with datasets with small number of samples ... here we have 3! So to go on with our investigation we have to rely on parametric tests. In doing so we should always remember that we are making strong assumptions, so no guarantee (as usual ;-)) that our results will be valid for the population ....
+4. Since we are performing multiple tests, we should remember that false positives will be present!
+
+We will now employ the parametric test (the `Student's t-Test`) using in this case the log-transformed values.
+
+```{r}
+class <- xdata$country[xdata$type != "QC"]
+stats.tt <- function(x){t.test(x ~ class)$p.value}
+pval_tt <- apply(DM_i[xdata$class != "QC",], 2, stats.tt)
+hist(pval_tt, breaks = 20, xlim = c(0, 1), col = rgb(0, 0, 1, 1/4))
+```
+
+If there would be no difference the distribution of p-values is expected to be uniform ... there is a clear enrichment of small p-values and it speaks of the presence of a significant fraction of differences between samples from Italy and Germany. This result is not unexpected considering the large difference observed in the PCA
+
+
+```{r}
+
+random_DM <- DM_i[xdata$class != "QC",] 
+random_DM <- random_DM[sample(1:6),]
+
+pval_tt_rnd <- apply(random_DM, 2, stats.tt)
+
+
+hist(pval_tt, breaks = 20, xlim = c(0, 1), col=rgb(0, 0, 1, 1/4), 
+     main = "Correctight and random labels")
+hist(pval_tt_rnd, breaks = 20, xlim = c(0, 1), col=rgb(1, 0, 0, 1/4), add = T)
+```
+
+so far we know that the two classes are different, but to start with the biomarker annotation job we would need to decide a criterion to prioritize a subset of the features ...
+
+A sensible choice would be to rank the variables on the base of their contrast between the two classes... so we would be interested on focusing on those features which, in addition to being statistically significant, show high differences between their respective mean values. The presence of an "high" contrast between the two classess can be measured in terms of **effect size**. Specifically we'll use the `Cohen's d`.
+
+
+```{r}
+stats.cd <- function(x){cohens_d(x ~ class)$Cohens_d}
+cd <- apply(DM_i[xdata$class != "QC",], 2, stats.cd)
+```
+
+
+The Cohens'd and the p-value can be represented in a volcano plot
+
+
+```{r}
+plot(cd,1-pval_tt, xlab = "Cohen's D", main = "Volcano Plot", pch = 3)
+```
+
+The crosses in the upper extremes corresponds to features with high statistical significance and large effect size
+
+Now we join all the outputs in a unique data matrix and we sort the results by effect size:
+
+```{r}
+res <- cbind(
+  as.data.frame(featureDefinitions(xdata))[,c("mzmed", "rtmed")], pval_tt, cd)
+res$rtmed <- res$rtmed/60
+res <- res[order(res[,"cd"]),]
+head(res)
+tail(res)
+```
+
+
+This is the list of "biomarkers", let's plot one of them ...
+
+```{r}
+sample_colors <- group_colors[xdata$country]
+set.seed(123)
+ptx <- as.numeric(factor(xdata$class)) + runif(length(xdata$class), -0.2, 0.2)
+plot(ptx, DM_f[,rownames(res)[1]], ylab = "intensity", 
+     col = gsub("60", "", sample_colors), pch = 19, xaxt = "n",
+     ylim = c(0, max(DM_f[,rownames(res)[1]])),
+     main = rownames(res)[1])
+axis(1, seq(3), levels(factor(xdata$class)))
+```
+
+Which exactly shows what we expect.
+
+Furthermore, we can also manually check its peak shape, as well as the integrated area. Within xcms there is the function `featureChromatograms()` which allows to visualize the EIC of an specific feature, displaying the area integrated by the algorithm:
+
+```{r, fig.width=10}
+ft_chr1 <- featureChromatograms(xdata, features = rownames(res)[1], 
+                               expandRt = 15, filled = FALSE)
+ft_chr2 <- featureChromatograms(xdata, features = rownames(res)[1], 
+                               expandRt = 15, filled = TRUE)
+par(mfrow = c(1, 2))
+plot(ft_chr1, col = group_colors[xdata$country],
+     peakBg = sample_colors[chromPeaks(ft_chr1)[, "sample"]])
+plot(ft_chr2, col = group_colors[xdata$country],
+     peakBg = sample_colors[chromPeaks(ft_chr2)[, "sample"]])
+legend("topright", col = gsub("60", "", group_colors), 
+       legend = names(group_colors), pch = 19)
+```
+
+Another way to check the feature of interest is using the function `plotChromPeakDensity()`:
+
+```{r}
+chr_mzr <- chromatogram(xdata, mz = res$mzmed[1] + 0.01 * c(-1, 1))
+plotChromPeakDensity(chr_mzr, col = group_colors, param = pdp,
+                     peakBg = sample_colors[chromPeaks(chr_mzr)[, "sample"]],
+                     peakCol = sample_colors[chromPeaks(chr_mzr)[, "sample"]],
+                     peakPch = 16)
+```
+
+The upper panel in the plot shows the EIC with the detected peaks highlighted, whereas the lower plot indicates which individual peaks were detected, as well as how they have been grouped within features (indicated with grey rectangles). The black line represents the density distribution of detected peaks along the retention times.  
+In this example we can see that there have been detected 2 features with this m/z value at different retention times. The plot tells us that our feature of interest (eluted around 800 seconds) has initially been detected only in Italian (blue) samples. Although the plot shows that this feature was not detected in QC neither in samples from Germany, with the boxplot we have seen that there is also a value for these samples. Note that this value has obtained during the application of the function `fillChromPeaks()`. This is clearly seen when we use the function `featureChromatograms()` and playing with the argument `filled`.
+

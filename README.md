@@ -39,8 +39,8 @@ The material (which is growing!) covers: the following topics:
 
 * [Untargeted metbolomics data matrix](Day3/Untargeted_metabolomics_DM.html)
 * [Creating a data matrix in xcms from raw LC-MSdata](Day3/from_rawdata_to_DM.html)
-  * Practical: [html](Day3/faahKO.html), [Rmd](Day3/faahKO.Rmd)
-* [Feature Cleaning and Quality Assessment]()
+  * Practical: faaKO data [html](Day3/faahKO.html), [Rmd](Day3/faahKO.Rmd)
+  * Practical: grape data [html](Day3/analyze_the_grapes.html), [Rmd](Day3/analyze_the_grapes.Rmd)
 * [Some words on annotation](Day3/annotation.html)
 * [SW resources for preprocessing](Day3/software_resources_for_preprocessing.html)
 
