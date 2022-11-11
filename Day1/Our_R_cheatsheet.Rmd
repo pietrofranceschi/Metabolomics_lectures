@@ -83,10 +83,9 @@ The `purrr` package (which is part of `tidyverse` ) allows you to recursively ap
 Suppose, for example, that we want to calculate the determinant of the previous matrices
 
 ```{r}
-## in R there is a specifica function called determinat to do that
+## in R there is a specific function called "determinat" to do that
 ?determinant
 ```
-
 
 If my data are organized in tabular form ...the determinant of the two matrices can be 
 calculated in a very efficient and organized way as follows
@@ -113,49 +112,16 @@ my_first_tibble$determinant[[1]]
 
 
 ## Homework
-Create a tibble that contains 100 random sampling from a normal distribution (mu = 0, sd = 1 ... rnorm())
-
-
-```{r}
-Sample <- paste0("s",1:100)
-```
-
-
-```{r}
-your_tibble <- tibble(sample = Sample)
-
-your_tibble
-```
-
-```{r}
-your_tibble <- your_tibble %>% 
-  mutate(random = map(sample, function(x) runif(10)))
-
-your_tibble
-```
-
-```{r}
-your_tibble <- your_tibble %>% 
-  mutate(means = map_dbl(random, function(pippo) mean(pippo)))
-
-your_tibble
-```
-
-
-```{r}
-hist(your_tibble$means)
-```
-
-
-## Homework 2
-
-Show that the means of the 100 samples shows a normal distribution regardless the shape of the distribution we are drawing from
+1. Create a tibble that contains 100 random sampling from a normal distribution (mu = 0, sd = 1 ... rnorm())
+2. Show that the means of the 100 samples shows a normal distribution regardless the shape of the distribution we are drawing from
 
 
 To draw from different distributions:
 
 * `runif` for uniform distribution
 * `rlnorm` for the lognormal distribution
+
+
 
 
 

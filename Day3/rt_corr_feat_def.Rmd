@@ -1,0 +1,119 @@
+---
+title: "Rt Correction and Feature definition"
+author: "Pietro Franceschi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(xcms)
+library(tidyverse)
+library(plotly)
+```
+
+## Introduction
+
+In the previous demo we have been dealing with peak picking, so we assume that we have now a full list of chromatographic peaks which have been detected across the full set of samples.
+
+The next step in the process is now to "match" these list of peaks in a consensus list of **features** which will be the variables which will be present in the final data matrix. 
+
+This process of matching is necessary to compensate:
+
+* measurement error in the m/z dimension
+* retention time shifts
+
+In general, the first phenomenon is less important than the second: when you buy a very expensive mass spectrometer, the instrument producer will do its best to keep *mass accuracy* as high as possible. Chromatographic stability, on the other, end is by far less easy to control.
+
+We start reading in the pick picked data
+
+```{r}
+load("data/picked_peak.RData")
+```
+
+We already know that our dataset contains blank injections. They could be used to identify an exclusion list, but for now let's take them out
+
+
+```{r}
+## identify non blank indices
+no_blank_id <- which(raw_data$variety != "blank")
+
+## subset the data
+raw_data <- filterFile(raw_data, file = no_blank_id)
+
+## check the metadata
+pData(raw_data)
+```
+
+Let's now visualize the amount of retention time shift looking to the ionic trace of compound which should be present in almost all samples:
+
+```{r}
+# extract the chromatogram
+chr_raw <- chromatogram(raw_data, 
+                        mz = 295.0445 + 0.01*c(-1, 1), 
+                        rt = 250 + 20*c(-1, 1),
+                         include = "none")
+
+```
+
+Find the CP in the slice
+
+
+```{r}
+sub_peaks <- chromPeaks(raw_data) %>% 
+  as_tibble() %>% 
+  filter(between(mz,295.03,295.05)) %>% 
+  filter(between(rt, 230,270))
+```
+
+
+```{r}
+mypalette <- c("steelblue", "coral", "darkgreen")
+names(mypalette) <- c("red","X","wht")
+
+plot(chr_raw, col = mypalette[raw_data$color])
+legend("topright", legend = c("red","QC","white"), col = mypalette, lty = 1)
+abline(v = sub_peaks$rt, col = "red", lty = 3)
+```
+
+Here we have a tricky situation. The peaks are not aligned, but this is actually a double feature which is a potential biomarker for color and variety ... so we should go back to peak detection and play around ;-)
+
+Anyway, let's try to correct the rt shift. As usual in xcms this can be done in different way, here we will use the most advanced one which relies on *dynamic time warping*.
+
+What we will do is to apply this algorithm on the QCs and the extrapolate the estimated Rt correction on the samples. The rationale behind this choice is the following. Samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in rt) with a retention time shift of analytical origin.
+
+If I use QCs to do that the chemical nature of the samples is the same so every difference is coming from analytical drifts!.
+
+
+```{r}
+raw_data <- adjustRtime(raw_data, param = ObiwarpParam(
+  binSize = 0.05,
+  subset = which(raw_data$variety == "QC"),
+  subsetAdjust = "average")) ## we have to extend the correction to the other samples!
+```
+
+
+* **binSize** set the width of the slices of the m/z bins used to extract the traced which are then aligned
+
+It is of utmost importance to check the amount of correction since large time shifts are not reasonable. Below we plot the BPC before and after applying the RT correction, as well as the differences of the adjusted- to the raw retention times per sample.
+
+The first thing to do is too look to the amount of correction which was applied
+
+
+```{r}
+plotAdjustedRtime(raw_data, col = mypalette[raw_data$color])
+```
+
+
+
+
+
+
+
+
+
+
+

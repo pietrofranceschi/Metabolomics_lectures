@@ -4,9 +4,9 @@ This repository contains material for a full metabolomics course ideally organiz
 The material (which is growing!) covers: the following topics:
 
 * General Introduction to metabolomics and study design
-* General analyttical considerations
+* General analytical considerations
 * Analysis of a targeted metabolomics data matrix
-* Pre processing of Untargeted LC-MS data by xcms
+* Pre processing of Untargeted LC-MS data by `xcms`
 * NMR
 * Introduction to machine learning and multivariate tools
 * Statistical analysis of metabolomics data by univariate tools
@@ -15,9 +15,9 @@ The material (which is growing!) covers: the following topics:
 ## Day One
 
 * [Our R cheatsheet](Day1/Our_R_cheatsheet.html) - [Rmd](Day1/Our_R_cheatsheet.Rmd)
-  * Practical: tiduverse hands on
+  * Practical: `tidyverse` & `purrr` hands on
 * [What is Metabolomics](Day1/Metabolomics.html)
-* Practical Considerations on the study design
+* [Practical Considerations on the study design](Day1/practical_considerations.html)
 * [Experimental design](Day1/experimental_design.html)
   * Practical: [html](Day1/stratified_random_sampling.html), [Rmd](Day1/stratified_random_sampling.Rmd)
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)
@@ -27,13 +27,16 @@ The material (which is growing!) covers: the following topics:
 
 ## Day Two
 
+* [Wrangling a targeted metabolomics data matrix](Day2/wrangling_targeted_DM.html) - [Rmd](Day2/wrangling_targeted_DM.Rmd)
+  * [KOMP data](Day2/KOMP_data_targeted.RData)
+  * [Rubus data](Day2/rubus_targeted.csv)
+
+Special Topics
 * [Missing values and imputation](Day2/MissingValues.html)
 * [Variable distribution](Day2/Variable_distribution.html)
 * [Variable scaling and Sample normalization](Day2/Scaling_and_normalization.html)
 * [Multivariate visualization: PCA](Day2/PCA.html)
-* [Wrangling a targeted metabolomics data matrix](Day2/wrangling_targeted_DM.html) - [Rmd](Day2/wrangling_targeted_DM.Rmd)
-  * [KOMP data](Day2/KOMP_data_targeted.RData)
-  * [Rubus data](Day2/rubus_targeted.csv)
+
 
 ## Day Three
 
@@ -49,6 +52,8 @@ The material (which is growing!) covers: the following topics:
 * Biomarker discovery: the univariate way
 * False discoveries, and multiple testing
 * [Machine Learning for Dummies](Day4/ML_intro.html)
+  * [KOMP data](Day2/KOMP_data_targeted.RData)
+* PLS and PLS-DA
 * [Decision Trees and Random Forest](Day4/Decision_Trees_and_RandomForest.html)
   * Practical: [html](Day4/Random_Forest_in_practice.html), [Rmd](Day4/Random_Forest_in_practice.Rmd)
 

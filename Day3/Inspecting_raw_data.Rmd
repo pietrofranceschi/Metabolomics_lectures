@@ -1,0 +1,252 @@
+---
+title: "Inspecting raw LC-MS Data"
+author: "Pietro Franceschi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(xcms)
+library(Spectra)
+library(tidyverse)
+library(plotly)
+```
+
+## Introduction
+
+The objective of this demo is to make you familiar with the characteristics of LC-MS metabolomics data (both MS1 and MS2) by using two packages belonging to the `xcms` ecosystem. 
+
+Since its first release in 2006, `xcms` has been steadily growing as one of the standards for the analysis of LC(GC)-MS-(MS) metabolomics data.
+
+In the last years a huge effort has been made to set up a full `xcms` centric ecosystem which now allows to:
+
+* efficiently handle raw MS data
+* create and integrate databases of standards to perform annotation
+* use/handle the results of fragmentation experiments
+* ...
+
+... so many thanks to the people that are working on that!
+
+
+## The Data
+
+For our demo we will use a subset of a dataset on wines which have been recently acquired at the Fondazione E. Mach in Italy (many thanks to Dr. Mar Garcia Aloy). The dataset has been designed for training purposes and includes MS and DDA (MS2 e MS3) (in positive and negative polarity) acquisition of a 20 wines with the following characteristics:
+
+* two colors: red(10), white(10)
+* 12 varieties
+
+
+The acquisition sequences included blanks, pooled QC and samples. Al data were acquired with a UPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
+
+
+## Reading one injection
+
+To understand how the data behaves, let's start reading in the data coming from one injection
+
+```{r}
+raw_one <- readMSData(
+  files = "data/x016_X_QC_X_4_NEG_DDA.mzML",
+  msLevel. = c(1,2), ## we read only MS1 and MS2
+  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+```
+
+
+Let's look to the object
+
+```{r}
+raw_one
+```
+
+We see ...
+
+* the file name!
+* something called `phenoData`. More on that later!
+* something called `featureDatra`. More on that later!
+* the length of the LC method was 12 minutes
+* during this time 1638 spectra were collected
+
+
+It is important that along the process one can be able to visualize the raw data, so let's give a look to the structure of the R object we created.
+
+Let's first get the retention times where spectra were collected
+
+```{r}
+## method to extract the retention times
+rtime(raw_one)[1:20]
+```
+
+The variable names should be read as "F(ile)x.S(can)000y". Since we are dealing with a DDA experiment, the data contains a combination of full scan and fragmentation spectra, so each one of the previous Scans should show either the full family of ions coming from the source, or what is produced by fragmenting a specific **precursor**
+
+```{r}
+## this gives the type of the corresponding 10 scans
+msLevel(raw_one)[1:10]
+```
+
+As you see, they are interleaved. 
+
+
+## Full Scans
+
+Let's now get out the full scans 
+
+```{r}
+fs_raw <- raw_one %>% filterMsLevel(1)
+```
+
+
+We already now how the `rt` will look like, but what about `mz` and `intensity`
+
+
+```{r}
+rt <- rtime(fs_raw)
+mz <- mz(fs_raw)
+I <- intensity(fs_raw)
+```
+
+And their structure ...
+
+```{r}
+glimpse(mz[1:4])
+```
+
+```{r}
+glimpse(I[1:4])
+```
+
+So both object are lists: for every scan we have a vector of `mz` and a vector of `I`: a spectrum. We have 3D data!
+
+### Plot by hand
+
+```{r}
+plot(mz[[1]], I[[1]], type = "h")
+```
+
+### Plot with `xcms`
+
+The first spectrum can be extracted by standard list subsetting
+
+```{r}
+s1 <- fs_raw[[1]]
+s1
+```
+
+So a method for this type of object is alredy in place
+
+```{r}
+plot(s1)
+```
+
+This can be also made interactive with a little (and inelegant) trick
+
+```{r}
+ggplotly(plot(s1))
+```
+
+This is an alternative 2D visualization of the ion map
+
+```{r}
+ggplotly(tibble(rt = rt, mz = mz, I = I)  %>% 
+  unnest(c("mz","I")) %>%
+  filter(mz > 284 & mz < 300) %>% 
+  filter(rt > 200 & rt < 300) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
+  scale_color_viridis_c() + 
+  theme_light())
+
+```
+
+
+As we have discussed in the presentation, the different metabolites present in the sample will show-up as peaks in their ion chromatograms, basically because when more molecule of a specific type are reaching the ionization source, more ions associated to that molecule are produced.
+
+The previous map shows that the ion around m/z 295.0445 could show an interesting profile over time ...
+
+```{r}
+# extract the chromatogram
+chr_raw <- chromatogram(fs_raw, 
+                        mz = 295.0445 + 0.01*c(-1, 1), 
+                        rt = 250 + 60*c(-1, 1))
+
+chr_raw
+```
+
+As before we can get out the data and manually plot the trace
+
+```{r}
+plot(rtime(chr_raw[1,1]), intensity(chr_raw[1,1]), type = "b")
+```
+
+Note: the structure of the `Mchromatograms` is "matrix like" because it is designed to work best with many ions and many files.
+
+Just to show what I mean let's read in the data coming from two different injections
+
+```{r}
+two_raw <- readMSData(
+  files = c("data/x016_X_QC_X_4_NEG_DDA.mzML","data/x020_wht_gewurz_A_1_NEG_DDA.mzML"),
+  msLevel. = 1, ## we read only MS1 and MS2
+  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+```
+
+
+As before we "slice" an extracted ion chromatogram
+
+```{r}
+# extract the chromatogram
+chr_raw_2 <- chromatogram(two_raw, 
+                        mz = 295.0445 + 0.01*c(-1, 1), 
+                        rt = 250 + 60*c(-1, 1))
+
+chr_raw_2
+```
+
+Here we could extract the rt and intensity for the separate files, but we can plot them with a handy `xcms` method
+
+The plot can be also obtained by a specific method, which is also giving some additional info
+
+```{r}
+plot(chr_raw_2)
+```
+
+Here we see a clear difference between the two traces, looking to the names we see that one datafile is a QC, while the second is one injection of a white wine (`wht`)... food for brains !  ;-)
+
+
+**Note** The previous plot shows a typical characteristics of Orbitrap (and in general FT) instruments: the signal off peaks is almost invariably zero. As we will see this can be a problem in presence of missing data, since no "real" noise can be integrated there.
+
+
+## DIY
+
+* Play around with the previous 2d map and look for potentially interesting ions. Plot their chromatogram
+* Look how the quality of the mass spectrum is changing across one chromatographic peak
+* If you look to the map, can you say why the signal with high intensity are organized in vertical groups?
+* The trace around 289 seems to show two horizontal peaks. What does it mean? Can you interpret that?
+
+
+## MS/MS data
+
+The last part of this demo is fastly devoted to fragmentation spectra ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

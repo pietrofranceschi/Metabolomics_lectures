@@ -27,7 +27,7 @@ In this demo we will use only the metabolites quantified in the targeted assays.
 
 Here we get the data
 ```{r}
-load("KOMP_data_targeted.RData")
+load("../data/KOMP_data_targeted.RData")
 ```
 
 
@@ -147,7 +147,7 @@ For example, the number of NAs in relation of the median intensity can be visual
 DM_nest %>% 
   mutate(nnas = map_dbl(data,function(x) sum(is.na(x$I))),                  ## calculate the univariate statistics "on the fly"
          medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
-  filter(nnas > 0) %>% ## we keep only features with at leas on NA!
+  filter(nnas > 0) %>% ## we keep only features with at least one NA!
   ggplot() +   ## plot them
   geom_point(aes(x = medI, y = nnas)) + 
   scale_x_log10() + 
@@ -317,11 +317,11 @@ DM_nest %>%
         legend.position = "bottom")
 ```
 
-The situation largely improves, even if some compounds are still showing strange behaviors ...
+The situation largely improves, even if some compounds are still showing strange behaviours ...
 
 **Something For you**
 
-1. Could you look to the metabolites showing outlying behaviors? Is this a matter of genotype? 
+1. Could you look to the metabolites showing outlying behaviours? Is this a matter of genotype? 
 
 
 
@@ -525,32 +525,6 @@ DM_i_nest <- DM_i_nest %>%
 ```
 
 
-As we have seen yesterday, a first idea on the presence of "relevant" differences in the two classes is the distribution of the p-values
-
-```{r}
-hist(DM_i_nest$ps)
-```
-
-Create a set of data with permuted intensities
-
-
-```{r}
-DM_i_nest <- DM_i_nest %>% 
-  mutate(perm_data = map(data, function(t)  t %>% mutate(I = sample(I)))) %>% 
-  mutate(perm_wilcoxon = map(perm_data, ~wilcox.test(I ~ Gender, data = .x, exact = FALSE))) %>% 
-  mutate(perm_ps = map_dbl(perm_wilcoxon, ~.x$p.value))
-  
-```
-
-
-```{r}
-hist(DM_i_nest$perm_ps)
-```
-
-
-
-This is clearly not uniform and it speaks of the presence of a significant fraction of differences between males and females.
-
 Now we would like to rank the variables on the base of their contrast on the two classes ... but as we know it is not correct to use the _p-value_ for that. 
 
 We need to calculate the **effect size**! Now I'll use the Cohen's d. A word of caution here, this type of effect size is parametric ... but I've been stressing that non parametric analysis here should be preferred. 
@@ -566,6 +540,20 @@ DM_i_nest <- DM_i_nest %>%
   mutate(pcorr = p.adjust(ps, method = "bonferroni")) %>% 
   mutate(cohend = map_dbl(data, ~cohen.d(I ~ Gender, data = .x)$estimate))
 ```
+
+Now we use the effect size and the p value to create a volcano plot
+
+
+```{r}
+library(plotly)
+ggplotly(DM_i_nest %>% 
+           left_join(metabolite_meta %>% select(CompoundID,CompoundName)) %>% 
+           ggplot(aes(text=CompoundName)) + 
+           geom_hline(yintercept = 5, lty = 2, col = "red") + 
+           geom_point(aes(x = cohend, y = -log10(ps)), fill = "orange", size = 3, pch = 21) + 
+           theme_bw(), tooltip="text")
+```
+
 
 Now we focus on the compound which are significant at the 0.01 level and we sort the results by effect size ...
 

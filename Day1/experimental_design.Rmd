@@ -90,8 +90,7 @@ and Nobel Laureates**](http://www.biostat.jhsph.edu/courses/bio621/misc/Chocolat
 **Key question**: what is the best way to sample my population in a _representative_ way?
 
 * Do it _randomly_ to avoid any intentional or unintentional bias (**Randomized Sampling**)
-* Take into account known subpopulations (**Stratified Random Sampling**)
-* Take into account known confounding factors (**Blocking**)
+* Take into account known subpopulations and confunding factors (**Stratified Random Sampling**)
 * The number of samples is determined by practical/economical considerations
 
 In presence of known subpopulations stratified random sampling result in a more accurate characterization of the population
@@ -105,7 +104,6 @@ In presence of known subpopulations stratified random sampling result in a more 
 * Identify the **sampling unit**
 * Define the conceptual population
 * Can I sample it in a representative way?
-* Plan a clever sampling ...
 * Identify **confounding factors** and stratify the sampling
 
 
@@ -170,6 +168,7 @@ include_graphics("../images/blocks.png")
 <br>
 <hr>
 <br>
+
 **Examples of common blocking factors:**
 
 * Location  

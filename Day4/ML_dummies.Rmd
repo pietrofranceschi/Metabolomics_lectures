@@ -21,7 +21,7 @@ The objective of this demo, and of the subsequent DIY, is to make you familiar w
 To do that in a simple way we will try to solve in the ML way the problem of fitting a line through a set of points. It is clear that this could be easily done by regression, but the idea is not to use mathematics, but brute force ...
 
 
-As we discussed in the lecture to peform machine learnign we need 
+As we discussed in the lecture to perform machine learning we need 
 
 >1. collect data
 >2. propose a model
@@ -93,7 +93,7 @@ abline(a = 12, b=3, col = "red")
 segments(x0 = dummy_data$x, y0 = dummy_data$y, y1 = dummy_data$pred, col = "green")
 ```
 
-The green lines are the residuals, so the "loss" of this model will be the squared sum of the length of the green segments.
+The green lines are the residuals, so the "loss" of this model will be the squared sum  the green segments.
 
 
 ## Find the best model
@@ -114,7 +114,7 @@ search_grid <- expand_grid(a = seq(0,20,0.5), b = seq(0.1,10,0.1))
 head(search_grid)
 ```
 
-As you can see here I have the complete lost of possible combination, which is rather long:  `r nrow(search_grid)` entries!
+As you can see here I have the complete set of possible combinations, which is rather long:  `r nrow(search_grid)` entries!
 
 Now for each row I calculate the model predictions and then the loss function
 

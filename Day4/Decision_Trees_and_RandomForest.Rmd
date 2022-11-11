@@ -21,15 +21,14 @@ library(tidyverse)
 A tibble containing the passenger of the TItanic along with their fate during the accident
 
 
-```{r, message=TRUE}
+```{r, message=FALSE}
 train_titanic <- read_csv("../data/train_titanic.csv") %>% 
   dplyr::select(Survived, Sex, Age) %>% 
   na.omit() %>% 
   mutate(Survived = ifelse(Survived == 1, "survived","died"))
 
-
+summary(train_titanic)
 ```
-
 
 
 

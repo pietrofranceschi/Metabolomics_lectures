@@ -1,0 +1,137 @@
+---
+title: "Practical Considerations"
+author: "Pietro Franceschi"
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+```
+
+
+
+## {.flexbox .vcenter}
+
+~~**Start from a clear question**~~
+
+
+## Quantify analytical variability {.build}
+
+> * What is the best strategy to quench metabolism?
+> * What is the best way to extract my samples?
+> * **MS performance degrade with time**: how long can I run my sample list before cleaning
+> * **Block** your experimental design on the analytical batch 
+> * Reduce as much as possible the length of the chromatographic run
+
+##
+
+```{r fig.height=4, fig.width=8}
+sample_list <- tibble(batch = rep(c("Batch 1","Batch 2"), each = 20),
+                      class = rep(c("treated","control"), each = 20),
+                      order = rep(1:20, times = 2)) %>% 
+  mutate(random_class = sample(class))
+
+class.labs <- c("non random","random")
+names(class.labs) <- c("class","random_class")
+
+
+sample_list %>% 
+  ungroup() %>% 
+  pivot_longer(contains("class")) %>% 
+  ggplot() + 
+  geom_point(aes(y = batch, x = order, fill = value), pch = 21, size = 3) + 
+  facet_wrap(~name, labeller = labeller(name = class.labs)) + 
+  theme_bw() + xlab("Injection Order") + ylab("") + 
+  scale_fill_brewer(palette = "Set1", name = "Sample Class") + 
+  theme(aspect.ratio = 0.5, legend.position = "bottom")
+
+```
+
+
+
+## Quality Contro Samples (QC) {.build}
+
+> Reference samples should be regularly injected along the sequence.  
+
+> They measure analytical stability because the sample itself is the same.
+
+> QC samples should be representative of the chamical complexity of the samples
+
+> **Pooled samples** are often the preferred choice
+
+
+## 
+
+```{r fig.height=3, fig.width=4, fig.align="center"}
+
+tibble(order = 1:14,
+       sample = c("blank","QC","QC","QC",rep(c("S","S","S","S","QC"), times = 2))) %>% 
+  ggplot() + 
+  geom_point(aes(y = 1, x = order, fill = sample), pch = 21, size = 4) +
+  theme_bw() + xlab("Injection Order") + ylab("") + 
+  scale_fill_brewer(palette = "Set1", name = "Sample Class") + 
+  theme(aspect.ratio = 0.5, legend.position = "bottom", axis.text.y = element_blank() )
+
+```
+
+* The usefulness of blanks is disputed
+* The first repeated QCs are use to allow column equilibration
+* One could add QC dilutions
+* Also the design of the sequence can be validated
+
+
+## DDA and Fragmentation
+
+```{r out.width="100%", fig.align="center"}
+include_graphics("../images/tandemMS.jpg")
+```
+
+Experiment combining full scan and fragmentation experiment are quite popular, because fragmentation patterns are needed for metabolite annotation
+
+
+## Use wisely your time
+
+```{r fig.height=3, fig.width=12, out.width="100%", fig.align="center"}
+x <- seq(1, 15, length=40)
+y <- dnorm(x, mean = 10, sd = 1)
+
+par(mfrow = c(1,3))
+plot(x,y, type = "l", xlab = "time", ylab = "I", main = "Only FS")
+points(x,y, col = "steelblue", pch = 19)
+points(x,y, col = "steelblue", type = "h")
+polygon(x,y, col = "#4682B450", border = NA)
+legend("topleft", legend = c("FS","DDA"), lty = 1, col = c("steelblue", "orange"))
+
+plot(x,y, type = "l", xlab = "time", ylab = "I", main = "FS + 1DDA")
+points(x[seq(1,100,2)],y[seq(1,100,2)], col = "steelblue", pch = 19)
+points(x[seq(1,100,2)],y[seq(1,100,2)], col = "steelblue", type = "h")
+points(x[seq(2,100,2)],y[seq(2,100,2)], col = "orange", pch = 19)
+points(x[seq(2,100,2)],y[seq(2,100,2)], col = "orange", type = "h")
+polygon(x[seq(1,100,2)],y[seq(1,100,2)], col = "#4682B450", border = NA)
+
+
+plot(x,y, type = "l", xlab = "time", ylab = "I", main = "FS + 3DDA")
+points(x[seq(1,100,4)],y[seq(1,100,4)], col = "steelblue", pch = 19)
+points(x[seq(1,100,4)],y[seq(1,100,4)], col = "steelblue", type = "h")
+points(x[seq(2,100,4)],y[seq(2,100,4)], col = "orange", pch = 19)
+points(x[seq(2,100,4)],y[seq(2,100,4)], col = "orange", type = "h")
+points(x[seq(3,100,4)],y[seq(3,100,4)], col = "orange", pch = 19)
+points(x[seq(3,100,4)],y[seq(3,100,4)], col = "orange", type = "h")
+points(x[seq(4,100,4)],y[seq(4,100,4)], col = "orange", pch = 19)
+points(x[seq(4,100,4)],y[seq(4,100,4)], col = "orange", type = "h")
+polygon(x[seq(1,100,4)],y[seq(1,100,4)], col = "#4682B450", border = NA)
+
+```
+
+The more experiments I do, the worst is my estimate of the peak area ...
+
+* plan different runs for FS and DDA
+* fragment only ion of interest
+* strike a balance between chromatography, instrument speed and number of experiments
+
+
+

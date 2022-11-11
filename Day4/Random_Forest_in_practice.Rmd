@@ -156,7 +156,7 @@ test_df <- work_df %>%
 Now we are ready to train the RF
 
 ```{r}
-rfmodel <- randomForest(Gender~., data = training_df)
+rfmodel <- randomForest(Gender~., data = training_df, ntree = 500)
 
 rfmodel
 ```
@@ -217,7 +217,7 @@ mtrytest %>%
   theme_light()
 ```
 
-Apparently the minimum of the error rate is obtained with `mtry` set to 6 
+Apparently the minimum of the error rate is obtained with `mtry` set to 7 
 
 
 ```{r}
