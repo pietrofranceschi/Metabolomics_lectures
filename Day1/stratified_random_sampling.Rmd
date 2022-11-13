@@ -12,11 +12,10 @@ library(tidyverse)
 
 ## Intro
 
-During the presentation I clearly affirmed that in presence of subpopulations **stratified random sampling** is able to give a more accurate estimate of the properties of my reference population. Let's check my statement ...
-
+During the presentation I affirmed that in presence of known subpopulations **stratified random sampling** is able to give a more accurate estimate of the properties of my reference population. Let's check my statement ...
 
 ## The question
-Suppose that I'm interested in estimating the average height of group of 10000 people (8000 males and 2000 females). The two subpopulations are characterized by the following properties, which normally are unknown ...
+Suppose that I'm interested in estimating the average height in a population of 10000 people and that I know that out of them 8000 are males and 2000 are females. To create my population I use the following properties: 
 
 * Males: mean = 180 cm, sd = 10 cm
 * Females: mean = 150 cm, sd = 10 cm
@@ -44,20 +43,19 @@ mypop %>%
   geom_histogram(aes(x = height, fill = gender), col = "white",  alpha = 0.4, position = "identity")  +
   theme_light()
 ```
-
 Ok, we see what we expect, the two groups are different, and there is an unbalancing.
-
-
 
 
 ## The problem
 
-suppose that I'm interested in estimating well the true population mean. In my case this parameter is known ...
+Ok suppose now that I'm interested in estimating well the population mean. In my case this parameter is known ...
 
 ```{r}
 pop_mu <- mean(mypop$height)
 pop_mu
 ```
+
+In the plt it stays there ...
 
 ```{r}
 mypop %>% 
@@ -67,15 +65,15 @@ mypop %>%
   theme_light()
 ```
 
-What I would do is to **sample** a group of people from the population and use the mean of this group as an estimate of the population mean. The number of samples I can extract is normally dictated by practical or economical reasons.
+Suppose also that I do not have money to cover the full population, so the best I can do is to interview 30 people. So I'll use their mean height to estimate the mean of the population.  
+
+What I can do in my simulation (and that I cannot do in my real life) is to ask myself how **variable** is my estimation of the population mean when I repeat the sampling several times
 
 
 ## Simple Random Sampling
-suppose that I have no clue about the presence of the two sub-populations, so the best I can do to avoid biases is **simple random sampling**.
+suppose that I have no clue about the presence of the two sub-populations, so the best I can do to avoid biases is **simple random sampling**. Remember, *random* is my best way to avoid introducing biases
 
-Suppose that I can afford to take 30 people and we use this group to estimate the population mean, what is the type of variability we expect with a simple **Random Sampling**?
-
-To do that I simulate the extraction of 30 people from my population and to see the variability of the process I do it 500 times
+So let's now simulate repeatedly the extraction of 30 people from my population and to see the variability of the process I do it 500 times
 
 ```{r}
 ## start creating the tibble container
@@ -98,7 +96,7 @@ x <- x %>%
 head(x)
 ```
 
-This plot show the variability of the estimate as a reference with the true population mean
+And we plot the distribution of the estimates as a reference with the true population mean
 
 ```{r}
 x %>% 
@@ -108,7 +106,7 @@ x %>%
   theme_light() + 
   theme(axis.text.x = element_blank())
 ```
-
+The same plot as a histogram ...
 
 ```{r}
 x %>% 
@@ -118,8 +116,7 @@ x %>%
   theme_light()
 ```
 
-
-As we can see, the estimate has variance (:-P), and it is centered around the correct value for the population mean. It is also normally distributed, but this you already know from the previous practical ...
+As we can see, the estimate has variance (:-P), and it is centred around the correct value for the population mean. It is also normally distributed, but this you already know from the previous practical ...
 
 ## Stratified sampling
 
@@ -134,8 +131,6 @@ nsamp <- 30
 ## here I calculate the fraction
 subfractions <- ceiling((table(mypop$gender)/nrow(mypop))*nsamp)
 
-
-
 ## just to show how much easy to read is the coding with pipes
 library(magrittr)
 
@@ -147,6 +142,15 @@ another_subfraction <- mypop$gender %>%
 
 subfractions
 ```
+
+Just to check let's look to the proportions
+
+```{r}
+subfractions[1]/subfractions[2]
+2000/8000
+```
+
+Let's now code this new way of sampling
 
 
 ```{r}
@@ -175,12 +179,13 @@ And now we plot!
 ```{r}
 x %>% 
   ggplot() + 
-  geom_point(aes(x = sampid, y = random_averages)) + 
-  geom_point(aes(x = sampid, y = stratified_averages), col = "red") + 
+  geom_point(aes(x = sampid, y = random_averages), col = "steelblue", alpha = 0.5) + 
+  geom_point(aes(x = sampid, y = stratified_averages), col = "orange", alpha = 0.5) + 
   geom_hline(yintercept = pop_mu, col = "red", lty = 2) + 
   theme_light() + 
   theme(axis.text.x = element_blank())
 ```
+As before in terms of a histogram
 
 ```{r}
 x %>% 
@@ -192,13 +197,20 @@ x %>%
 ```
 
 
-As you can see the average is still good, but the _variability (variance) is much smaller_
-This is true for all the tings you would like to estimate from your sample. If you think to it, the reason for this fact is that using stratification we ensure that our sample is representative of both subpopulations.
+As you can see the average is still good, but the _variability (variance) of my estimate is much smaller_
+This is true for all the statistics you would like to estimate from your sample. If you think to it, the reason for this fact is that using stratification we ensure that our sample is representative of both subpopulations.
+
+For our metabolomics business knowing this is important when you are dealing with observational studies. Because with experiment you are in general allocating experimental units as you want.
+
 
 **Something for You**
 
-* Check what happens to the two types of sampling if you change the unbalancing in the population? 
+* Check what happens to the two types of sampling if you change the unbalancing in the population ? 
 * Check what happens to the two types of sampling if you change the size of the sample (here 30)?
+
+
+Both tasks can be dealt either by changing my code above and looking to the results or everything can be organized in a more "scientific" way by calculating the variance of the estimates and wrapping the code in some sort of loop which will allow you to conveniently show your results in a plot.  
+
 
 
 

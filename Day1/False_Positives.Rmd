@@ -14,7 +14,7 @@ library(tidyverse)
 ```
 
 
-This first demo deals with "random organization". As we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization" 
+This demo deals with "random organization". As we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization" 
 
 * can mirror a population level property
 * can be the result of a "unlucky" sampling
@@ -29,7 +29,6 @@ To simulate my dummy experiment I will fill my data matrices with random numbers
 ## Random expression data matrix
 dummy_data <- tibble(nsamples = seq(10,500,10)) %>% 
   mutate(DM = map(nsamples,function(x) matrix(rnorm(1000*x), ncol = 1000)))
-
 
 head(dummy_data)
 ```
@@ -72,7 +71,7 @@ dummy_data <- dummy_data %>%
 ```
 
 
-Let's now start from the most "unfavorable" situation: 10 samples and 1000 variables
+Let's now start from the most "unfavourable" situation: 10 samples and 1000 variables
 
 ```{r}
 hist(dummy_data$uptri[[1]], 
@@ -81,7 +80,6 @@ hist(dummy_data$uptri[[1]],
      main = "Random Correlations")
 abline(v = c(-0.8,0.8), col = "red", lty = 2)
 ```
-
 
 Unexpectedly ( ;-) ) ... we also have variables showing high correlation! The vertical lines show the 0.8 limit ... 
 
@@ -169,6 +167,9 @@ myt <- function(m,n) {
 
 
 ```{r}
+
+## map2 is the extension of map the case in which the new column is created combining 
+## the content of other two columns ...
 ex2 <- ex2 %>% 
   mutate(ps = map2(A,B,function(x,y) myt(x,y)))
 

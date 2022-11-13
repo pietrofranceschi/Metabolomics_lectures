@@ -1,0 +1,413 @@
+---
+title: "Processing LC MS Data"
+author: "Pietro Franceschi"
+output: 
+  ioslides_presentation:
+    css: "../mycss.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+library(patchwork)
+library(cowplot)
+library(xcms)
+library(plotly)
+```
+
+
+## What is `xcms` {.smaller}
+
+Framework for processing and visualization of chromatographically separated and single-spectra mass spectral data.
+
+[xcms](http://www.bioconductor.org/packages/release/bioc/html/xcms.html)
+
+and still growing ...
+
+[RforMassSpectrometry](https://www.rformassspectrometry.org/)
+
+```{r fig.align='center', fig.height=2, fig.width=3, out.width="70%"}
+p1 <- ggdraw() + draw_image("../images/compoundDB.png", scale = 0.6)
+p2 <- ggdraw() + draw_image("../images/spectra.png", scale = 0.6)
+
+plot_grid(p1, p2)
+```
+
+
+
+## Outline {.smaller}
+
+-   Data analysis, organization and data matrices
+-   Some thoughts on validation
+-   Preprocessing and analytical variability
+-   MS for Dummies
+-   LC-MS data handling
+-   Demo & DIY
+-   Peak Picking in `xcms`
+-   Demo & DIY
+-   Retention time correction and features definition
+-   Demo & DIY
+-   Dealing with Fragmentation esperiments
+-   Demo & DIY
+
+## The data matrix
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/Matrix.svg")
+```
+
+## The role of Data Analysis
+
+Statistics, Bionformatics, Machine Learning, Chemometrics, ..., provide the tools to:
+
+-   make science shared and reproducible ... ;-)
+-   process and organize **big data** into the matrix
+-   identify the presence of **organization** in the data matrix
+-   assess the confidence that our result is true "at the population level"
+
+## Examples of Organization
+
+```{r fig.align='center', out.width="80%"}
+
+a <- tibble(class = rep(c("A","B"), each = 100),
+       intensity = c(rnorm(100,10), rnorm(100,11))) %>% 
+  ggplot() + 
+  geom_jitter(aes(x = class, y = intensity, col = class), width = 0.1) + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+
+
+b <- tibble(met_a = runif(20,0,10)) %>%
+  mutate(noise = rnorm(20)) %>% 
+  mutate(met_b = met_a*2 + noise) %>% 
+  ggplot() + 
+  geom_point(aes(x = met_a, y = met_b), col = "steelblue", size = 2) + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+
+
+b|a
+
+```
+
+
+
+## False Positives {.build}
+
+> * Organization can show up only by chance
+> * These results are *true*, but the hold only for the data we are analyzing now
+> * Organization is not necessarily science
+> * Variability causes this
+> * We need to *validate* our outcomes
+
+
+## On Validation {.build}
+
+> * **Statistical Validation**: get brand new samples and see if what we get is still there
+> * **Domain Validation**: is what I'm getting in keeping with the domain specific body of knowledge? Could I design an experiment to check my hypothesis?
+
+> #### Do we always need statistics?
+
+## Data hygiene {.build}
+
+> * Go for a scripting language and forget Excel
+> * ... at least use a gui pipeline or a web based solution
+> * Organize data and metadata
+> * Avoid as much as possible *manual curation*
+> * Share your data, your scripts, your results
+> * Go open source
+
+## Get out your data
+
+* Metabolomics data are always stored in "formats" which are specifically developed by instrument vendors
+* In the case of MS data several open source standards are available (cdf, mzML, mzIML, ...)
+
+[Proteowizard](https://proteowizard.sourceforge.io/)
+
+* command line tool
+* gui application
+* docker with proprietary libraries
+
+## LC-MS For Dummies
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/LCMS.jpg")
+```
+
+## Analytical Variability in LC-MS | Mass
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/mass_drift.png")
+```
+
+## Analytical Variability in LC-MS |Retention time
+
+```{r message=FALSE, warning=FALSE}
+
+fnames <- list.files("../data/SpikedApples/control/","CDF", full.names = TRUE)
+
+apples <- readMSData(fnames, mode = "onDisk") 
+
+```
+
+```{r message=FALSE, warning=FALSE}
+bpi <- apples %>% filterRt(c(250,410)) %>% chromatogram(aggregationFun = "max")
+```
+
+```{r fig.align='center', out.width="80%", fig.height=6}
+#| fig-height: 6
+#| fig-align: center
+
+plot(bpi, col = "steelblue", main = "BPI")
+```
+
+
+## Analytical Variability in LC-MS| Intensity
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/Total_ion_current.png")
+```
+
+
+## Preprocessing {.build}
+
+
+> * I call **preprocessing** all the data carpentry steps I do to go from the raw experimental data to the data matrix
+> * The aim of this process is to compensate for *analytical variability* being able to reliably build a data matrix
+> * *QC samples* play a big role on that because they are sensitive only to analytical variability
+
+
+## Uses of QCs 
+
+*QCs should be representative of the chemical complexity of your samples*
+
+* correct for retention time shifts
+* identify [reliable]{style="color: red"} variables:
+   * variance in QC should be smaller than in samples
+   * they should decrease during dilution
+   *    ...
+* help in correcting for bath effects ...
+
+## LC-MS produces 3D data  | (rt,mz,I) {.smaller}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/LCMS_data.png")
+```
+
+
+**Things too look at**
+
+* Extracted Ion Trace/Current (EIT/EIC)
+* Mass Spectra
+
+## Extracted ion traces
+
+```{r fig.align='center', out.width="80%", fig.height=6}
+#| fig-height: 6
+#| fig-align: center
+
+register(SerialParam())
+proc_trace <- chromatogram(apples %>% filterRt(c(100,500)), mz = 577.13 + c(-1,1)*0.01)
+plot(proc_trace, col = "coral")
+```
+
+## Mass Spectra
+
+```{r fig.align='center', out.width="80%", fig.height=6} 
+
+#| fig-height: 6
+#| fig-align: center
+
+
+ms <- apples[[1000]]
+
+tibble(mz =  mz(ms), i = intensity(ms)) %>% 
+  ggplot() + 
+  geom_segment(aes(x = mz, xend = mz, y = 0, yend = i)) + 
+  theme_bw()
+
+
+
+```
+
+## Back to Raw data
+
+Always check your results on the raw data
+
+* problems in preprocessing
+* bad peaks
+* biomarkers
+* results hidden in noise
+
+## {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/RStudio.png")
+```
+
+# Peak Picking
+
+## Peaks and metabolites: facts {.build}
+
+> * A **metabolite produces peaks** in the extracted ion traces of its associated ions
+> * Different peaks in the same ion chromatograms are associated to different metabolites
+> * **Peaks are not metabolites**
+> * The same peak can slightly **move** across the injections
+
+<hr>
+
+>  **We need an automatic method to look for peaks**
+
+## MatchedFilter 
+
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+include_graphics("../images/matchedFilter.png")
+```
+
+<font size="2">Anal Chem 2006 1;78(3):779-87. doi: 10.1021/ac051437y</font>
+
+
+## Cent Wave
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/cent_wave.png")
+```
+
+<font size="2">BMC Bioinformatics 9, 504 (2008). https://doi.org/10.1186/1471-2105-9-504</font>
+
+## Peak Intensity: `into` and `maxo` {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/maxointo.png")
+```
+
+
+## Things to always consider {.build}
+
+> * Real peaks can be really badly shaped
+> * You are better than an algorithm ... maybe AI will do well
+> * Every algorithm has parameters to tune!
+> * Look to the data!
+> * Know how the instrument works
+> * Check what happens to metabolites you know should be there
+
+## {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/RStudio.png")
+```
+
+# Retention time correction and feature definition
+
+## ... Just a recap
+
+1.  We converted the data files in an open source format (here mzML)
+2.  We optimized the peak picking parameters working on a representative sample (Qc)
+3.  We have been running peak picking on the full set of samples
+4.  We have been saving the output somewhere, just to avoid re-starting from scratch ;-)
+
+## What Next
+
+We have to merge the lists of [chromatographic peaks]{style="color: red"} into a consensus list of [ features peaks]{style="color: red"}, which will be the columns of our data matrix
+
+* *chromatographich peaks* what was detected in the individual samples (mz,rt,intensity)
+* *features* consensus variables which are *grouping* several peaks coming from the different injections (mz,rt, intensity)
+
+## Grouping - Correspondence {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/grouping.svg")
+```
+
+## Grouping - Correspondence {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/workflow.svg")
+```
+
+
+## Dynamic Time Warping {.build}
+
+> Available in `xcms` trough `obiwarp`
+
+> ![](../images/warping.png){width="100%" fig-align="center"}
+
+
+## RT Checks {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/rt_shift.png")
+```
+
+
+## Things to always consider 
+
+-   Aligning samples and not QCs can be tricky
+-   Some metabolites could not be present in pooled QC (dilutions)
+-   Sometimes chromatographic peaks are missed
+-   Always check the data and the known peaks!
+-   Parameters are easier to tune if you know how the analytics works
+-   Rt shifts should be smaller than peak width
+
+
+## NAssss NAssss
+
+Even if you do everything well your final data matrix will be full of missing values:
+
+-   errors in peak picking
+-   "absence" of a metabolite in one or more samples (biology)
+-   that metabolite is below the detection limit (analytics)
+
+<hr>
+
+
+-   missing at random
+-   missing not at random
+
+
+## {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/RStudio.png")
+```
+
+
+# Fragmentation Data
+
+## Annotation and MS {.build}
+
+> * At the end of the journey we would like to work on *metabolites* or *pathways* and not on features
+> * We know that **annotation** is the most challenging step of all the business
+> * The more we know about the structure of our ions the better it is
+> * Database of standards, web resources, chemoinformatics, ...
+> * **Fragmentation patterns are extremely useful**
+
+## MS/MS and DDA
+
+*DDA*: Data Dependent Acquisition
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/tandemMS.jpg")
+```
+
+
+## Notes
+
+* `xcms` allows also to handle fragmentation experiments
+* `xcms` ecosystem is growing towards databases of spectra
+* As we already discussed, do not be too optimistic with complex MS experiments
+* Sometimes the ion you are interested was not fragmented (plan a specific run!)
+
+## {.flexbox .vcenter}
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/RStudio.png")
+```
+
+
+
+
+
+
+
