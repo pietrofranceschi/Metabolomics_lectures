@@ -51,7 +51,7 @@ Let's start reeding in a raw file
 
 ```{r}
 raw_one <- readMSData(
-  files = "data/x016_X_QC_X_4_NEG_DDA.mzML",
+  files = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
   msLevel. = 1, ## we read only MS1
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
@@ -277,7 +277,7 @@ Typically all these info should be included in the filename, or in a csv which l
 
 ```{r}
 library(tools)  ## just to use file_path_sans_ext
-phenodata <- tibble(filepath = list.files("data/", pattern = ".mzML", full.names = TRUE)) %>% 
+phenodata <- tibble(filepath = list.files("../data/wines/", pattern = ".mzML", full.names = TRUE)) %>% 
   mutate(fname = file_path_sans_ext(basename(filepath))) %>% 
   separate(fname, into = c("inj_ord","color","variety","bottle","rep","polarity","mode"), 
            sep = "_", remove = FALSE) %>% 
@@ -306,11 +306,12 @@ register(SerialParam())
 raw_data <- findChromPeaks(raw_data, param = cwp)
 ```
 
-To make the process faster, I did the peak picking beforehand and I saved the outcomes as an RData file
+To spare time we save the picked object ...
 
 ```{r}
-load("data/picked_peak.RData")
+save(raw_data, file = "wines.RData")
 ```
+
 
 Let's give a look to the content of the full dataset
 

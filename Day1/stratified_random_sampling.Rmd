@@ -212,6 +212,141 @@ For our metabolomics business knowing this is important when you are dealing wit
 Both tasks can be dealt either by changing my code above and looking to the results or everything can be organized in a more "scientific" way by calculating the variance of the estimates and wrapping the code in some sort of loop which will allow you to conveniently show your results in a plot.  
 
 
+## Effects of the sample size
+
+
+
+
+Let's try to organize everything in a table. We make a plan for that
+
+* one column for the sample size
+* one column with the random sampling
+* two columns for the fractions males/females
+* two columns for the numbers of males and females
+* one column with the result of stratified sampling
+* then the means
+* then the summary for the SD and a plot
+
+```{r}
+## we split data in males and females
+
+mypop_m <- rnorm(50000,180,10)  ## Extracting 8000 numbers from a gaussian population with mean 180 and sd 10
+mypop_f <- rnorm(1000,150,10)
+```
+
+Let's join these two subpopulationsinto one population
+
+```{r}
+mypop <- c(mypop_m,mypop_f)  ## Concatenating the two vectors
+
+
+hist(mypop)
+```
+
+This will be my reference population. From this pop I can calculate the mean of the number. Mind that this mean **is** the true population mean
+
+
+```{r}
+mean(mypop)
+```
+
+I can also plot it
+
+```{r}
+## this plot is mad by using "base" R plotting utilities
+hist(mypop)
+abline(v = mean(mypop), 
+       col = "red", 
+       lty = 4, ## the type of the line
+       lwd = 2)       
+```
+
+
+Now I have my population, I want now to simulate the sdampling from that population. So basically I want to estimate the mean of my population from a group of samples extracted from `mypop`
+
+If you think to it, every sample will give you a slightly different estimate of the population mean
+
+
+```{r}
+## Example of sampling
+
+pop_mean <-  
+  mean(mypop)
+
+pop_mean
+```
+
+Trust me, the variability of the estimate of the mean, decreases as the size of the sample increases. The distribution of the means (called sampling distribution of the mean) is normally distribute.
+
+
+What to do now is to compare the spread of the estimates of the population mean when samplin gis performed in a "ranndom" fashion or in  a stratified fashion
+
+In particular I want to test both the effect of the stratification and the size of my sample 
+
+
+I now create a vector containing the sample sizes I'll check
+
+```{r}
+## Set of sizes we will consider
+sizes <- c(10,31,50,100,500)
+```
+
+
+
+
+```{r}
+sample_size_effect <- tibble(s_size = rep(c(sizes), each = 500)) %>% 
+  mutate(m_fraction = length(mypop_m)/(length(mypop_m) + length(mypop_f))) %>% 
+  mutate(f_fraction = 1 - m_fraction) %>% 
+  mutate(across(contains("fraction"), function(s) ceiling(s*s_size),.names = "sample_{.col}")) %>% 
+  #mutate(across(contains("fraction"),~ ceiling(.x*s_size),.names = "sample_{.col}")) %>% 
+  mutate(random_samplings = map(s_size, ~ sample(mypop, size = .x))) %>% 
+  mutate(stratified_samplings = map2(sample_m_fraction,sample_f_fraction, function(a,b) c(sample(mypop_m,a), sample(mypop_f,b)))) %>%
+  # mutate(stratified_samplings = map2(sample_m_fraction,sample_f_fraction,~ c(sample(mypop_m,.x), sample(mypop_f,.y)))) %>%
+  mutate(mean_random = map_dbl(random_samplings,~mean(.x))) %>% 
+  mutate(mean_strat = map_dbl(stratified_samplings,~mean(.x)))
+  
+```
+
+
+
+```{r}
+sample_size_effect %>% 
+  ggplot() + 
+  geom_histogram(aes(x = mean_random), 
+                 col = "white",    ## color of the border
+                 fill = "steelblue",  ## color of the bars
+                 alpha = 0.5) +  ## transparency
+  geom_histogram(aes(x = mean_strat), col = "white", fill = "orange", alpha = 0.5) + 
+  geom_vline(xintercept = pop_mean, lty = 2, col = "red") + 
+  facet_wrap(~factor(s_size), scales = "free")
+```
+
+
+So in all cases stratifying is better ...
+
+```{r}
+sample_size_effect %>% 
+  group_by(s_size) %>% 
+  summarize(sd_random = sd(mean_random),
+            sd_strata = sd(mean_strat)) %>% 
+  mutate(sdratio = sd_random/sd_strata)
+```
+
+
+So the ratio is constant. This means that it is always advantageous to use stratified sampling. 
+* Our estimate of the "true" mean is less variable. 
+* It is less likely to have an estimate completely off
+* Can you check the role of the unbalancing in the populations?
+
+
+
+
+
+
+
+
+
 
 
 

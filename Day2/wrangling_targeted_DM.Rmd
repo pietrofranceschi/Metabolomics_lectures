@@ -27,7 +27,7 @@ In this demo we will use only the metabolites quantified in the targeted assays.
 
 Here we get the data
 ```{r}
-load("../data/KOMP_data_targeted.RData")
+load("../data/KOMP_data_targeted.RData") ## the initial data were saved in RData format
 ```
 
 
@@ -92,13 +92,11 @@ Since our mouse ID is a number without the leading "KOMP_" we fix this on the fl
 
 ```{r}
 DM <- DM %>% 
-  as.data.frame() %>% 
   column_to_rownames("CompoundID") %>% 
   t(.) %>% 
   as_tibble(rownames = "Sampname") %>% 
   separate(Sampname, c("One","MouseID"),"_") %>% ## split the column
-  dplyr::select(-One) %>%   ## remove the first piece
-  mutate(MouseID = as.numeric(MouseID))
+  dplyr::select(-One) 
   
 ```
 
@@ -109,19 +107,25 @@ Now the matrix looks like this
 head(DM[,1:20])
 ```
 
+Now I fix the sample name in the `sample_meta`
+
+```{r}
+sample_meta_data <- sample_meta_data %>% 
+  mutate(MouseID = as.character(MouseID))
+```
+
+
 * As expected we have missing data, which most likely show up for metabolites with very low concentrations. 
 * This statement is not always true because the detection limit con vary between different compounds.
 
 
 To check that we organize the matrix in a different way also joining the concentration data with the sample metadata
 
-
 ```{r}
 DM_nest <- DM %>% 
   left_join(sample_meta_data) %>% 
   pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") %>% 
-  group_by(CompoundID) %>% 
-  nest()
+  nest(data = -CompoundID)
 ```
 
 This data structure highlights the role of each metabolite 
@@ -145,7 +149,7 @@ For example, the number of NAs in relation of the median intensity can be visual
 
 ```{r}
 DM_nest %>% 
-  mutate(nnas = map_dbl(data,function(x) sum(is.na(x$I))),                  ## calculate the univariate statistics "on the fly"
+  mutate(nnas = map_dbl(data,function(p) sum(is.na(p$I))),                  ## calculate the univariate statistics "on the fly"
          medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
   filter(nnas > 0) %>% ## we keep only features with at least one NA!
   ggplot() +   ## plot them
@@ -163,16 +167,19 @@ Is this effect dependent on the class of metabolite?
 
 
 ```{r}
-DM_nest %>% 
+library(plotly)
+
+
+ggplotly(DM_nest %>% 
   left_join(metabolite_meta) %>% 
   mutate(nnas = map_dbl(data,~sum(is.na(.x$I))),                  ## calculate the univariate statistics "on the fly"
          medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
   filter(nnas > 0) %>% ## we keep only features with at leas on NA!
-  ggplot(aes(x = medI, y = nnas, col = Assay)) +   ## plot them
+  ggplot(aes(x = medI, y = nnas, col = Assay, text = CompoundName)) +   ## plot them
   geom_point() + 
   scale_x_log10() + 
   scale_color_brewer(palette = "Set2") + 
-  theme_light()
+  theme_light(), tooltip="text")
 ```
 
 That's strange ... the largest number of NAs is corresponding to lower intensities for the Bile Acids_Steroids and not for Oxylipins. This is curious 
@@ -205,6 +212,7 @@ myplot <- function(t,l = ""){
   p <- t %>% 
   ggplot() + 
   geom_jitter(aes(x = Genotype, y = I, color = Gender, shape = Zygosity), width = 0.1) + 
+  scale_shape_manual(values = c(19,3,1)) + 
   scale_y_log10() + 
   scale_color_brewer(palette = "Set1") + 
   theme_light() + 
@@ -226,6 +234,11 @@ And I recursively apply it to the nested data tibbles ...
 DM_nest <- DM_nest %>%
   left_join(metabolite_meta %>% dplyr::select(CompoundID,CompoundName)) %>% 
   mutate(rawplots = map2(data,CompoundName, ~myplot(.x,.y)))
+
+## adding compound names as names oif the list of plots
+
+names(DM_nest$rawplots) <- DM_nest$CompoundName
+
 ```
 
 
@@ -259,7 +272,7 @@ Considering that we have 220 samples the level of missingness is never extremely
 
 ## Variable Distribution
 
-The need of displaying the intensity in log scale is already suggesting that the distribution of the intensities is far from being normal. This is not unexpected in metabolomics. In real life what i do is to work almost invariably with log-transformed datasets.
+The need of displaying the intensity in log scale is already suggesting that the distribution of the intensities is far from being normal. This is not unexpected in metabolomics. In real life what I do is to work almost invariably with log-transformed datasets.
 
 For sure
 
@@ -274,11 +287,11 @@ An alternative could be to `unnest` the data and rely on faceting ...
 
 ```{r fig.height=14, fig.width=8}
 DM_nest %>% 
-  ungroup() %>% 
   dplyr::select(CompoundName,data) %>% 
   unnest(data) %>% 
   ggplot(aes(sample = I)) +
   stat_qq(aes(col = Gender, shape = Zygosity)) + 
+  scale_shape_manual(values = c(19,3,1)) + 
   scale_color_brewer(palette = "Set1") + 
   stat_qq_line() + 
   facet_wrap(~CompoundName, scales = "free_y", ncol = 5) +
@@ -345,7 +358,7 @@ The rationale behind this choice is that
 * everything I cannot measure is equally likely
 
 
-In my practical example imputation could be perfoed both in the `DM` and in its nested version `DM_nest`. Since we are going to do PCA, I'll work on the unnested data matrix.
+In my practical example imputation could be performed both in the `DM` and in its nested version `DM_nest`. Since we are going to do PCA, I'll work on the unnested data matrix.
 
 First of all I need a function to perform the imputation of a vector
 
@@ -368,7 +381,7 @@ Now we apply it to the full set of columns
 
 ```{r}
 DM_i <- DM %>% 
-  mutate(across(starts_with("CPD"), ~myimputer(.x)))
+  mutate(across(starts_with("CPD"), ~ myimputer(.x)))
 ```
 
 
@@ -388,7 +401,10 @@ library(factoextra)
 ```
 
 ```{r}
-myPCA <- PCA(DM_i %>% dplyr::select(starts_with("CPD")), graph = FALSE)
+myPCA <- PCA(DM_i %>% 
+               column_to_rownames("MouseID") %>% 
+               dplyr::select(starts_with("CPD")
+                             ), graph = FALSE)
 ```
 
 
@@ -401,6 +417,36 @@ fviz_pca_ind(myPCA,
   scale_color_brewer(palette = "Set1")
 ```
 Even if the amount of variability captured in this representation is only the 30%, the previous plot shows the presence of a separation between males and females.
+
+It would be nice to have a similar plot highlighting the role of the different genetic backgrounds, but we do not have enough colors to put everything in the same plot. 
+
+
+
+```{r}
+## we get out the scores
+PC_12_scores <- facto_summarize(myPCA, "ind", axes = c(1,2)) %>%    ## get the data from the PCA object
+  mutate(name = as.character(name)) %>%              ## transform the sample name to a character
+  rename("MouseID" = "name") %>%     ## align the name with the correct name
+  left_join(sample_meta_data)        ## join with the sample data
+
+PC_12_scores
+```
+
+```{r fig.height=6, fig.width=8}
+PC_12_scores %>% 
+  ggplot() + 
+  geom_point(data = PC_12_scores %>% select(Dim.1,Dim.2), 
+             mapping = aes(x= Dim.1, y = Dim.2), col = "gray80", size = 0.2) + 
+  geom_hline(yintercept = 0, lty = 2)+ 
+  geom_vline(xintercept = 0, lty = 2)+ 
+  geom_point(aes(x = Dim.1, y = Dim.2, pch = Gender), col  ="red") + 
+  facet_wrap(~Genotype, ncol = 6) + 
+  
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+So, at least in the PCA, no clear separation between the genotypes
 
 This is not unexpected considering the results of our univariate investigation
 

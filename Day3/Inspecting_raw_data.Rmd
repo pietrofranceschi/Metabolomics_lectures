@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r message=FALSE, warning=FALSE}
 library(xcms)
-library(Spectra)
 library(tidyverse)
 library(plotly)
 ```
@@ -50,7 +49,7 @@ To understand how the data behaves, let's start reading in the data coming from 
 
 ```{r}
 raw_one <- readMSData(
-  files = "data/x016_X_QC_X_4_NEG_DDA.mzML",
+  files = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
   msLevel. = c(1,2), ## we read only MS1 and MS2
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
@@ -187,7 +186,8 @@ Just to show what I mean let's read in the data coming from two different inject
 
 ```{r}
 two_raw <- readMSData(
-  files = c("data/x016_X_QC_X_4_NEG_DDA.mzML","data/x020_wht_gewurz_A_1_NEG_DDA.mzML"),
+  files = c("../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
+            "../data/wines/x020_wht_gewurz_A_1_NEG_DDA.mzML"),
   msLevel. = 1, ## we read only MS1 and MS2
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
@@ -226,9 +226,6 @@ Here we see a clear difference between the two traces, looking to the names we s
 * The trace around 289 seems to show two horizontal peaks. What does it mean? Can you interpret that?
 
 
-## MS/MS data
-
-The last part of this demo is fastly devoted to fragmentation spectra ...
 
 
 

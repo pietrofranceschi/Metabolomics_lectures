@@ -30,7 +30,7 @@ Many of the steps we have been discussing today are common to almost all softwar
 [`xcms` online](https://xcmsonline.scripps.edu/landing_page.php?pgcontent=mainPage)
 
 ### 2 - Allows to use xcms through Galaxy
-The french metabolomics network also provide software for pathway analysis and visualization
+The French metabolomics network also provide software for pathway analysis and visualization
 
 [`Metabohub` - Workflow-4-metabolomics](https://workflow4metabolomics.org/)
 

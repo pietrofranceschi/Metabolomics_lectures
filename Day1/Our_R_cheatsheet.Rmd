@@ -93,7 +93,8 @@ calculated in a very efficient and organized way as follows
 ```{r}
 my_first_tibble <- 
   my_first_tibble %>% 
-  mutate(determinant = map(tables, function(x) determinant(x)))
+  mutate(determinant = map(tables, function(x) determinant(x))) %>% 
+  mutate(determinant1 = map(tables, ~ determinant(.x)))
 
 my_first_tibble
 ```

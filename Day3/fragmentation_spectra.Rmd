@@ -53,7 +53,7 @@ The automatic way is to do peak picking ... but this will be part of your assign
 
 
 ```{r}
-std_files <- list.files("data/", pattern = "mix", full.names = TRUE)
+std_files <- list.files("../data/wines/", pattern = "mix", full.names = TRUE)
 
 
 std_raw <- readMSData(std_files, 

@@ -19,15 +19,15 @@ The material (which is growing!) covers: the following topics:
 * [What is Metabolomics](Day1/Metabolomics.html)
 * [Practical Considerations on the study design](Day1/practical_considerations.html)
 * [Experimental design](Day1/experimental_design.html)
-* Practical: [html](Day1/stratified_random_sampling.html), [Rmd](Day1/stratified_random_sampling.Rmd)
+* Practical: [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)
-* Practical: [Fat data matrices and false positives](Day1/False_Positives.html),[Rmd](Day1/False_Positives.Rmd) 
+* Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd) 
 * [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.html)
 
 ## Day Two
 
-* Practical: [Wrangling a targeted metabolomics data matrix](Day2/wrangling_targeted_DM.html), [Rmd](Day2/wrangling_targeted_DM.Rmd)
+* Practical: [Wrangling a targeted metabolomics data matrix](Day2/wrangling_targeted_DM.html) -  [Rmd](Day2/wrangling_targeted_DM.Rmd)
 
 ### Focus Topics
 * [Missing values and imputation](Day2/MissingValues.html)
@@ -41,10 +41,11 @@ The material (which is growing!) covers: the following topics:
 
 ## Day Three
 
-* [Untargeted metbolomics data matrix](Day3/Untargeted_metabolomics_DM.html)
-* [Creating a data matrix in xcms from raw LC-MSdata](Day3/from_rawdata_to_DM.html)
-  * Practical: faaKO data [html](Day3/faahKO.html), [Rmd](Day3/faahKO.Rmd)
-  * Practical: grape data [html](Day3/analyze_the_grapes.html), [Rmd](Day3/analyze_the_grapes.Rmd)
+* [Processing LC-MS data with `xcms`](Day3/processing_LC_MS.html.html)
+* Practical: Inspecting raw data [html](Day3/Inspecting_raw_data.html), [Rmd](Day3/Inspecting_raw_data.Rmd)
+* Practical: Peak picking [html](Day3/peak_picking.html), [Rmd](Day3/peak_picking.Rmd)
+* Practical: Retention time correction and feature definition [html](Day3/rt_corr_feat_def.html), [Rmd](Day3/rt_corr_feat_def.Rmd)
+* Practical: Fragmentation Spectra [html](Day3/fragmentation_spectra.html), [Rmd](Day3/fragmentation_spectra.Rmd)
 * [Some words on annotation](Day3/annotation.html)
 * [SW resources for preprocessing](Day3/software_resources_for_preprocessing.html)
 

@@ -17,7 +17,7 @@ library(plotly)
 
 ## Introduction
 
-In the previous demo we have been dealing with peak picking, so we assume that we have now a full list of chromatographic peaks which have been detected across the full set of samples.
+In the previous demo we have been dealing with peak picking, so we assume that we have now a list of chromatographic peaks which have been detected across the full set of samples.
 
 The next step in the process is now to "match" these list of peaks in a consensus list of **features** which will be the variables which will be present in the final data matrix. 
 
@@ -26,12 +26,13 @@ This process of matching is necessary to compensate:
 * measurement error in the m/z dimension
 * retention time shifts
 
-In general, the first phenomenon is less important than the second: when you buy a very expensive mass spectrometer, the instrument producer will do its best to keep *mass accuracy* as high as possible. Chromatographic stability, on the other, end is by far less easy to control.
+In general, the first phenomenon is less important than the second: when you buy a very expensive mass spectrometer, the instrument producer will do its best to keep *mass accuracy* as high as possible. On that dimension you, basically, do binning.
+Chromatographic stability, on the other, end is by far less easy to control.
 
 We start reading in the pick picked data
 
 ```{r}
-load("data/picked_peak.RData")
+load("wines.RData")
 ```
 
 We already know that our dataset contains blank injections. They could be used to identify an exclusion list, but for now let's take them out
@@ -40,10 +41,8 @@ We already know that our dataset contains blank injections. They could be used t
 ```{r}
 ## identify non blank indices
 no_blank_id <- which(raw_data$variety != "blank")
-
 ## subset the data
 raw_data <- filterFile(raw_data, file = no_blank_id)
-
 ## check the metadata
 pData(raw_data)
 ```
@@ -56,11 +55,9 @@ chr_raw <- chromatogram(raw_data,
                         mz = 295.0445 + 0.01*c(-1, 1), 
                         rt = 250 + 20*c(-1, 1),
                          include = "none")
-
 ```
 
 Find the CP in the slice
-
 
 ```{r}
 sub_peaks <- chromPeaks(raw_data) %>% 
@@ -71,41 +68,189 @@ sub_peaks <- chromPeaks(raw_data) %>%
 
 
 ```{r}
-mypalette <- c("steelblue", "coral", "darkgreen")
-names(mypalette) <- c("red","X","wht")
-
-plot(chr_raw, col = mypalette[raw_data$color])
-legend("topright", legend = c("red","QC","white"), col = mypalette, lty = 1)
+library(RColorBrewer)
+group_colors <- paste0(brewer.pal(3, "Set1"), "60")
+names(group_colors) <- c("red","wht","X")
+plot(chr_raw, col = group_colors[raw_data$color])
+legend("topright", legend = c("red","white", "X"), col = group_colors, lty = 1)
 abline(v = sub_peaks$rt, col = "red", lty = 3)
 ```
 
-Here we have a tricky situation. The peaks are not aligned, but this is actually a double feature which is a potential biomarker for color and variety ... so we should go back to peak detection and play around ;-)
+Here we have a tricky situation. The peaks are not aligned, but this is actually a double feature, which is also potential biomarker for color and variety ... so we should go back to peak detection and play around ;-)
 
-Anyway, let's try to correct the rt shift. As usual in xcms this can be done in different way, here we will use the most advanced one which relies on *dynamic time warping*.
+Anyway, let's try to correct the rt shift. As usual in xcms this can be done in different way, here we will use the most simple solution (a potentially more flexible one based on *dynamic time warping* is also available) 
 
-What we will do is to apply this algorithm on the QCs and the extrapolate the estimated Rt correction on the samples. The rationale behind this choice is the following. Samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in rt) with a retention time shift of analytical origin.
+What we will do is to apply this algorithm on the QCs and the extrapolate the estimated Rt correction on the samples. The rationale behind this choice is the following: samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in rt) with a retention time shift of analytical origin.
 
-If I use QCs to do that the chemical nature of the samples is the same so every difference is coming from analytical drifts!.
+If I use QCs to do that the chemical nature of the samples is the same so every difference is coming from analytical drifts!
+
+The idea behind retention time is quite simple:
+
+* match groups of chromatographic peaks present in all samples (called house keeping peak groups)
+* estimate a consensus retention time
+* extrapolate/interpolate the retention time on regions of the rt axes where the peaks are not present (either with a linear or a loess function)
+
+The first thing to do is to identify the house keeping groups:
+
+The parameters here are:
+
+- **sampleGroups**: some peak could be missing in some sample, so a house keeping group could include less peaks than samples. The way to control that is to identify groups of samples and consider as good groups only those detected in 
+- **minFraction** of at least one group
+- **binSize** is the width of the m/z slices
+- **bw** a density estimator is used to find the "correct" position of the peak inalong the rt dimension. This is the bandwith in seconds of the density estimator
 
 
 ```{r}
-raw_data <- adjustRtime(raw_data, param = ObiwarpParam(
-  binSize = 0.05,
-  subset = which(raw_data$variety == "QC"),
-  subsetAdjust = "average")) ## we have to extend the correction to the other samples!
+raw_data <- groupChromPeaks(
+  raw_data, 
+  param = PeakDensityParam(sampleGroups = raw_data$color,
+                           minFraction = 2/3,           
+                           binSize = 0.02,  ## width of the slices
+                           bw = 3))  ## bandwidth of the density used to find the consensus position
 ```
 
-
-* **binSize** set the width of the slices of the m/z bins used to extract the traced which are then aligned
-
-It is of utmost importance to check the amount of correction since large time shifts are not reasonable. Below we plot the BPC before and after applying the RT correction, as well as the differences of the adjusted- to the raw retention times per sample.
-
-The first thing to do is too look to the amount of correction which was applied
+After this grouping, the retention time correction is performed working 
 
 
 ```{r}
-plotAdjustedRtime(raw_data, col = mypalette[raw_data$color])
+raw_data <- adjustRtime(
+  raw_data, 
+  param = PeakGroupsParam(minFraction = 1,
+                          subset = which(raw_data$variety == "QC"), span = 0.4))
 ```
+
+
+```{r}
+plotAdjustedRtime(raw_data, col = group_colors[raw_data$color])
+```
+
+So the retention time correction here really small, speaking of a remarkable analytical reproducibility. In general the reproducibility of the chromatography is considered good if the required shift is smaller than the typical chromatographic width. This is anyway a rule of thumb since everything is very much dependent on the analytical method.
+The black dots show the position of the housekeeping groups which were used to estimate the extent of retention time correction on the QCs
+
+After retention time correction is now time to move from *chromatographic peaks* to **features**. With this term we define a set of consensus groups of peaks which can be used reliably to measure the intensity of a given ion across all samples. If you look to the overall pre-processing from a distant perspective, what we have been basically doing is to try to compensate in a clever and intelligent way for mz inaccuracies and retention time shifts, and the core of the riddle is that  the samples are actually (and luckily different)
+
+Features are obtained by a further grouping of the chromatographic peaks after retention time correction
+
+```{r}
+raw_data <- groupChromPeaks(
+  raw_data, 
+  param = PeakDensityParam(sampleGroups = raw_data$color,
+                           minFraction = 2/3,           
+                           binSize = 0.02,  ## width of the slices
+                           bw = 3))  ## bandwidth of the density used to find the consensus position
+```
+
+Let's mow look top their definition
+
+```{r}
+## extract them from the grouped 
+features <- featureDefinitions(raw_data)
+head(features)
+```
+
+The df is quite rich:
+
+* rownames are the feature id
+* mz* refer to the boundaries of the mz of the chromatographic peaks which were *grouped* in that feature
+* rt* is the same byt for retention time
+* npeaks tell us how many chromatographic peaks were assigned to this feature
+* the subsequent columns are gicing you the same info split by sample group
+* peakidx contains the index of peaks which were assigned to this feature 
+
+Let's dig more on this. For example, can we visualize the position of the peaks assigned to FT005. The idx are the indexes of the row in the peak table
+
+
+```{r}
+idx_F005 <- features["FT005","peakidx"][[1]]
+```
+
+Let's plot them across the retention time
+
+```{r}
+chromPeaks(raw_data) %>% 
+  as_tibble() %>% 
+  slice(idx_F005) %>% 
+  ggplot() + 
+  geom_density(aes(x = rt), bw = 3) + 
+  geom_rug(aes(x = rt)) +
+  geom_vline(xintercept = features["FT005","rtmed"], col = "red", lty = 2) + 
+  xlim(140, 200) + 
+  theme_bw()
+```
+
+Here the rug show the position of the chromatigraphic peaks, the line is the density profile (not a chromatrographic trace!) and the red line is our best "estimate" of the true position of the feature
+
+Ok now that we have the definition of the features, let's get the final data matrix! Mind the gap! We will need to transpose it to get it into the standard R shape.
+
+
+```{r}
+DM <- featureValues(raw_data, value = "into") 
+head(DM)
+```
+
+
+Well ... we see a lot of NAs there ... 
+Recalling what we discussed in the lecture, NAs can be there for two main reasons:
+
+* a compound is below the detection limit in one or more samples. No compounds, no features, no party ...
+* our peak picking could have been mistaken somewhere
+
+NAs will be discussed in more details by Maria in the afternoon, here we can anticipate that the two previous processes will result in different type of missingness (either random or non random) ...
+
+Anyway, `xcms` implement a clever strategy to try to fix, at least partially, the NAs. The function `fillChromPeaks` will take care of going back to the raw files and integrate the signal possibly present in the mz/rt region of each feature. If the peak was there and was missed by chance this will basically recover the lost signal
+
+
+```{r}
+raw_data_filled <- fillChromPeaks(raw_data)
+```
+
+```{r}
+DM <- featureValues(raw_data_filled, value = "into") 
+head(DM)
+```
+
+
+The situation improved, but it is not yet perfect. Wait until the afternoon to see what else can be done.
+
+
+## Checking Feature chromatograms
+
+A typical thing one wants to at some point in the analysis is to check if the chromatographic peaks of a really interesting feature are really there ...
+
+In order to do that xcms provides a really handy function
+
+```{r}
+ft_chr1 <- featureChromatograms(raw_data, features = 10, 
+                               expandRt = 15, filled = FALSE)
+```
+
+Now we plot it highlighting the integrated areas and the class of the samples 
+
+
+```{r}
+sample_colors <- group_colors[raw_data$color]
+plot(ft_chr1, col = group_colors[raw_data$color],
+     peakBg = sample_colors[chromPeaks(ft_chr1)[, "sample"]])
+```
+
+
+That can be used to spot problems of integration, and, also, if a biomarker is really a biomarker ;-)
+
+
+## DIY
+
+* If you go back to the feature tables, you will see that in some cases the number of peaks assigned to a features can be larger than the number of samples. How can this be? Try to check the diagnostic plots and understand what happens
+* At the beginning of this demo we have been focussing our attention to the extracted ion trace around mz 289. Try to check how many features were defined there. Can you check if there the peak was integrated well?
+
+
+
+
+
+
+
+
+
+
 
 
 
