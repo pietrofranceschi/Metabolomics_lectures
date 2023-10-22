@@ -41,7 +41,7 @@ We already know that our dataset contains blank injections. They could be used t
 ```{r}
 ## identify non blank indices
 no_blank_id <- which(raw_data$variety != "blank")
-## subset the data
+## subset the data with a specific xcms function
 raw_data <- filterFile(raw_data, file = no_blank_id)
 ## check the metadata
 pData(raw_data)
@@ -54,8 +54,10 @@ Let's now visualize the amount of retention time shift looking to the ionic trac
 chr_raw <- chromatogram(raw_data, 
                         mz = 295.0445 + 0.01*c(-1, 1), 
                         rt = 250 + 20*c(-1, 1),
-                         include = "none")
+                        include = "none")
 ```
+
+The `include = "none"` argument is used to force xcms to read the raw data, the same function can indeed be used to extract the EIC only of the ions which show a chromatrographic peak in that interval. 
 
 Find the CP in the slice
 
@@ -76,15 +78,15 @@ legend("topright", legend = c("red","white", "X"), col = group_colors, lty = 1)
 abline(v = sub_peaks$rt, col = "red", lty = 3)
 ```
 
-Here we have a tricky situation. The peaks are not aligned, but this is actually a double feature, which is also potential biomarker for color and variety ... so we should go back to peak detection and play around ;-)
+Here we have a tricky situation. The peaks are not aligned, even if the shift is really small, moreover this is actually a double feature, which is also potential biomarker for color and variety ... so we should go back to peak detection and play around ;-) to be able to identify the two peaks
 
-Anyway, let's try to correct the rt shift. As usual in xcms this can be done in different way, here we will use the most simple solution (a potentially more flexible one based on *dynamic time warping* is also available) 
+Anyway, let's try to correct the rt shift. As usual in xcms this can be done in different ways, here we will use the most simple solution (a potentially more flexible one based on *dynamic time warping* is also available) 
 
 What we will do is to apply this algorithm on the QCs and the extrapolate the estimated Rt correction on the samples. The rationale behind this choice is the following: samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in rt) with a retention time shift of analytical origin.
 
 If I use QCs to do that the chemical nature of the samples is the same so every difference is coming from analytical drifts!
 
-The idea behind retention time is quite simple:
+The idea behind retention time correction is quite simple:
 
 * match groups of chromatographic peaks present in all samples (called house keeping peak groups)
 * estimate a consensus retention time
@@ -95,7 +97,7 @@ The first thing to do is to identify the house keeping groups:
 The parameters here are:
 
 - **sampleGroups**: some peak could be missing in some sample, so a house keeping group could include less peaks than samples. The way to control that is to identify groups of samples and consider as good groups only those detected in 
-- **minFraction** of at least one group
+  - **minFraction** of at least one group
 - **binSize** is the width of the m/z slices
 - **bw** a density estimator is used to find the "correct" position of the peak inalong the rt dimension. This is the bandwith in seconds of the density estimator
 
@@ -117,6 +119,10 @@ raw_data <- adjustRtime(
   raw_data, 
   param = PeakGroupsParam(minFraction = 1,
                           subset = which(raw_data$variety == "QC"), span = 0.4))
+
+
+
+
 ```
 
 
@@ -209,8 +215,26 @@ DM <- featureValues(raw_data_filled, value = "into")
 head(DM)
 ```
 
+The definition of each feature can be extracted with a specific function
+
+```{r}
+feat <- featureDefinitions(raw_data_filled)
+
+feat
+```
+
 
 The situation improved, but it is not yet perfect. Wait until the afternoon to see what else can be done.
+
+We now save the output which will be used for the subsequent statistical analysis
+
+```{r}
+save(DM,feat, file = "processed_wines_data.RData")
+```
+
+
+
+
 
 
 ## Checking Feature chromatograms
@@ -220,8 +244,10 @@ A typical thing one wants to at some point in the analysis is to check if the ch
 In order to do that xcms provides a really handy function
 
 ```{r}
-ft_chr1 <- featureChromatograms(raw_data, features = 10, 
-                               expandRt = 15, filled = FALSE)
+ft_chr1 <- featureChromatograms(raw_data, 
+                                features = 10, 
+                               expandRt = 15, 
+                               filled = FALSE)
 ```
 
 Now we plot it highlighting the integrated areas and the class of the samples 
@@ -238,9 +264,49 @@ That can be used to spot problems of integration, and, also, if a biomarker is r
 
 
 ## DIY
-
-* If you go back to the feature tables, you will see that in some cases the number of peaks assigned to a features can be larger than the number of samples. How can this be? Try to check the diagnostic plots and understand what happens
 * At the beginning of this demo we have been focussing our attention to the extracted ion trace around mz 289. Try to check how many features were defined there. Can you check if there the peak was integrated well?
+* If you go back to the feature tables, you will see that in some cases the number of peaks assigned to a features can be larger than the number of samples. How can this be? Try look to the extracted ion traces and understand what happens (ADVANCED)
+
+
+## Feature Quality Assessment
+
+As we stressed along the full lecture, the best way to validate the outcomes of your analysis is to go back to the raw data and inspect the extracted ion traces. However it would be useful to get an overall feedback on "quality" of each feature. 
+
+`xcms` already implements some useful tool to do that:
+
+```{r}
+head(featureSummary(raw_data))
+```
+
+Here we see:
+
+* **counts**: number of chromatographic peaks associated to each feature
+* **perc**: percentage of samples in which a peak was found
+* **multi_count**: how many multiple peaks you have in the data?
+* **relative standard deviation** 
+
+This can be also split by sample class
+
+```{r}
+
+sample_vs_qc <- ifelse(raw_data$color == "X","QC","S")
+
+
+
+featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
+  as_tibble() %>% 
+  arrange(desc(QC_rsd))
+```
+
+This useful to filter features with higher variability in the QC (more than in the samples).
+But ...
+
+* marker of variety can suffer of dilution effects on the pooled QC
+* variety specific QC! ... but then the number of injections explodes
+
+
+
+
 
 
 

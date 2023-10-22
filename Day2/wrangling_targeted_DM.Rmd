@@ -403,15 +403,19 @@ library(factoextra)
 ```{r}
 myPCA <- PCA(DM_i %>% 
                column_to_rownames("MouseID") %>% 
-               dplyr::select(starts_with("CPD")
-                             ), graph = FALSE)
+               dplyr::select(starts_with("CPD")), 
+             graph = FALSE, scale.unit = FALSE   ## to avoid factmineR producing a plot by default
+             )
 ```
 
 
 ```{r}
+
+library(plotly)
+
 fviz_pca_ind(myPCA, 
-             habillage = factor(sample_meta_data$Gender), 
-             geom = "point", 
+             habillage = factor(sample_meta_data$Gender), ## factor which will be used to color the dots
+             # geom = "point", 
              pointsize = 2,
              axes = c(1,2)) + 
   scale_color_brewer(palette = "Set1")
@@ -424,9 +428,14 @@ It would be nice to have a similar plot highlighting the role of the different g
 
 ```{r}
 ## we get out the scores
-PC_12_scores <- facto_summarize(myPCA, "ind", axes = c(1,2)) %>%    ## get the data from the PCA object
-  mutate(name = as.character(name)) %>%              ## transform the sample name to a character
-  rename("MouseID" = "name") %>%     ## align the name with the correct name
+PC_12_scores <- facto_summarize(myPCA, "ind", 
+                                axes = c(1,2),
+                                result = "coord"
+                                ) %>%    ## get the data from the PCA object
+  mutate(name = as.character(name)) %>%  
+  as_tibble() %>% 
+  ## transform the sample name to a character
+  dplyr::rename("MouseID" = "name") %>%     ## align the name with the correct name
   left_join(sample_meta_data)        ## join with the sample data
 
 PC_12_scores
@@ -439,9 +448,8 @@ PC_12_scores %>%
              mapping = aes(x= Dim.1, y = Dim.2), col = "gray80", size = 0.2) + 
   geom_hline(yintercept = 0, lty = 2)+ 
   geom_vline(xintercept = 0, lty = 2)+ 
-  geom_point(aes(x = Dim.1, y = Dim.2, pch = Gender), col  ="red") + 
+  geom_point(aes(x = Dim.1, y = Dim.2, col = Gender)) + 
   facet_wrap(~Genotype, ncol = 6) + 
-  
   theme_bw() + 
   theme(aspect.ratio = 1)
 ```
@@ -545,15 +553,14 @@ For illustrative purposes let's focus on the Female-Male Comparison.
 DM_i_nest <- DM_i %>% 
   pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") %>% 
   left_join(sample_meta_data) %>% 
-  nest(-c(CompoundID))
+  nest(data = -c(CompoundID))
 ```
 
 Now we run the tests on the metabolites
 
-
 ```{r}
 DM_i_nest <- DM_i_nest %>% 
-  mutate(wilcoxon = map(data, ~wilcox.test(I ~ Gender, data = .x, exact = FALSE)))
+  mutate(wilcoxon = map(data, ~ wilcox.test(I ~ Gender, data = .x, exact = FALSE)))
 ```
 
 
@@ -571,6 +578,40 @@ DM_i_nest <- DM_i_nest %>%
 ```
 
 
+since we have potentially false positive it is always a good idea to look to the distribution of the p-values
+
+```{r}
+hist(DM_i_nest$ps, breaks = 20)
+```
+
+We see a clear enrichment of the "low" p values. One could ask what would be the distribution of the p-values if there would be no difference between males and females.
+
+Let's try so simulate this case. To do that I scramble the intensities for each metabolite, so I'll destroy the assiciation between the intensity and the gender
+
+```{r}
+DM_i_nest <- DM_i_nest %>% 
+  mutate(permuted_data = map(data, ~ .x %>% mutate(I = sample(I))))
+  
+```
+
+Let's now run a wikoxon test on the permuted data
+
+
+```{r}
+DM_i_nest <- DM_i_nest %>% 
+  mutate(wilcoxon_p = map(permuted_data, ~ wilcox.test(I ~ Gender, data = .x, exact = FALSE))) %>% 
+  mutate(ps_p = map_dbl(wilcoxon_p, ~.x$p.value))
+```
+
+And now we plot the histogram
+
+```{r}
+hist(DM_i_nest$ps_p, breaks = 20)
+```
+
+This is clearly demonstrating that there is a difference between males and females and that this difference is "statistically significant"
+
+
 Now we would like to rank the variables on the base of their contrast on the two classes ... but as we know it is not correct to use the _p-value_ for that. 
 
 We need to calculate the **effect size**! Now I'll use the Cohen's d. A word of caution here, this type of effect size is parametric ... but I've been stressing that non parametric analysis here should be preferred. 
@@ -583,8 +624,8 @@ Let's stick to Cohen's d. In the same time I'll also calculate the p-values corr
 library(effsize)
 
 DM_i_nest <- DM_i_nest %>%  
-  mutate(pcorr = p.adjust(ps, method = "bonferroni")) %>% 
-  mutate(cohend = map_dbl(data, ~cohen.d(I ~ Gender, data = .x)$estimate))
+  mutate(pcorr = p.adjust(ps, method = "BH")) %>%    ## here I'm calculating the corrected p-values
+  mutate(cohend = map_dbl(data, ~cohen.d(I ~ Gender, data = .x)$estimate))  ## here I'm calculating the effect size
 ```
 
 Now we use the effect size and the p value to create a volcano plot
@@ -593,10 +634,10 @@ Now we use the effect size and the p value to create a volcano plot
 ```{r}
 library(plotly)
 ggplotly(DM_i_nest %>% 
-           left_join(metabolite_meta %>% select(CompoundID,CompoundName)) %>% 
+           left_join(metabolite_meta %>% select(CompoundID,CompoundName, Assay)) %>% 
            ggplot(aes(text=CompoundName)) + 
-           geom_hline(yintercept = 5, lty = 2, col = "red") + 
-           geom_point(aes(x = cohend, y = -log10(ps)), fill = "orange", size = 3, pch = 21) + 
+           geom_hline(yintercept = 1.3, lty = 2, col = "red") + 
+           geom_point(aes(x = cohend, y = -log10(ps), fill = Assay), size = 3, pch = 21) + 
            theme_bw(), tooltip="text")
 ```
 

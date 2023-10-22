@@ -56,7 +56,7 @@ raw_one <- readMSData(
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
 
-I'll now show to you how to perform peak picking with two algoritms availabe in xcms. In the 99% of the case you will use only one of them (CentWave), but it is nice - once in the life - to really put your hands in the machine 
+I'll now show to you how to perform peak picking with two algorithms available in xcms. In the 99% of the case you will use only one of them (CentWave), but it is nice - once in the life - to really put your hands in the machine 
 
 ## Peak picking: matched filter
 
@@ -66,7 +66,7 @@ A full description of the parameters of the algorithm can be found in the [`xcms
 
 * **binSize:** the "width" of the bins use to extract the ionic traces where we look for peaks
 * **fwhm:** the "expected" width of the peak in the chromatographic direction
-* **snthresh:** the signal/to noise threshold uset to say: "yeah, this is a peak and not a bump in the noise" 
+* **snthresh:** the signal/to noise threshold used to say: "yeah, this is a peak and not a bump in the noise" 
 
 In xcms the parameters of the algorithm are stored into a specific object:
 
@@ -182,7 +182,7 @@ Also here many parameters (and others are not mentioned). I highlight here some 
 
 * **peakwidth:** this is the expected range of the width of the chromatographic peaks. In this case from 5 to 30 seconds 
 * **ppm:** this is the expected mass shift of the signal of a "true" ion due to electric noise
-* **prefilter:** this is an initial filter which will consider valid only ion traces which are preserving a signal of more than 100000 counts for at least 3 scans.
+* **prefilter:** this is an initial filter which will consider valid only ion traces which are preserving a signal of more than 50000 counts for at least 3 scans.
 * **noise:** this is the minimum signal which will be considered
 
 
@@ -190,7 +190,7 @@ Also here many parameters (and others are not mentioned). I highlight here some 
 cwp <- CentWaveParam(peakwidth = c(5, 30),    ## expected range of chromatographic peak width
                      ppm = 5,                 ## tolerance to identify ROIs in the mz/rt plane
                      prefilter = c(5, 50000),## number of consecutive scans showing a signal higher than 50000
-                     noise = 5000)            ## minimum signal to be considered
+                     noise = 6000)            ## minimum signal to be considered
 cwp
 ```
 
@@ -269,15 +269,19 @@ In view of the step in which the peak list will be merged together it is importa
 * the filename
 * the class of the sample (QC,blank,sample,standard) 
 * the study factors (treated, control, time, color, ...)
-* the injectio order (to spot analytical drifts)
+* the injection order (to spot analytical drifts)
 
 in `xcms` all these infos are stored in an `AnnotatedDataFrame` object
 
 Typically all these info should be included in the filename, or in a csv which links the filename with the metadata. In the dataset we are using everything is in the file name, so let's process them. In the following we will assume that the data are stored as `mzML` inside the `data` subfolder.
 
+
+
+
 ```{r}
 library(tools)  ## just to use file_path_sans_ext
 phenodata <- tibble(filepath = list.files("../data/wines/", pattern = ".mzML", full.names = TRUE)) %>% 
+  filter(!grepl("mix",filepath)) %>%     ## remove the injections of the standard mixes 
   mutate(fname = file_path_sans_ext(basename(filepath))) %>% 
   separate(fname, into = c("inj_ord","color","variety","bottle","rep","polarity","mode"), 
            sep = "_", remove = FALSE) %>% 
@@ -291,7 +295,7 @@ pData(phenodata)
 Here we read the data in 
 
 ```{r}
-raw_data <- raw_data <- readMSData(
+raw_data <- readMSData(
   files = phenodata$filepath, 
   msLevel. = 1,
   pdata = phenodata, ## this is the structure of xcms holding phenotypic data
@@ -302,7 +306,7 @@ raw_data <- raw_data <- readMSData(
 And perform the peak picking with centwave
 
 ```{r}
-register(SerialParam()) 
+register(SerialParam()) ## Setting xcms in serial mode
 raw_data <- findChromPeaks(raw_data, param = cwp)
 ```
 
@@ -338,7 +342,7 @@ We now plot them, with colors matching the sample class
 mypalette <- c("steelblue", "coral", "darkgreen")
 names(mypalette) <- c("red","X","wht")
 
-plot(tics, col = mypalette[raw_data$color])
+plot(tics, col = mypalette[raw_data$color])  ## raw_data$color is getting out the phenodata column called color
 legend("topright", legend = c("red","Blank & QC","white"), col = mypalette, lty = 1)
 ```
 
@@ -350,6 +354,7 @@ The plot shows already nice things:
 The trend with the injection can be visualized as follows
 
 ```{r}
+## Visualize the overall trend in TIC along the injections
 tc <- split(tic(raw_data), f = fromFile(raw_data))
 full_tics <- sapply(tc, sum)
 
@@ -364,9 +369,9 @@ pData(raw_data) %>%
 
 ```
 
-So no clear trend is visible in the data. X here represents QC and blanks.
+So no clear trend is visible in the data. X here represents QC, blanks and StdMixes
 
-Another type ov visualization that I find useful with reasonably small datasets is the following
+Another type of visualization that I find useful with reasonably small datasets is the following
 
 ```{r fig.height=7, fig.width=14}
 chromPeaks(raw_data) %>% 
@@ -390,6 +395,10 @@ Something for you now:
 * Play around with the pick picking parameters and discuss what is the meaning of each one of them.
 * Try to used what we have done so far to understand what happens in correspondence of the horizontal lines visible in many samples. To do that you should find the "troublesome" mz and extract its chromatogram across the full set of samples.
 * Can you try to check the mz and rt of the same peak across the 29 samples (use the `filterFile` function to get rid of the blanks!)? Are they the same?
+
+
+
+## Exercise
 
 
 

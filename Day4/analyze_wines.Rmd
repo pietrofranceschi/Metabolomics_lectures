@@ -1,0 +1,130 @@
+---
+title: "Testing_wines"
+author: "Pietro Franceschi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(tidyverse)
+library(xcms)
+library(plotly)
+library(effsize)
+```
+
+Read in the untargeted data
+
+```{r}
+load("Day3/processed_wines_data.RData")
+```
+
+
+Step1: Arrange the data matrix in a sensible order
+
+```{r}
+DM <- DM %>% 
+  t(.) %>% 
+  as_tibble(rownames = "fname")
+```
+
+We need now to process the fname to have the study factors
+
+```{r}
+library(tools)
+DM <- DM %>% 
+  mutate(fname = file_path_sans_ext(fname)) %>% 
+  separate(fname, into = c("inj_ord","color","variety","bottle","rep","polarity","mode"), 
+           sep = "_", remove = FALSE)
+           
+  
+```
+
+We need to impute missing values
+
+```{r}
+myimputer <- function(v){
+  if (sum(is.na(v)) == 0) {  ## If I do not have NAs please leave the vector unchanged
+    return(v)
+  } else {
+    napos <- which(is.na(v))  ## position of the NAs in the vector
+    newval <- runif(length(napos),0,min(v, na.rm = TRUE))  ## calculate the random numbers I should put in place of the NAs
+    out <- v
+    out[napos] <- newval
+    return(out)
+  }
+  
+}
+```
+
+Now we apply it to the full set of columns
+
+```{r}
+DM_i <- DM %>% 
+  mutate(across(starts_with("FT"), ~ myimputer(.x))) %>% 
+  filter(color != "X")   ## remove QCs
+```
+
+Now we move to a nested tibble
+
+
+```{r}
+DM_nest <- DM_i %>% 
+  pivot_longer(starts_with("FT"), names_to = "feature", values_to = "into") %>% 
+  nest(data = -feature)
+```
+
+Now we run the test ...
+
+
+```{r}
+DM_nest <- DM_nest %>% 
+  mutate(wilcoxon = map(data, ~ wilcox.test(into ~ color, data = .x, exact = FALSE)))
+```
+
+```{r}
+DM_nest <- DM_nest %>% 
+  mutate(ps = map_dbl(wilcoxon, ~.x$p.value))
+```
+
+We calculate the effect size
+
+```{r}
+DM_nest <- DM_nest %>%  
+  mutate(pcorr = p.adjust(ps, method = "BH")) %>%    ## here I'm calculating the corrected p-values
+  mutate(cohend = map_dbl(data, ~cohen.d(log10(into) ~ color, data = .x)$estimate))
+```
+
+Add feature info to the df
+
+```{r}
+DM_nest <- DM_nest %>% 
+  left_join(feat %>% as_tibble(rownames = "feature")) %>% 
+  mutate(lab = paste(round(mzmed,3), round(rtmed,1), sep  ="_"))
+```
+
+
+
+```{r}
+library(plotly)
+ggplotly(DM_nest%>% 
+           ggplot(aes(text = lab)) + 
+           geom_hline(yintercept = 1.3, lty = 2, col = "red") + 
+           geom_point(aes(x = cohend, y = -log10(ps)), fill = "steelblue", size = 1, pch = 21) + 
+           theme_bw(), tooltip="text")
+```
+
+
+
+
+```{r}
+library(factoextra)
+library(FactoMineR)
+```
+
+

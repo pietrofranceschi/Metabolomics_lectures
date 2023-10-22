@@ -1,175 +1,270 @@
 ---
 title: "Experimental Design"
-author: "Pietro Franceschi"
+author: |
+  | Pietro Franceschi 
+  | pietro.franceschi@fmach.it
+institute: "FEM - UBC"
+
 output: 
-  ioslides_presentation:
-    css: "../mycss.css"
+  beamer_presentation:
+    theme: "Warsaw"
+    colortheme: "orchid"
+    incremental: false
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(knitr)
+library(kableExtra)
+options(knitr.table.format = "latex")
 ```
 
 
 ## Statistics
 
-**Statistics** is the science which deals with **the collection, the analysis, the visualization and the interpretation** of experimental data
+**Statistics** is the science which deals with **the collection, the analysis, the visualization and the interpretation** of experimental data.
 
-* random sampling
-* observational studies
-* experiments
+
+## How data are collected ...
+
+
+::: {.columns align=center}
+:::: {.column width=.6}
+* Random samplings
+* Observational studies
+* Experiments
+::::
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/picking_flowers.png")
+```
+::::
+:::
+
+
+
+
 
 
 ## Random Samplings (polls)
 
-Random sapling allow to characterize the properties of a finite population without measuring all of its members
+
+::: {.block}
+### Definition
+Random samplings allow to characterize the properties of a finite population without measuring all of its members.
+:::
+
 
 **Examples**
 
 * *Electoral polls*
 * *Normal levels of cholesterol in the human population*
+* *Characterization of a population of grapes, apples, wines, ...*
 * ...
 
 ## Observational Studies
 
-Observational studies are designed with tho objective of **identifying relationships** between the different properties of a conceptual population. The role of the experimenter is to perform the **selection of the sample**
-
-<hr>
+::: {.block}
+### Definition
+Observational studies are designed with the objective of **identifying relationships** between the different properties of a conceptual population. The role of the experimenter is to perform the **selection of the sample**.
+:::
 
 **Examples**
 
->* *Is it true that people who eat more chocolate are more happy?*
->* *The level of cholesterol of people eating more vegetables is lower*
->* ...
+* *Is it true that people who eat more chocolate are more happy?*
+* *The level of cholesterol of people eating more vegetables is lower*
+...
 
 ## Experiments
 
-**Experiments** are designed with the objective of identifying **causal relations** between the properties of a conceptual population. The role of the experimenter is to **modify the conditions** to verify the presence of causal relationship between the observed properties
-
-<hr>
+::: {.block}
+### Definition
+**Experiments** are designed with the objective of identifying **causal relations** between the properties of a conceptual population. The role of the experimenter is to **modify the conditions** to verify the presence of causal relationship between the observed properties.
+:::
 
 **Examples**
 
->* *If you eat more chocolate you will get happier*
->* *If I drink more beer I'll get more sympathetic*
->* ...
+* *If you eat more chocolate you will get happier*
+* *If I drink more beer I'll get more sympathetic*
+*  ...
 
 
-## Imortant notes
+## Important notes
 
+::: {.columns align=center}
+:::: {.column width=.6}
 * Causal relations can be assessed only in **experiments**
 * This is really Galileian ;-)
-* Experiments are impossible in many relevant fields ... human health, ecology
+* Experiments are impossible in many relevant fields like human health and ecology
+::::
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+  include_graphics("../images/fieldnotes.jpg")
+```
+::::
+:::
 
-<hr>
 
-<div class="red2">
-* Should we then give up on obtaining causal information?
-<div>
+`r text_spec("Should we then give up on obtaining causal information there?", color = "red")`
 
-## Mind the chocolate ... {.flexbox .vcenter}
 
-<div class="centered">
+## Mind the chocolate ... 
 
-[**Chocolate Consumption, Cognitive Function,
-and Nobel Laureates**](http://www.biostat.jhsph.edu/courses/bio621/misc/Chocolate%20consumption%20cognitive%20function%20and%20nobel%20laurates%20(NEJM).pdf)
 
-<br>
-<hr>
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+  include_graphics("../images/chocolate.png")
+```
+\tiny
 
-*~~Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country~~*
+*New England Journal of Medicine, 2012*
 
-<hr>
-<br>
+\normalsize
+
+*" ... Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country ..."*
+
+
 [**...and more!**](https://tylervigen.com/spurious-correlations)
-<div>
+
 
 ## Planning a sampling
 
+::: {.block}
 **Key question**: what is the best way to sample my population in a _representative_ way?
+:::
 
 * Do it _randomly_ to avoid any intentional or unintentional bias (**Randomized Sampling**)
-* Take into account known subpopulations and confunding factors (**Stratified Random Sampling**)
+* Take into account known subpopulations and confounding factors (**Stratified Random Sampling**)
 * The number of samples is determined by practical/economical considerations
 
-In presence of known subpopulations stratified random sampling result in a more accurate characterization of the population
+In presence of known subpopulations stratified random sampling results in a more accurate characterization of the population
+
+## Stratified Random Sampling
+
+```{r, echo=FALSE, fig.align='center', out.width="60%"}
+include_graphics("../images/Stratified_sampling.png")
+```
+
+## Key idea: do it randomly
+
+The most reasonable way to "smear out" the effects of unknown biases is to do everything **randomly**
+
+`r text_spec("Random is not a synonym of **haphazard**", color = "red")`
+
+
+```{r, echo=FALSE, fig.align='center', out.width="40%"}
+include_graphics("../images/Random-Numbers-Cloud.png")
+```
 
 ## Planning an observational study
 
-**Objective**: get a useful and clear answer
+::: {.block}
+### Keep in mind ... 
+
+**Objective**: get an useful and clear answer
 
 **Mean**: start from a clear, useful and often simple question
+:::
 
 * Identify the **sampling unit**
+* Decide the number of samples (money, power, ...)
 * Define the conceptual population
-* Can I sample it in a representative way?
-* Identify **confounding factors** and stratify the sampling
+* Sample it in a representative way
+* Identify **confounding factors** and, if possible, **stratify** for them 
 
 
-## Key idea #1: Sampling Unit
-The smaller unit of a population which retains the properties we are interested into.
+## Key idea: Sampling Unit
+The smaller unit of a population which retains the properties we are interested into
 
 
-## Key idea #2: Confounding Factor
+* *Example: grapevine, leafs, infections ...*
 
-In statistics, a confounder (also confounding variable, confounding factor, or lurking variable) is a variable that influences both the dependent variable and independent variable, causing a spurious association. Confounding is a causal concept, and as such, cannot be described in terms of correlations or associations. (*wikipedia*)
 
-* Smoke, cardiovascular disease, alcohol consumption
-* Birth order (1st child, 2nd child, etc.), presence of Down Syndrome in the child, maternal age
+## Key idea: Confounding Factor
 
----
+A variable that influences both the dependent variable and independent variable, causing a spurious association (*wikipedia*).
 
-```{r, echo=FALSE, fig.align='center', out.width="60%"}
+* *Smoke, cardiovascular disease, alcohol consumption*
+* *Birth order (1st child, 2nd child, etc.), maternal age, Down Syndrome in the child*
+
+```{r, echo=FALSE, fig.align='center', out.width="40%"}
 include_graphics("../images/Confounding.png")
 ```
 
 
+## Notes
+
+::: {.columns align=center}
+:::: {.column width=.6}
+
+
+* Some confounders can be controlled by careful sampling 
+  * Eg. *Age and Gender on the relation between happiness and chocolate*
+* Some others are impossible to control 
+  * Eg. *Presence of chemical pollution in the water streams and altitude of sampling*
+
+::::
+:::: {.column width=.4}
+
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+  include_graphics("../images/fieldnotes.jpg")
+```
+
+::::
+:::
+
 
 ## Planning one experiment
 
-**Objective**: get a useful and clear answer
+::: {.block}
+### Keep in mind ... 
+
+**Objective**: get an useful and clear answer
 
 **Mean**: start from a clear, useful and often simple question
+:::
 
-* What is my experimental unit?
+
+* What is my **experimental unit**?
 * How many samples should I measure?
-* What are the potential sources of variability?
+* What are the **potential sources of variability**?
 
 ## Experimental Design
 
+::: {.block}
 A strategy to assign the experimental units to the different *treatments* to optimize my capacity of inferring **causal relationships**
+:::
 
-* Control of unwanted sources of variability (technical/biological)
 
-## Key idea #3: Blocking
+`r text_spec("Control of unwanted sources of variability (technical/biological) to highlight the effects of the intervention", color = "red")`
+
+
+## Key tool : Blocking
 
 * Group experimental units in homogeneous groups (blocks)
 * Study the variability inside the blocks
 * Identify and subtract the variability across the blocks
-* Blocking allows to "subtract" the difference between the blocks
+* Blocking allows to *subtract* the difference between the blocks
 * Blocks and study factors should be *orthogonal*
 
----
 
-```{r, echo=FALSE, fig.align='center', out.width="70%"}
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
 include_graphics("../images/blocks.png")
 ```
 
 
 --- 
 
-**Block what you can; randomize what you cannot.**
+`r text_spec("Block what you can; randomize what you cannot", color = "red", bold = TRUE)`
+
+Blocking is “better” than randomization because statistics allows to “subtract” the variability coming from the blocking factor
+
+
+## Examples of common blocking factors
 
 
 
-*~~Blocking is better than randomization because it is possible to "subtract" the variability between the blocks~~*
-
-<br>
-<hr>
-<br>
-
-**Examples of common blocking factors:**
+::: {.columns align=center}
+:::: {.column width=.6}
 
 * Location  
 * Analytical batch
@@ -177,7 +272,64 @@ include_graphics("../images/blocks.png")
 * Operator 
 * ...
 
+::::
+:::: {.column width=.4}
 
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+  include_graphics("../images/usual_suspects.jpg")
+```
+
+::::
+:::
+
+
+## Randomized Complete Designs 
+
+```{r, echo=FALSE, fig.align='center', out.width="90%"}
+include_graphics("../images/exp_des_1.png")
+```
+
+
+## Split Plot Designs
+
+```{r, echo=FALSE, fig.align='center', out.width="90%"}
+include_graphics("../images/exp_des_2.png")
+```
+
+
+## Longitudinal Studies
+
+```{r, echo=FALSE, fig.align='center', out.width="90%"}
+include_graphics("../images/exp_des_3.png")
+```
+
+
+## Crossover Studies
+
+```{r, echo=FALSE, fig.align='center', out.width="90%"}
+include_graphics("../images/exp_des_4.png")
+```
+
+
+## Notes
+
+::: {.columns align=center}
+:::: {.column width=.6}
+
+* Block as much as possible!
+* Repeated measures are more "powerful" because each unit is the control of itself
+* Crossovers can be tricky for the wash-out
+* Repeated measures design are the key in presence of large variability in the population (e.g. plants in the field/greenhouse)
+
+::::
+:::: {.column width=.4}
+
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+  include_graphics("../images/fieldnotes.jpg")
+```
+
+::::
+:::
 
 
 

@@ -88,23 +88,24 @@ msLevel(raw_one)[1:10]
 
 As you see, they are interleaved. 
 
-
 ## Full Scans
 
 Let's now get out the full scans 
 
 ```{r}
+## I'm telling xcms to filter only scans acquired in "Full scan mode"
 fs_raw <- raw_one %>% filterMsLevel(1)
+
+fs_raw
 ```
 
 
 We already now how the `rt` will look like, but what about `mz` and `intensity`
 
-
 ```{r}
 rt <- rtime(fs_raw)
 mz <- mz(fs_raw)
-I <- intensity(fs_raw)
+I <-  intensity(fs_raw)
 ```
 
 And their structure ...
@@ -134,7 +135,7 @@ s1 <- fs_raw[[1]]
 s1
 ```
 
-So a method for this type of object is alredy in place
+So a method for this type of object is already in place
 
 ```{r}
 plot(s1)
@@ -221,7 +222,7 @@ Here we see a clear difference between the two traces, looking to the names we s
 ## DIY
 
 * Play around with the previous 2d map and look for potentially interesting ions. Plot their chromatogram
-* Look how the quality of the mass spectrum is changing across one chromatographic peak
+* Look how the quality of the mass spectrum is changing across one chromatographic peak (Advanced)
 * If you look to the map, can you say why the signal with high intensity are organized in vertical groups?
 * The trace around 289 seems to show two horizontal peaks. What does it mean? Can you interpret that?
 

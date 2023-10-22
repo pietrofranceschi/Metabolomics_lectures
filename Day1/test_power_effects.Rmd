@@ -1,0 +1,627 @@
+---
+title: "Tests, effects and power"
+author: |
+  | Pietro Franceschi 
+  | pietro.franceschi@fmach.it
+institute: "FEM - UBC"
+
+output: 
+  beamer_presentation:
+    theme: "Warsaw"
+    colortheme: "orchid"
+    incremental: false
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+library(MASS)
+```
+
+
+## The BIG question
+
+\Large
+\begin{center}
+\color{red}{Is what I’m observing \textbf{true beyond my sample}. Can I draw general conclusions from a limited set of samples?}
+\end{center}
+
+In presence of variability, there will be always the possibility that what I observe in my data cannot be generalized at the population level.
+
+* measure more sample
+* validate
+* give a measure of my **confidence** on the results
+
+
+## Variability
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/varianceadditivity.png")
+```
+
+\vspace{1em}
+
+
+::: {.block}
+### On Variability
+The overall variability comes from the *sum* of the different sources of variability
+:::
+
+
+## Distributions
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/distribution.png")
+```
+
+\vspace{1em}
+
+
+::: {.block}
+### On Variability
+Due to variability each property can have different values with different probabilities, this result in a *distribution*. Each distribution can be characterized by:
+
+* location (e.g. mean)
+* spread (e.g variance)
+
+:::
+
+## Sampling Distribution
+
+::: {.block}
+### Definition
+The probability distribution of a given random-sample-based statistic. E.g. The distribution of the mean of a group of samples upon repeated sampling from a population
+:::
+
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/central_limit.png")
+```
+
+\vspace{1em}
+
+::: center
+_The sampling distribution of the mean is always normally distributed_
+:::
+
+
+## More samples ...
+
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+include_graphics("../images/asynt_values.jpg")
+```
+
+## Statistical testing
+
+::: columns
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/statistical_testing.png")
+```
+
+::::
+
+:::: {.column width=.6}
+Due to variability, it is impossible to get **certain** answers from an experiment. The best one can do is to try to **quantify the level of confidence**. Statistical testing is a procedure which allows us to quantify this level of confidence
+::::
+:::
+
+
+## Statistical testing
+
+_E.g. I set up an experiment to test a new pruning strategy, which should improve apple productivity. Is the productivity I measure significantly different from what I observe for the "standard practice"?_
+
+\vspace{1em}
+
+::: {.block}
+### Measuring confidence
+* Suppose that what we observe is the result of chance alone (Null Hypothesis - H0)
+* Use statistics to calculate the probability of getting at least what we observe under H0 (by chance!) (*p-value*)
+* Set a threshold of reasonable confidence (0.05,0,01, ...)
+:::
+
+## Example: lowering cholesterol
+
+* Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
+* We claim that a new secret drug reduces *significantly* the cholesterol level in the population
+* To prove that we get a sample of 50 people, we treat them with the drug and we measure their average cholesterol level. The mean level turns out to be 193.
+* Is this pilot study supporting my claim?
+
+## Let's test that!
+
+1. Suppose that the drug has no effect (H0), so my 50 people are a random draw from the population of people treated with the standard drug.
+2. Calculate the distribution of the mean level of cholesterol on groups of 50 people (it is not the distribution of cholesterol in the population!)
+3. Calculate the probability of obtaining at least the observed value from this distribution (*p-value*)
+4. Reject H0 if the p-value is lower than the selected threshold
+
+## Let's plot it!
+
+```{r out.width="70%", fig.align='center'}
+
+set.seed(123)
+means50 <- rep(0,100)
+
+for(i in (1:100)){
+  means50[i] <- mean(rnorm(50,200,50))
+}
+
+mycols <- rep("#C8081570",100)
+mycols[means50 < 193] <- "#377eb870"
+
+plot(x = 1:100, means50, ylim = c(150, 250), pch = 19, col = mycols, 
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling from theoretical population")
+abline(h = 193, col = "steelblue", lty = 2)
+abline(h = 200, col = "darkred")
+
+```
+
+* Each dot shows the value of the mean of an independent sample of 50 people extracted from the population
+* The blue line represents the mean of my sample 50 people (193)
+
+## What we see
+
+* The distribution of the means is nicely centered around the population mean!
+* Apparently getting at least 193 only by chance is not extremely unlikely ... 14 blue dots out 100 (*p value* = *0.14 !)
+* I cannot reject H0 at the 0.05 level ... but I could at the 0.15 level of confidence!
+
+## More samples!
+
+I'm stubborn ... We redo the same study with a test group of 500 people ...
+
+```{r out.width="70%", fig.align='center'}
+means50 <- rep(0,50)
+
+for(i in (1:50)){
+  means50[i] <- mean(rnorm(500,200,50))
+}
+
+
+mycols <- rep("#C8081570",50)
+mycols[means50 < 193] <- "#377eb870"
+
+plot(x = 1:50, means50, ylim = c(180, 220), pch = 19, col = mycols, 
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling from theoretical population")
+abline(h = 193, col = "steelblue", lty = 2)
+abline(h = 200, col = "darkred")
+
+```
+
+Magic! Now it is significant!  No more blue dots, so it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect.
+
+
+## Take home messages
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/important.png")
+```
+
+\vspace{1em}
+
+* The choice of a threshold (0.05) for statistical significance is arbitrary
+* With more samples we can "see" smaller differences
+* We are never sure!
+* Is statistical significance the only thing we are looking for?
+
+
+## ;-)
+
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+include_graphics("../images/pvalueworship.png")
+```
+
+
+## Back to our magic drug ...
+
+Unfortunately it turns out that our drug is not so good ... apparently it reduces the cholesterol only of 0.01%
+
+```{r}
+
+samp_serie <- rep(c(5,50,500,5000,50000), each = 100)
+group_means <- rep(0,length(samp_serie))
+
+for(i in 1:length(samp_serie)){
+  group_means[i] <- mean(rnorm(samp_serie[i],200,50))
+}
+
+mycols <- rep("#C8081570", length(samp_serie))
+mycols[group_means < 198] <- "#377eb870"
+
+
+plot(x = 1:length(samp_serie), group_means, ylim = c(150, 250), pch = 19, col = mycols, cex = 0.5,
+     ylab = "mean of n individuals", xlab = "Replicated sampling from theoretical population", xaxt="n")
+abline(h = 198, col = "steelblue", lty = 2)
+abline(h = 200, col = "darkred")
+abline(v = c(0,100,200,300,400), col = "gray80")
+text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000","50000"), pos = 4)
+
+```
+
+## Is a low *p-value* the only thing we need?
+
+* Is a reduction of 0.01% really useful/relevant?
+* Big number of samples will make tiny differences statistically significant!
+* Statistical significance does not mean biological/agronomic relevance
+* The *p-value* alone cannot be used to judge the relevance of a research ...
+
+## Is a low *p-value* the only thing we need?
+
+* Is a reduction of 0.01% really useful/relevant?
+* Big number of samples will make tiny differences statistically significant!
+* Statistical significance does not mean biological/agronomic relevance
+* The *p-value* alone cannot be used to judge the relevance of a research ...
+
+
+## Erroneous ...
+
+* _p-values_ deals with probability of obtaining by chance, not with the strength of an effect
+* strong effects with low variability **will** result in low _ps_
+* the reverse is not necessarily true!
+* "look, I have a low p value!" is not the only thing that matters
+
+## Measuring the _effect size_
+
+
+```{r out.width= "100%", fig.align='center'}
+## Standard normal distribution:
+
+xvalues <- data.frame(x = c(-20, 20))
+
+## add a second normal curve
+normal1 <- function(x){
+  dnorm(x, mean = -15, sd = 2)
+}
+
+normal2 <- function(x){
+  dnorm(x, mean = -13, sd = 2)
+}
+
+normal3 <- function(x){
+  dnorm(x, mean = 5, sd = 2)
+}
+
+normal4 <- function(x){
+  dnorm(x, mean = 15, sd = 2)
+}
+
+
+
+xvalues %>% ggplot(aes(x = x)) + 
+  stat_function(fun = normal1, lwd = 1, col = "darkblue") + 
+  stat_function(fun = normal1, geom = "area", fill = "steelblue", alpha = 0.5) +
+  stat_function(fun = normal2, lwd = 1, col = "darkred") + 
+  stat_function(fun = normal2, geom = "area", fill = "red", alpha = 0.5) +
+  stat_function(fun = normal3, lwd = 1, col = "darkblue") + 
+  stat_function(fun = normal3, geom = "area", fill = "steelblue", alpha = 0.5) +
+  stat_function(fun = normal4, lwd = 1, col = "darkred") + 
+  stat_function(fun = normal4, geom = "area", fill = "red", alpha = 0.5) +
+  geom_hline(yintercept = 0, lwd = 1) + xlab("") + ylab("") + 
+  geom_text(x = -14, y = 0.25, label = "Small Effect") + 
+  geom_text(x = 10, y = 0.25, label = "Large Effect") + 
+  theme_light() + 
+  ylim(c(0,0.3)) +
+  theme(aspect.ratio = 0.3)
+
+
+```
+
+## Notes
+
+1. The difference in means is not sufficient
+2. The measure should take into account of the variability
+3. The variability of the population not the one of he sampling distribution ;-)
+
+
+::: block
+### Fold Change and Effect Size
+The _fold change_ is **not**  a good measure of the effect size ...
+:::
+
+## Cohen's d
+
+$$
+d = \frac{\bar{x}_{1} - \bar{x}_{2}}{s}
+$$
+
+Where
+
+* $\bar{x}$ are the estimates of the population means
+* $s$ is the estimate of the population standard deviation (pooled)
+
+
+
+## Let's _see_
+
+- 2 populations: $\mu_{1}=5$, $\mu_{2}=10$, $\sigma=5$
+- _t-test_ to test the difference
+- different sample sizes
+
+
+```{r}
+library(effsize)
+library(tidyverse)
+
+## We start with two gaussians @0 and @5 with sd of 5
+## for a set of different sample sizes we calculate 100 saplings and for each one p values and cohen d
+
+
+
+x <- tibble(size = c(3,5,20,50,100))
+
+## now we create the dataset
+
+x <- x %>% 
+  mutate(
+    g1 = map(size, function(s) {
+      out <- matrix(0,nrow = s, ncol = 100)
+      for(i in 1:s){
+        out[i,] <- rnorm(100,0,5)
+      }
+      out
+    }),
+    g2 = map(size, function(s) {
+      out <- matrix(0,nrow = s, ncol = 100)
+      for(i in 1:s){
+        out[i,] <- rnorm(100,5,5)
+      }
+      out
+    })
+  ) 
+    
+  ## Now we calculate the pvalues
+
+
+x <- x %>% 
+  mutate(ps = map2(g1,g2, function(x,y){
+    ps <- rep(0,ncol(x))
+    for(i in 1:ncol(x)){
+      ps[i] <- t.test(x[,i],y[,i])$p.value
+    }
+    ps
+  }))
+
+## Now the cohen's d
+
+x <- x %>% 
+  mutate(ds = map2(g1,g2, function(x,y){
+    ds <- rep(0,ncol(x))
+    for(i in 1:ncol(x)){
+      ds[i] <- cohen.d(x[,i],y[,i])$estimate
+    }
+    ds
+  }))
+
+
+x %>% 
+  unnest(c("ps","ds")) %>%
+  mutate(size = factor(size)) %>% 
+  dplyr::select(size,ps,ds) %>% 
+  pivot_longer(-size) %>% 
+  ggplot() + 
+  geom_jitter(aes(x = size, y = value), width = 0.2, col = "steelblue", alpha = 0.7) +
+  geom_hline(aes(yintercept = if_else(name == "ds",-1,0.05)), col  ="red", lty = 2) +
+  facet_wrap(~name, scales = "free") + 
+  xlab("Sample Size") + 
+  theme_light() + 
+  theme(aspect.ratio = 0.7)
+  
+```
+
+## Notes
+
+* With three samples variability in *p values* and estimated *d* is large
+* Also the probability of calling non significant a real difference is large ... 
+* The average estimate of *d*, however, is not changing with the sample size
+* The reason for that is that *d* is calculated by using the standard deviation of the population and not the standard deviation of the sampling ditribution of the mean.
+* The effect size does not tell to me if something is biologically/ecologically relevant
+
+
+## H0, Ha and Power Calculation
+
+::: {.block}
+### Alternative hypothesis
+In statistical hypothesis testing, the alternative hypothesis is a position that states **something is happening**, a new theory is preferred instead of an old one (null hypothesis). 
+
+It is usually consistent with the research hypothesis because it is constructed from literature review or previous studies ... or technical/economical considerations
+
+\vspace{1em}
+
+In presence of Ha a sensible question is: _how many sample should I measure to assess if my data support Ha?_
+:::
+
+\vspace{2em}
+
+\tiny 
+
+_Eg. My new pruning strategy is worth being introduced only if it is increasing the productivity of 10 %_
+
+
+## The origin Ha
+
+::: columns
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/la-creazione-di-adamo.jpg")
+```
+
+::::
+:::: {.column width=.6}
+* Biological/agronomic knowledge
+* Technical objective (it is worth introducing a practice only if it is x% better then the old one)
+* Literature search
+* Preliminary experiment
+::::
+:::
+
+
+## Power calculation by hand: the tree problem
+
+::: columns
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+  include_graphics("../images/appletree.jpg")
+```
+
+::::
+:::: {.column width=.6}
+* Standard productivity 100 kg/tree
+* Expected improvement with new pruning: 10% (Ha = 110 kg/tree)
+* Variability 40 kg/tree
+* I propose to test everything in a CRD with 50 trees
+::::
+:::
+
+\vspace{1em}
+
+::: center
+
+_Is this number of trees appropriate to be able to reliably see the expected difference?_
+
+:::
+
+## What About Ha?
+
+```{r out.width="70%", fig.align='center'}
+
+set.seed(123)
+
+meansh0 <- rep(0,100)
+meansha <- rep(0,100)
+
+for(i in (1:100)){
+  meansh0[i] <- mean(rnorm(50,100,40))
+  meansha[i] <- mean(rnorm(50,110,40))
+}
+
+mycols <- rep("#C8081570",100)
+
+mycols1 <- rep("#028A0F70",100)
+
+
+plot(x = 1:100, meansh0, ylim = c(80, 120), pch = 19, col = mycols, 
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling", main = "H0 and Ha")
+abline(h = 100, col = "darkred", lwd = 2)
+points(x = 1:100, meansha, pch = 19, col = mycols1)
+abline(h = 110, col = "darkgreen", lwd = 2)
+
+legend("bottomright", legend = c("H0","Ha"), lty = 1, lwd = 2, col = c("darkred","darkgreen"), bty = "n")
+
+```
+
+\tiny
+
+* Each dot represents the possible outcome of a real experiment: red under H0, green under Ha
+* Even if Ha is true, in many cases I could obtain a productivity similar to the one under H0 (green dots mixed with red dots)
+* My setting is not suitable to disentangle H0 and Ha
+
+
+## 100 trees
+
+More trees/samples!
+
+```{r out.width="70%", fig.align='center'}
+
+set.seed(123)
+
+meansh0 <- rep(0,100)
+meansha <- rep(0,100)
+
+for(i in (1:100)){
+  meansh0[i] <- mean(rnorm(100,100,40))
+  meansha[i] <- mean(rnorm(100,110,40))
+}
+
+mycols <- rep("#C8081570",100)
+
+mycols1 <- rep("#028A0F70",100)
+
+
+plot(x = 1:100, meansh0, ylim = c(80, 120), pch = 19, col = mycols, 
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling", main = "H0 and Ha")
+abline(h = 100, col = "darkred", lwd = 2)
+points(x = 1:100, meansha, pch = 19, col = mycols1)
+abline(h = 110, col = "darkgreen", lwd = 2)
+
+legend("bottomright", legend = c("H0","Ha"), lty = 1, lwd = 2, col = c("darkred","darkgreen"), bty = "n")
+
+```
+
+* Better, but not sufficient yet ...
+
+
+## 175 trees
+
+More trees/samples!
+
+```{r out.width="70%", fig.align='center'}
+
+set.seed(123)
+
+meansh0 <- rep(0,100)
+meansha <- rep(0,100)
+
+for(i in (1:100)){
+  meansh0[i] <- mean(rnorm(175,100,40))
+  meansha[i] <- mean(rnorm(175,110,40))
+}
+
+mycols <- rep("#C8081570",100)
+
+mycols1 <- rep("#028A0F70",100)
+
+
+plot(x = 1:100, meansh0, ylim = c(80, 120), pch = 19, col = mycols, 
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling", main = "H0 and Ha")
+abline(h = 100, col = "darkred", lwd = 2)
+points(x = 1:100, meansha, pch = 19, col = mycols1)
+abline(h = 110, col = "darkgreen", lwd = 2)
+
+legend("bottomright", legend = c("H0","Ha"), lty = 1, lwd = 2, col = c("darkred","darkgreen"), bty = "n")
+
+```
+\tiny
+
+* Yes! Now the "contrast" is sufficient
+* If I want to be able to call the difference of 10% significant I need at least 175 plants
+* In real life you strike a balance between level of significance and number of samples
+
+
+## Important
+
+::: block
+### Power Calculation
+Power calculation does not ensure that the new pruning works (successful experiment) ... but ensures that our design would be able to see (at least) the target effect 
+:::
+
+## Summary
+
+::: columns
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+  include_graphics("../images/fieldnotes.jpg")
+```
+
+::::
+:::: {.column width=.6}
+* In real life situations the standard deviation of the population is unknown!
+* We developed ideas without any mathematical formalism
+* The same line of reasoning can be extended to various types of scenarios
+* Low *p-value* is not the only thing we need!
+::::
+:::
+
+
+## Web Resources
+
+* http://www.gpower.hhu.de/en.html
+* https://www.stat.ubc.ca/~rollin/stats/ssize/
+* https://glimmpse.samplesizeshop.org/
+
+
+
+## 
+
+```{r, echo=FALSE, fig.align='center', out.width="70%"}
+  include_graphics("../images/questions.png")
+```

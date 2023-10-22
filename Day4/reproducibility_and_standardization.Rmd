@@ -1,0 +1,251 @@
+---
+title: "Reproducibility and Standardization"
+author: |
+  | Pietro Franceschi 
+  | pietro.franceschi@fmach.it
+institute: "FEM - UBC"
+
+output: 
+  beamer_presentation:
+    theme: "Warsaw"
+    colortheme: "orchid"
+    incremental: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(kableExtra)
+options(knitr.table.format = "latex")
+```
+
+
+## Science and Reproducibility
+
+
+\begin{center}
+`r text_spec("Every scientific result should be reproducible", color = "red", bold = TRUE, monospace = TRUE)`
+\end{center}
+
+
+
+## Sources of non-reproducibility
+
+::: {.columns align=center}
+:::: {.column width=.6}
+* Errors
+* Frauds
+* Incomplete or bad reporting
+* False positives (sampling)
+* ...
+::::
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/bias.png")
+```
+::::
+:::
+
+
+## Reproducibility in Science
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+  include_graphics("../images/reproducibility.png")
+```
+
+\tiny
+
+Nature. 2016;533:452-454. doi: 10.1038/533452a
+
+\normalsize
+
+*“More than 70% of researchers have tried and failed to reproduce another scientist’s experiments, and more than half have failed to reproduce their own experiments”*
+
+
+---
+
+::: {.block}
+### Sharing and Standardization
+
+* The impact of all the abovementioned problems can be reduced by **sharing** data and methods
+* Sharing requires **standardization**
+:::
+
+
+`r text_spec("If I have seen further, it is by standing on the shoulders of giants", color = "red", bold = TRUE, monospace = TRUE)`
+
+\tiny
+*Isaac Newton*
+
+## Minimum Reporting Standards
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+  include_graphics("../images/minreports.png")
+```
+
+
+
+## What can we standardize in metabolomics?
+
+
+::: {.columns align=center}
+:::: {.column width=.6}
+* Analytical protocols
+* Data analysis pipelines
+* Description of samples and experiments
+* Names and onthologies
+* Names of chemicals
+* Annotation levels (untargeted)
+::::
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/standard.png")
+```
+::::
+:::
+
+
+
+## What can we share in metabolomics?
+
+::: {.columns align=center}
+:::: {.column width=.7}
+* Sample metadata
+* Raw experimental data
+* Data Analysis Scripts
+* MS and NMR spectra
+::::
+:::: {.column width=.3}
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/share.png")
+```
+::::
+:::
+
+## Please ... be FAIR
+
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/FAIR_data_principles.jpg")
+```
+
+
+
+## Sharing is Value
+
+
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/value.jpg")
+```
+
+## Standardization can be tricky: chemical names
+
+```{r, echo=FALSE, fig.align='center', out.width="65%"}
+  include_graphics("../images/chem_nam_std.png")
+```
+
+\small
+
+What is good for a computer is not necessarily good for a man ...
+
+## Isa Tab
+
+*Standardizing metadata for scientific experiments*
+
+
+```{r, echo=FALSE, fig.align='center', out.width="30%"}
+  include_graphics("../images/isa.png")
+```
+
+[https://isa-tools.org/](https://isa-tools.org/)
+
+
+## MIAPPE
+
+*Minimum Information About Plant Phenotyping Experiments*
+
+```{r, echo=FALSE, fig.align='center', out.width="30%"}
+  include_graphics("../images/miappe.png")
+```
+
+[https://www.miappe.org/](https://www.miappe.org/)
+
+
+## Annotation Levels
+
+```{r, echo=FALSE, fig.align='center', out.width="60%"}
+  include_graphics("../images/annotation_levels.png")
+```
+\tiny
+*Metabolomics Standard Initiative*
+
+
+## Sharing Raw data
+
+::: {.columns align=center}
+:::: {.column width=.6}
+* The **machine specific** data can be more difficult to use but they are the most informative
+* **Open Sources Formats** (mzML) boost interoperability and community analysis
+* For targeted assays coherent tables are sufficient
+* Untargeted MS data can be converted with [*proteowizard*](https://proteowizard.sourceforge.io/)
+::::
+:::: {.column width=.4}
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/OpenSwissKnife.png")
+```
+::::
+:::
+
+## Metabolomics Data Repositories
+
+* **Metabolights**:[https://www.ebi.ac.uk/metabolights/](https://www.ebi.ac.uk/metabolights/)
+* **Metabolomics Workbench**:[https://www.metabolomicsworkbench.org/](https://www.metabolomicsworkbench.org/)
+* **GNPS**:[https://gnps.ucsd.edu](https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp)
+* ...
+
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+  include_graphics("../images/met_rep.png")
+```
+
+
+## Sharing data analysis pipelines
+
+* Scripting Language (R,Python,Matlab) ... not Excel  ;-)
+* Workflow Managers *Online*
+  * Workflow4Metabolomics: [https://workflow4metabolomics.org/](https://workflow4metabolomics.org/)
+  * Metaboanalyst: [https://www.metaboanalyst.ca/](https://www.metaboanalyst.ca/)
+  * `xcms` online: [https://xcmsonline.scripps.edu/](https://xcmsonline.scripps.edu/)
+* Workflow Managers *Offline*
+  * Galaxy: [https://usegalaxy.org/](https://usegalaxy.org/)
+  * Knime: [https://www.knime.com/](https://www.knime.com/)
+* Containers
+  * Docker: [https://www.docker.com/](https://www.docker.com/)
+  * Singularity: [https://apptainer.org/](https://apptainer.org/)
+
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+  include_graphics("../images/workflows_metabolomics.png")
+```
+
+
+## Sharing Spectra
+
+Databases of spectra are useful for **annotation** and for the training of **machine based** annotation approaches
+
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+  include_graphics("../images/spectra_db.png")
+```
+[*https://wiki.metabolomicssociety.org/index.php/Databases*](https://wiki.metabolomicssociety.org/index.php/Databases)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
