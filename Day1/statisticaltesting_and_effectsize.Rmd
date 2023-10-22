@@ -32,23 +32,19 @@ In presence of variability, there will be always the possibility that what I obs
 ## On Variability
 The overall variability comes from the *sum* of the different sources of variability
 
+<br>
 
-## Distributions
-
-Due to variability each property can have different values with different probabilities, this result in a *distribution*
-Each distribution can be characterized by:
-
-* location (e.g. mean)
-* spread (e.g variance)
-
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
+include_graphics("../images/varianceadditivity.png")
+```
 
 
 ## Sampling Distribution
 
-We are always dealing with a group of "individuals": a **Sample**
-
-
-~~The sampling distribution is always normally distributed~~
+* We are always dealing with a group of "individuals" extracted from an unknown population: a **Sample**
+* Fro each sample we calculate summary **statistics**, typically the **mean**
+* ~~The distribution of the sample means is always normally distributed~~
+* The width of the distribution of the sample mean decreases as the sample size increases
 
 
 ```{r fig.height=3, fig.width=8, out.width= "100%", fig.align="center"}
@@ -88,7 +84,6 @@ tibble(samp = paste0("s",1:500)) %>%
 
 ```
 
-
 More samples, ~~narrower~~ distribution.
 
 ## Statistical testing
@@ -108,14 +103,14 @@ Statistical testing is a procedure which allows us to quantify this level of con
 
 * Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
 * We claim that a new secret drug reduces significantly the cholesterol level in the population
-* To prove that we get a sample of 50 people, we treat them with the drug and we measure their average cholesterol level.  The levels turns out to be 193.
+* To prove that we get a sample of 50 people, we treat them with the drug and we measure their average cholesterol level.  This mean turns out to be 193.
 * Is this pilot study supporting my claim?
 
 ## Let's test that!
 
 1. Suppose that the drug has no effect (H0), so my 50 people are a random drawing from the population
-2. Calculate the distribution of the mean level of cholesterol on groups of 50 people (mind the gap! ... it is not the distribution of cholesterol in the population!)
-3. Calculate the probability of obtaining at least the observed value from this distribution (p-value)
+2. Calculate the distribution of the mean level of cholesterol in groups of 50 people (mind the gap! ... it is not the distribution of cholesterol in the population!)
+3. Calculate the probability of obtaining at least the observed value from this distribution (*p-value*)
 4. Reject the H0 if the p-value is lower than the selected threshold
 
 ## Let's plot it!
@@ -142,15 +137,31 @@ abline(h = 200, col = "darkred")
 ## What we see
 
 * The distribution of the means is nicely centered around the population mean!
-* The blue line represents the mean of my sample 50 people
-* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (0.14 !)
+* The blue line represents the mean of my sample 50 people (193!)
+* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (p = 0.14 !)
 * I cannot reject H0 at the 0.05 level ...
+
+
+## More on this ...
+
+So you see ... we need a **probability** and we also need a **threshold** (0.05)
+
+<br>
+
+The correct warding in my paper should be 
+
+
+*" ... the results are not statistically significant at the 0.05 level of confidence"* ... 
+
+but they are significant at the 0.15 level!  
+
+
 
 ## More samples! {.smaller}
 
 I'm stubborn ... We redo the same study with a test group of 500 people ...
 
-```{r out.width="80%", fig.align='center'}
+```{r out.width="70%", fig.align='center'}
 means50 <- rep(0,50)
 
 for(i in (1:50)){
@@ -168,10 +179,17 @@ abline(h = 200, col = "darkred")
 
 ```
 
-Magic! Now it is significant!  No more blue dots, so it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect
+Magic! Now it is significant at the 0.05!  No more blue dots, so it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect
 
 
 ## Take home messages
+
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/important.png")
+```
+
+<br>
 
 * The choice of a ~~threshold (here 0.05) for statistical significance is arbitrary~~
 * With more samples we can "see" smaller differences
@@ -179,13 +197,18 @@ Magic! Now it is significant!  No more blue dots, so it is extremely unlikely to
 * Is statistical significance the only thing we are looking for?
 
 
-# ;-)
+---
+
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+include_graphics("../images/pvalueworship.png")
+```
+
 
 ## Back to our magic drug ...
 
 Unfortunately it turns out that our drug is not so good ... apparently it reduces the cholesterol only of 0.01%
 
-```{r}
+```{r fig.align='center', out.width="70%"}
 
 samp_serie <- rep(c(5,50,500,5000,50000), each = 100)
 group_means <- rep(0,length(samp_serie))
@@ -223,7 +246,6 @@ text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000",
 * "look, I have a low p value!" is not the only thing to look for
 
 ## Measuring the _effect size_
-
 
 ```{r out.width= "100%", fig.align='center'}
 ## Standard normal distribution:
@@ -299,7 +321,7 @@ Where
 - different sample sizes
 
 
-```{r}
+```{r fig.align='center', out.width="70%"}
 library(effsize)
 library(tidyverse)
 

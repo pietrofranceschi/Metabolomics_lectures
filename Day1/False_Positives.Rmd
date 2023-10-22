@@ -110,7 +110,7 @@ Here the presence of high correlation is clear!!!
 
 >**But this correlation does not have a "biological" origin ... so it does not represent a truly scientific result ...**
 
-Before giving the chance to you to play with some random science, let's look oh what happens to the histogram of the correlation coefficients as the number of samples increases ...
+Before giving you the chance to play with some random science, let's look oh what happens to the histogram of the correlation coefficients as the number of samples increases ...
 
 ```{r}
 dummy_data %>% 

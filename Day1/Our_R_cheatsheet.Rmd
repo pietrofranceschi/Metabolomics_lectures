@@ -79,7 +79,13 @@ Now you see that my table contains a column made of matrices
 
 ## `purrr` and cycles
 
+In many cases you would like to apply some sort of function iteratively along a table. The standard way of doing this ion many programming languages is to use `for` loops. Unfortunately, for loops can be really slow in R. To work around this problem. base `r` provides a full set of *apply* functions (e.g. `apply`,`lapply`,`sapply`,`vapply` ...). Modern programming paradigms are making life easier using the `purrr` package
+
 The `purrr` package (which is part of `tidyverse` ) allows you to recursively apply operations to data stored in tabular form.
+
+BTW: Do you know how to write R functions???
+
+
 Suppose, for example, that we want to calculate the determinant of the previous matrices
 
 ```{r}
@@ -113,7 +119,7 @@ my_first_tibble$determinant[[1]]
 
 
 ## Homework
-1. Create a tibble that contains 100 random sampling from a normal distribution (mu = 0, sd = 1 ... rnorm())
+1. Create a tibble that contains 100 random sampling from a non normal distribution (I suggest to you uniform or a lognormal distribution).
 2. Show that the means of the 100 samples shows a normal distribution regardless the shape of the distribution we are drawing from
 
 
@@ -122,6 +128,8 @@ To draw from different distributions:
 * `runif` for uniform distribution
 * `rlnorm` for the lognormal distribution
 
+
+This is a brute force demonstration of the **central limit theorem**
 
 
 

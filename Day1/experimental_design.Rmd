@@ -148,7 +148,7 @@ include_graphics("../images/Stratified_sampling.png")
 
 The most reasonable way to "smear out" the effects of unknown biases is to do everything **randomly**
 
-`r text_spec("Random is not a synonym of **haphazard**", color = "red")`
+`r text_spec("Random is not a synonym of HAPHAZARD", color = "red")`
 
 
 ```{r, echo=FALSE, fig.align='center', out.width="40%"}

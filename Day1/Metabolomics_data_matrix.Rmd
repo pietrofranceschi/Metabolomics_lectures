@@ -54,6 +54,25 @@ par(pty="s")
 plot(x,y, main = "Correlation", xlab = "Var1", ylab = "Var2", cex = 1, col = "coral", pch = 19)
 ```
 
+---
+
+
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/important.png")
+```
+
+<br>
+
+<div style="background-color:#73AD21;padding:20px;border-radius: 15px;color:black;">
+  <p>Analytical correlation are always stronger than biological ones!</p>
+</div>
+
+<br>
+
+*The correlation structure of your matrix is often not really informative about biology*
+
+
 ## Rows (samples) are often dependent
 
 The design of the study can result in a ~~multilevel hierarchical structure~~  of the samples which violate independence. In other words some samples are "by construction" associated and share something in common
@@ -113,7 +132,7 @@ include_graphics("../images/Coord_planes_color.svg")
 
 ## Why multivariate
 
-```{r echo=FALSE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE, fig.align='center',out.width="60%"}
+```{r echo=FALSE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE, fig.align='center',out.width="50%"}
 library(cowplot)
 library(ggpubr)
 
@@ -162,6 +181,7 @@ Group separation is clearer in the 2d space ...
 
 1. Multiple testing
 2. The structure of the data creates redundancy
+3. Assumptions for parametric (and non parametric) approaches are often not fulfilled
 
 
 ## The course of dimensionality
