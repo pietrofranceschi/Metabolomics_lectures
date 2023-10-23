@@ -80,13 +80,14 @@ hist(means, main = "Means of repeated sampling (20)", col = "Orange")
 Where $N$ is the size of the sample
 
 
-## ... but
+## ... but {.build}
 
 We are often dealing with data non normally distributed
 
-1. Count based technologies never return negative numbers ... (MS!)
-2. Presence of sub-populations
-3. Outliers
+>1. Count based technologies never return negative numbers ... (MS!)
+>2. In many biochemical reactions the product of concentrations is important  
+>3. Presence of sub-populations
+>4. Outliers
 
 Sub populations are typically present in complex experiments
 
@@ -98,6 +99,9 @@ subpop <- c(rnorm(100,10,3),rnorm(100,20,3))
 hist(subpop, breaks = 30)
 abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
 ```
+
+**NB: In many cases subpopulations are unknown!
+
 
 ## Lognormal data {.smaller}
 

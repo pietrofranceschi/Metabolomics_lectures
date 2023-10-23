@@ -55,7 +55,7 @@ pop_mu <- mean(mypop$height)
 pop_mu
 ```
 
-In the plt it stays there ...
+In the plot it stays there ...
 
 ```{r}
 mypop %>% 
@@ -71,7 +71,7 @@ What I can do in my simulation (and that I cannot do in my real life) is to ask 
 
 
 ## Simple Random Sampling
-suppose that I have no clue about the presence of the two sub-populations, so the best I can do to avoid biases is **simple random sampling**. Remember, *random* is my best way to avoid introducing biases
+Suppose that I have no clue about the presence of the two sub-populations, so the best I can do to avoid biases is **simple random sampling**. Remember, *random* is my best way to avoid introducing biases.
 
 So let's now simulate repeatedly the extraction of 30 people from my population and to see the variability of the process I do it 500 times
 
@@ -116,7 +116,7 @@ x %>%
   theme_light()
 ```
 
-As we can see, the estimate has variance (:-P), and it is centred around the correct value for the population mean. It is also normally distributed, but this you already know from the previous practical ...
+As we can see, the estimate has variability (:-P), and it is centered around the correct value for the population mean. It is also normally distributed, but this you already know from the previous practical ...
 
 ## Stratified sampling
 
@@ -214,9 +214,6 @@ Both tasks can be dealt either by changing my code above and looking to the resu
 
 ## Effects of the sample size
 
-
-
-
 Let's try to organize everything in a table. We make a plan for that
 
 * one column for the sample size
@@ -230,7 +227,7 @@ Let's try to organize everything in a table. We make a plan for that
 ```{r}
 ## we split data in males and females
 
-mypop_m <- rnorm(50000,180,10)  ## Extracting 8000 numbers from a gaussian population with mean 180 and sd 10
+mypop_m <- rnorm(8000,180,10)  ## Extracting 8000 numbers from a gaussian population with mean 180 and sd 10
 mypop_f <- rnorm(1000,150,10)
 ```
 
@@ -262,7 +259,7 @@ abline(v = mean(mypop),
 ```
 
 
-Now I have my population, I want now to simulate the sdampling from that population. So basically I want to estimate the mean of my population from a group of samples extracted from `mypop`
+Now I have my population, I want now to simulate the sampling from that population. So basically I want to estimate the mean of my population from a group of samples extracted from `mypop`
 
 If you think to it, every sample will give you a slightly different estimate of the population mean
 
@@ -276,10 +273,10 @@ pop_mean <-
 pop_mean
 ```
 
-Trust me, the variability of the estimate of the mean, decreases as the size of the sample increases. The distribution of the means (called sampling distribution of the mean) is normally distribute.
+Trust me, the variability of the estimate of the mean, decreases as the size of the sample increases. The distribution of the means (called sampling distribution of the mean) is normally distributed.
 
 
-What to do now is to compare the spread of the estimates of the population mean when samplin gis performed in a "ranndom" fashion or in  a stratified fashion
+What to do now is to compare the spread of the estimates of the population mean when sampling is performed in a "random" fashion or in  a stratified fashion
 
 In particular I want to test both the effect of the stratification and the size of my sample 
 
@@ -288,7 +285,7 @@ I now create a vector containing the sample sizes I'll check
 
 ```{r}
 ## Set of sizes we will consider
-sizes <- c(10,31,50,100,500)
+sizes <- c(30,50,100,500)
 ```
 
 
@@ -296,7 +293,7 @@ sizes <- c(10,31,50,100,500)
 
 ```{r}
 sample_size_effect <- tibble(s_size = rep(c(sizes), each = 500)) %>% 
-  mutate(m_fraction = length(mypop_m)/(length(mypop_m) + length(mypop_f))) %>% 
+  mutate(m_fraction = length(mypop_m)/(length(mypop))) %>% 
   mutate(f_fraction = 1 - m_fraction) %>% 
   mutate(across(contains("fraction"), function(s) ceiling(s*s_size),.names = "sample_{.col}")) %>% 
   #mutate(across(contains("fraction"),~ ceiling(.x*s_size),.names = "sample_{.col}")) %>% 

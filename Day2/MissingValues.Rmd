@@ -22,13 +22,13 @@ _In statistics, missing data, or missing values, occur when no data value is sto
 - In **metabolomics** missing values arise when, for a sample, it was not possible to get a specific intensity for a feature/metabolite
 
 
-## Notes {#notes}
+## Notes {#notes .build}
 
 In metabolomics missing values pop up for different reasons
 
-1. There was an error during preprocessing (targeted or untargeted)
-2. For a sample the concentration of a metabolite was really low
-3. A metabolite was "absent" in a sample I'll get a missing value (_eg. red pigment in a an extract of white grape_)
+>1. There was an error during preprocessing (targeted or untargeted)
+>2. For a sample the concentration of a metabolite was really low
+>3. A metabolite was "absent" in a sample I'll get a missing value (_eg. red pigment in a an extract of white grape_)
 
 <br>
 
@@ -37,7 +37,7 @@ In metabolomics missing values pop up for different reasons
 
 
 
-## Analytical Absence {#highlights}
+## Analytical Absence {#highlights .build}
 
 ```{r, echo=FALSE, fig.align='center', out.width="50%"}
 include_graphics("../images/important.png")
@@ -47,9 +47,9 @@ include_graphics("../images/important.png")
 
 Having a **Missing** is **not** equivalent of having **zero** concentration!
 
-- Each analytical method is characterized by a well defined *detection limit* 
-- Every concentration between zero and the detection limit will not be detected
-- We never can be 100% sure that something is absent from my sample ...
+>- Each analytical method is characterized by a well defined *detection limit* 
+>- Every concentration between zero and the detection limit will not be detected
+>- We never can be 100% sure that something is absent from my sample ...
 
 Where can we get the detection limit ?
 
@@ -110,7 +110,19 @@ legend("topright", legend = c("Class A", "Class B"), pch = c(19,3), bty = "n")
 
 ```
 
-What would you do here?
+
+---
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/for_you.jpg")
+```
+
+<br>
+
+
+**What would you propose to do in the previous three cases?**
+
+
 
 ## Dealing with missing values
 
@@ -125,7 +137,7 @@ What would you do here?
 How many NAs are acceptable **depends on the allocation of the samples to the factors of the study** 
 
 
-## Imputation {#notes}
+## Imputation {#notes .build}
 
 **Imputation** is the process of substituting a missing value with a reasonable number:
 
