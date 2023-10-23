@@ -18,26 +18,41 @@ _In statistics, missing data, or missing values, occur when no data value is sto
 
 <br>
 
-- In **metabolomics** missing values arise when the value of a specific feature/metabolite is not returned from some of the samples
 - Data can be missing **at random** or **not at random**
+- In **metabolomics** missing values arise when, for a sample, it was not possible to get a specific intensity for a feature/metabolite
 
 
 ## Notes {#notes}
 
 In metabolomics missing values pop up for different reasons
 
->1. Missing values arise in presence of errors in preprocessing (targeted or untargeted)
->2. Missing values arise more easily in presence of low intensity signals
->3. If a metabolite is "absent" in a sample I'll get a missing value (_eg. red pigment in a an extract of white grape_)
+1. There was an error during preprocessing (targeted or untargeted)
+2. For a sample the concentration of a metabolite was really low
+3. A metabolite was "absent" in a sample I'll get a missing value (_eg. red pigment in a an extract of white grape_)
+
+<br>
+
+1,2 & 3 are **random** or **not random** ?
+
+
 
 
 ## Analytical Absence {#highlights}
 
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/important.png")
+```
+
+<br>
+
 Having a **Missing** is **not** equivalent of having **zero** concentration!
 
-- Each analytical method is characterized by a well defined *detection limit*
+- Each analytical method is characterized by a well defined *detection limit* 
 - Every concentration between zero and the detection limit will not be detected
-- We cannot be never 100% sure that something is absent from my sample ...
+- We never can be 100% sure that something is absent from my sample ...
+
+Where can we get the detection limit ?
+
 
 
 ## Scenario 1: 1 class
@@ -105,7 +120,7 @@ What would you do here?
 
 <br>
 <hr>
-<br>
+
 
 How many NAs are acceptable **depends on the allocation of the samples to the factors of the study** 
 
