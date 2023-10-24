@@ -78,6 +78,21 @@ Projecting the data along **specific latent variables**, we highlight some desir
 > 2. Prediction of sample properties (e.g. PLS)
 > 3. Good representation of the multidimensional data structure (e.g PCA, PCoA)
 
+
+## Food for brains
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/brain.jpg")
+```
+
+<br>
+
+* Some relevant "characteristics" of a system cannot be measures or are difficult to be defined (e.g. health, intelligence)
+* In this sense they are *latent*
+* We can measure several properties associated with them (e.g. for intelligence, math score, QI tests, school grades, ... ecc)
+* The latent variable "model" is exactly trying to formalize this ides
+
+
  
 ## LVs and Projections
 A set of latent variable can be used to reconstruct an informative representation of the dataset which captures some
@@ -88,6 +103,7 @@ This representation is constructed "projecting" the samples on the LVs
 <hr>
 
 ~~Each projection will result in:~~
+
 * **Scores**: the representation of the samples in the LV space (_the new coordinates_)
 * **Loadings**: the "weight" of the original variables on the single LVs (_the recipe to construct the new variables from the measured ones)
 
@@ -156,7 +172,7 @@ The transformation is defined in such a way way that the first principal compone
 
 ## Dummy Dataset
 
-```{r fig.height=5, fig.width=5, out.width="60%", fig.align='center'}
+```{r fig.height=5, fig.width=5, out.width="50%", fig.align='center'}
 par(pty="s")
 mu1 <- c(-1,0)
 mu2 <- c(1,0)
@@ -172,7 +188,7 @@ plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "
 
 ## PCA of the dummy dataset {.smaller}
 
-```{r fig.height=5, fig.width=5, out.width="50%", fig.align='center'}
+```{r fig.height=5, fig.width=5, out.width="45%", fig.align='center'}
 par(pty="s")
 
 myPCA <- prcomp(x = dummy, center = TRUE)
@@ -359,7 +375,6 @@ cbind.data.frame(group = multigroup$group, dir1 = mytsne$Y[,1], dir2 = mytsne$Y[
 ```
  
  
-## Distance based approaches
 
 
 

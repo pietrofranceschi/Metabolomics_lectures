@@ -14,7 +14,7 @@ library(MASS)
 ```
 
 
-## Variable Scale
+## Variable Scale {.build}
 
 Metabolomics aims at measuring the concentration of :
 
@@ -27,9 +27,9 @@ Metabolomics aims at measuring the concentration of :
 
 ~~We typically are dealing with huge differences in signal across the different variables~~
 
-- potential issues in the reliability of some measurement
-- no direct effect on a univariate analysis 
-- strong effect on multivariate analysis 
+>- potential issues in the reliability of some measurement
+>- no direct effect on a univariate analysis 
+>- strong effect on multivariate analysis 
 
 ## Same data different scales
 
@@ -120,7 +120,8 @@ The overall metabolite concentration in one or more samples can be different fro
 ## Normalization strategies
 
 1. Use **chemical standards** to compensate for analytical issues
-2. Wisely plan (**randomize!**) your analytical sequence to avoid biases
+2. Quality controls!
+3. Wisely plan (**randomize!**) your analytical sequence to avoid biases
 
 <br>
 <hr>

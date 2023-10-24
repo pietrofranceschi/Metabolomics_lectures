@@ -30,7 +30,10 @@ a <- 10
 b <- sqrt(log(a+2)) ## this is a trivial nested function ...
 
 ## with pipes I could write the same as 
-b1 <- a %>% add(2) %>% log(.) %>% sqrt(.)
+b1 <- a %>% 
+  add(2) %>%   ## here I'm adding 2 to a
+  log(.) %>%   ### here I'm taking the log of a+2
+  sqrt(.)
 
 ## the "dot" represent what is coming from the pipe
 
@@ -131,8 +134,66 @@ To draw from different distributions:
 
 This is a brute force demonstration of the **central limit theorem**
 
+```{r}
+## We need a function to sample from the unigorm distribution
+
+data_uniform <- runif(50)
+
+```
 
 
+```{r}
+## here I'm creating the tibble which will contain the data
+my_samplings <- tibble(id = 1:100)
+
+## I want to add a column with the amplings
+
+my_samplings <- my_samplings %>% 
+  mutate(sampling = map(id, function(x) runif(50)))
+
+
+
+```
+
+
+Now we want to calculate the means of the independent samplings
+
+```{r}
+my_samplings <- my_samplings %>% 
+  mutate(means = map(sampling, function(x) mean(x)))
+```
+
+
+Let's now look to the distribution of the means ...
+
+
+```{r}
+hist(unlist(my_samplings$means))
+```
+
+Here we are seeing that even if the samplings are coming from a uniform distribution, their means are normally distributed
+
+
+As you may have noticed it was necessary to unlist the output of map ... thius is necessary because map will produce a list  ...
+
+To make this step more straightforward, in `purrr` there is a `map_dbl` function which will output a number for each row
+
+
+```{r}
+my_samplings <- my_samplings %>% 
+  mutate(means_1 = map_dbl(sampling, function(x) mean(x)))
+```
+
+
+With this you could also use directly ggplot
+
+
+```{r}
+my_samplings %>% 
+  ggplot() + 
+  geom_histogram(aes(x = means_1), fill= "darkred", col  ="white") + 
+  theme_bw()
+```
 
 
 
