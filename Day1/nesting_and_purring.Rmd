@@ -1,0 +1,225 @@
+---
+title: "Purring and nesting in R"
+author: "Pietro Franceschi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+##load libraries
+library(tidyverse)
+```
+
+
+The objective is to handle the iris dataset with the following tasks
+
+1) organize the data into a tibble
+2) transform them in order to have a column which contains the names of the variables
+3) make a series of boxplots of the data of the different properties and place them inside the tiible
+4) run a non parametric anova on the differnt properties and store the results in the table
+
+
+Let's get the data:
+
+```{r}
+data(iris)
+
+head(iris)
+```
+
+## Tranform it into a tiible
+
+```{r}
+iris <- as_tibble(iris)
+
+iris
+```
+
+The objective is to ananlyze the four physical measures of the flowers as a function of the specie
+
+
+First we need to transform the data from a "wide" form to a "long" form
+
+
+```{r}
+iris_long <- iris %>% 
+  pivot_longer(-Species)
+```
+
+
+LEt's now move to a table of tables
+
+
+```{r}
+iris_nest <- iris_long %>% 
+  nest(data = -name)
+
+
+iris_nest
+
+```
+
+Now my data are organized as a table of tables where the column data cointains the values and the "class" label for the different properties
+
+Let's add to the table a column which will contain the individual boxplots
+
+
+```{r}
+iris_nest <- iris_nest %>% 
+  mutate(plots = map(data, function(t) t %>% 
+                       ggplot() + 
+                       geom_boxplot(aes(x = Species, y = value))))
+```
+
+
+This is a very basic plot ... suppose you want to have something nicer, the way to go is to write a function which will take care of the plotting and map it over the data ... basically the only difference with what we have done so far is to write "dunction of t" as an external object.
+
+
+```{r}
+my_plot <- function(t){
+  t %>% 
+    ggplot() + 
+    #geom_boxplot(aes(x = Species, y = value, fill = Species), alpha = 0.5) +
+    geom_violin(aes(x = Species, y = value, fill = Species), alpha = 0.5) + 
+    geom_point(aes(x = Species, y = value, col = Species), 
+               position = position_jitter(width = 0.1), 
+               size = 2, alpha = 0.7) + 
+    scale_fill_brewer(palette = "Set1") + 
+    scale_color_brewer(palette = "Set1") + 
+    theme_bw()
+  
+}
+
+
+my_plot(iris_nest$data[[1]])
+
+```
+
+
+
+```{r}
+iris_nest <- iris_nest %>% 
+  mutate(plots = map(data,~ my_plot(.x) ))
+```
+
+
+Now we can see our data ... can we check if the values measured in the three classess are significantly different?
+
+
+What I want to tdo is to add a new column to my table which will contain the outcomes of a kruskall-wallis test of value against the class label
+
+
+```{r}
+iris_nest <- iris_nest %>% 
+  mutate(kw = map(data, ~ kruskal.test(value ~ Species, data = .x)))
+```
+
+
+Now my last task would be to extract the p.values
+
+
+```{r}
+iris_nest <- iris_nest %>% 
+  mutate(ps = map_dbl(kw, ~.x$p.value))
+```
+
+As I just told you, all this modeling and handling can be condensed in a few lines of code ...
+
+```{r}
+iris_nest <- iris_long %>% 
+  nest(data = -name) %>% 
+  mutate(plots = map(data,~ my_plot(.x))) %>% 
+  mutate(kw = map(data, ~ kruskal.test(value ~ Species, data = .x))) %>% 
+  mutate(ps = map_dbl(kw, ~.x$p.value))
+```
+
+
+
+## Now For you
+
+We did the kruskall wallis to check the dependence of the intensity from the class label.
+
+Could you try to see if Sepal Lenght, Petal Length and Petal Width are associated to Sepal Width? 
+
+The idea is now to have a linear model with Sepal Width as predictor and the other properties as response (If you are brave you can also add the Species as a categorical predictor and check its interaction with Sepal Width)
+
+
+
+
+
+
+## Making the output of a model prettier (tidy)
+
+
+As you have seen lms (glms, nlmes, ...) are returning outups which are not super nice in the tibble/table context
+
+
+There is a package that allows to make the process of extracting the coefficients and the p values of the model ``broom`
+
+
+Let's show it in action ...
+
+
+```{r}
+dummy_model <- lm(Petal.Width ~ Sepal.Width*Species, data = iris)
+
+summary(dummy_model)
+```
+
+This is really infomative, but for the type of application we are envisaging it would be better to have this stuff into a tibble ...
+
+
+```{r}
+library(broom)
+```
+
+
+and now ..
+
+```{r}
+tidy(dummy_model)
+```
+
+
+
+the function `tidy` allows me to format in a _tidyshape_ structure the result of my modeling
+
+
+Let's now try to combine thisd with the modeling you were doing ...
+
+```{r}
+
+iris %>% 
+  pivot_longer(-c("Sepal.Width","Species")) %>% 
+  nest(data = -(name)) %>% 
+  mutate(models = map(data, ~ lm(value ~ Sepal.Width*Species, data = .x))) %>% 
+  mutate(terms = map(models, ~tidy(.x))) %>% 
+  unnest(terms) %>% 
+  filter(p.value < 0.05) %>% 
+  arrange(desc(estimate))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

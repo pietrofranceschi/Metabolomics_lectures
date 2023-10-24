@@ -255,14 +255,14 @@ As it can be expected, progesterone is lower in males, and, most likely close to
 Let's now look to PGD2
 
 ```{r fig.height=3, fig.width=8}
-DM_nest$rawplots[[22]]
+DM_nest$rawplots$PGD2
 ```
 The trend of this metabolite is really wired. Its large fraction of missing values do not seems to be associated to the intensity of the signal
 
 
-As far as I can see (but you could check better ... ;-) ), the distribution of the missing data does not seems to be higly associated with the study factors. 
+As far as I can see (but you could check better ... ;-) ), the distribution of the missing data does not seems to be highly associated with the study factors. 
 
-Considering that we have 220 samples the level of missingness is never extremely severe, so when it will be needed imputation should not be something that strongly influence the 
+Considering that we have 220 samples the level of missingness is never extremely severe. 
 
 
 **Something For you**
