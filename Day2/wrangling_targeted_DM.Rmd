@@ -354,6 +354,26 @@ The situation largely improves, even if some compounds are still showing strange
 1. Could you look to the metabolites showing outlying behaviors? Is this a matter of genotype? 
 
 
+```{r}
+DM_nest$rawplots$`Taurodeoxycholic acid`
+```
+
+Get out the samples wiuth intensity higher than 2000
+
+
+```{r}
+names(DM_nest$data) <- DM_nest$CompoundName
+```
+
+```{r}
+critical_1 <- DM_nest$data$`Taurodeoxycholic acid` %>% 
+  filter(I > 1500) %>% 
+  pull(MouseID)
+
+critical_1
+```
+
+
 
 ## Multivariate Visualization - PCA
 
@@ -470,6 +490,16 @@ PC_12_scores %>%
   theme_bw() + 
   theme(aspect.ratio = 1)
 ```
+
+## Something for You
+
+Suppose that I'm reall yinterested in the comparison between Pipox and Null (wt) ...
+Could you make a PCA plot only of these classes of samples?
+
+
+
+
+
 
 So, at least in the PCA, no clear separation between the genotypes
 
