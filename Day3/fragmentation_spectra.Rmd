@@ -150,7 +150,7 @@ points(mz(focus_MS_MS[[2]])+2, intensity(focus_MS_MS[[2]])/max(intensity(focus_M
 points(mz(focus_MS_MS[[4]])-2, intensity(focus_MS_MS[[4]])/max(intensity(focus_MS_MS[[4]])), col = "blue", type = "h")
 ```
 
-So, as expected the three procyanidins are giving substantially the same fragmentation spectrum and are eluted at three different retention times.
+So, as expected the three procyanidins are giving substantially the same fragmentation spectrum and are eluting at three different retention times.
 
 ### DIY
 Try to check if these compounds are visible inside one of our wine samples. Hint, (1) check the extracted ion trace of the 577 ion (2) check if this ion was fragmented, (3)  

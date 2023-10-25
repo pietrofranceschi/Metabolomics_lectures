@@ -306,9 +306,26 @@ Ok, the plot is "ugly" (maybe creating a set of plots as we did before could hav
 * No sign of normal distribution
 * For some metabolites M and F are really different ... and for 12(13)Ep-9-KODE the trend is really interesting.
 
+Let's focus on it
+```{r}
+DM_nest %>% 
+  dplyr::select(CompoundName,data) %>% 
+  unnest(data) %>% 
+  filter(CompoundName == "12(13)Ep-9-KODE") %>% 
+  ggplot(aes(sample = I)) +
+  stat_qq(aes(col = Gender, shape = Zygosity)) + 
+  scale_shape_manual(values = c(19,3,1)) + 
+  scale_color_brewer(palette = "Set1") + 
+  stat_qq_line() + 
+  facet_wrap(~CompoundName, scales = "free_y", ncol = 5) +
+  theme_light() + 
+  theme(aspect.ratio = 1, 
+        legend.position = "bottom")
+```
+
 
 ```{r fig.height=3, fig.width=8}
-DM_nest$rawplots[[50]]
+DM_nest$rawplots$`12(13)Ep-9-KODE`
 ```
 
 The interpretation for that would, most likely require a chat with a good biochemist...
@@ -330,11 +347,11 @@ DM_nest %>%
         legend.position = "bottom")
 ```
 
-The situation largely improves, even if some compounds are still showing strange behaviours ...
+The situation largely improves, even if some compounds are still showing strange behaviors ...
 
 **Something For you**
 
-1. Could you look to the metabolites showing outlying behaviours? Is this a matter of genotype? 
+1. Could you look to the metabolites showing outlying behaviors? Is this a matter of genotype? 
 
 
 
