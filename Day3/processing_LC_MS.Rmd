@@ -121,7 +121,7 @@ b|a
 ## Get out your data
 
 * Metabolomics data are always stored in "formats" which are specifically developed by instrument vendors
-* In the case of MS data several open source standards are available (cdf, mzML, mzIML, ...)
+* In the case of MS data several open source standards are available (cdf, mzML, mzML, ...)
 
 [Proteowizard](https://proteowizard.sourceforge.io/)
 
@@ -185,7 +185,7 @@ include_graphics("../images/Total_ion_current.png")
 * correct for retention time shifts
 * identify [reliable]{style="color: red"} variables:
    * variance in QC should be smaller than in samples
-   * they should decrease during dilution
+   * their intensity should decrease during dilution
    *    ...
 * help in correcting for bath effects ...
 
