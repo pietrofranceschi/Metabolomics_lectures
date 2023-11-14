@@ -29,13 +29,13 @@ This process of matching is necessary to compensate:
 In general, the first phenomenon is less important than the second: when you buy a very expensive mass spectrometer, the instrument producer will do its best to keep *mass accuracy* as high as possible. On that dimension you, basically, do binning.
 Chromatographic stability, on the other, end is by far less easy to control.
 
-We start reading in the pick picked data
+We start reading in the pick picked data:
 
 ```{r}
 load("wines.RData")
 ```
 
-We already know that our dataset contains blank injections. They could be used to identify an exclusion list, but for now let's take them out
+We already know that our dataset contains blank injections. They could be used to identify an exclusion list, but for now let's take them out:
 
 
 ```{r}
@@ -59,12 +59,12 @@ chr_raw <- chromatogram(raw_data,
 
 The `include = "none"` argument is used to force xcms to read the raw data, the same function can indeed be used to extract the EIC only of the ions which show a chromatrographic peak in that interval. 
 
-Find the CP in the slice
+Find the CP in the slice:
 
 ```{r}
 sub_peaks <- chromPeaks(raw_data) %>% 
   as_tibble() %>% 
-  filter(between(mz,295.03,295.05)) %>% 
+  filter(between(mz, 295.03,295.05)) %>% 
   filter(between(rt, 230,270))
 ```
 
@@ -78,11 +78,11 @@ legend("topright", legend = c("red","white", "X"), col = group_colors, lty = 1)
 abline(v = sub_peaks$rt, col = "red", lty = 3)
 ```
 
-Here we have a tricky situation. The peaks are not aligned, even if the shift is really small, moreover this is actually a double feature, which is also potential biomarker for color and variety ... so we should go back to peak detection and play around ;-) to be able to identify the two peaks
+Here we have a tricky situation. The peaks are not aligned, even if the shift is really small, moreover this is actually a double feature, which is also potential biomarker for color and variety ... so we should go back to peak detection and play around ;-) to be able to identify the two peaks.
 
-Anyway, let's try to correct the rt shift. As usual in xcms this can be done in different ways, here we will use the most simple solution (a potentially more flexible one based on *dynamic time warping* is also available) 
+Anyway, let's try to correct the RT shift. As usual in xcms this can be done in different ways, here we will use the most simple solution (a potentially more flexible one based on *dynamic time warping* is also available). 
 
-What we will do is to apply this algorithm on the QCs and the extrapolate the estimated Rt correction on the samples. The rationale behind this choice is the following: samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in rt) with a retention time shift of analytical origin.
+What we will do is to apply this algorithm on the QCs and the extrapolate the estimated RT correction on the samples. The rationale behind this choice is the following: samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in RT) with a retention time shift of analytical origin.
 
 If I use QCs to do that the chemical nature of the samples is the same so every difference is coming from analytical drifts!
 
@@ -90,16 +90,16 @@ The idea behind retention time correction is quite simple:
 
 * match groups of chromatographic peaks present in all samples (called house keeping peak groups)
 * estimate a consensus retention time
-* extrapolate/interpolate the retention time on regions of the rt axes where the peaks are not present (either with a linear or a loess function)
+* extrapolate/interpolate the retention time on regions of the RT axes where the peaks are not present (either with a linear or a loess function)
 
 The first thing to do is to identify the house keeping groups:
 
 The parameters here are:
 
 - **sampleGroups**: some peak could be missing in some sample, so a house keeping group could include less peaks than samples. The way to control that is to identify groups of samples and consider as good groups only those detected in 
-  - **minFraction** of at least one group
+- **minFraction** of at least one group
 - **binSize** is the width of the m/z slices
-- **bw** a density estimator is used to find the "correct" position of the peak inalong the rt dimension. This is the bandwith in seconds of the density estimator
+- **bw** a density estimator is used to find the "correct" position of the peak inalong the RT dimension. This is the bandwith in seconds of the density estimator.
 
 
 ```{r}
@@ -111,7 +111,7 @@ raw_data <- groupChromPeaks(
                            bw = 3))  ## bandwidth of the density used to find the consensus position
 ```
 
-After this grouping, the retention time correction is performed working 
+After this grouping, the retention time correction is performed working: 
 
 
 ```{r}
@@ -119,10 +119,6 @@ raw_data <- adjustRtime(
   raw_data, 
   param = PeakGroupsParam(minFraction = 1,
                           subset = which(raw_data$variety == "QC"), span = 0.4))
-
-
-
-
 ```
 
 
@@ -131,11 +127,11 @@ plotAdjustedRtime(raw_data, col = group_colors[raw_data$color])
 ```
 
 So the retention time correction here really small, speaking of a remarkable analytical reproducibility. In general the reproducibility of the chromatography is considered good if the required shift is smaller than the typical chromatographic width. This is anyway a rule of thumb since everything is very much dependent on the analytical method.
-The black dots show the position of the housekeeping groups which were used to estimate the extent of retention time correction on the QCs
+The black dots show the position of the housekeeping groups which were used to estimate the extent of retention time correction on the QCs.
 
-After retention time correction is now time to move from *chromatographic peaks* to **features**. With this term we define a set of consensus groups of peaks which can be used reliably to measure the intensity of a given ion across all samples. If you look to the overall pre-processing from a distant perspective, what we have been basically doing is to try to compensate in a clever and intelligent way for mz inaccuracies and retention time shifts, and the core of the riddle is that  the samples are actually (and luckily different)
+After retention time correction is now time to move from *chromatographic peaks* to **features**. With this term we define a set of consensus groups of peaks which can be used reliably to measure the intensity of a given ion across all samples. If you look to the overall pre-processing from a distant perspective, what we have been basically doing is to try to compensate in a clever and intelligent way for mz inaccuracies and retention time shifts, and the core of the riddle is that  the samples are actually (and luckily different).
 
-Features are obtained by a further grouping of the chromatographic peaks after retention time correction
+Features are obtained by a further grouping of the chromatographic peaks after retention time correction:
 
 ```{r}
 raw_data <- groupChromPeaks(
@@ -163,14 +159,14 @@ The df is quite rich:
 * the subsequent columns are gicing you the same info split by sample group
 * peakidx contains the index of peaks which were assigned to this feature 
 
-Let's dig more on this. For example, can we visualize the position of the peaks assigned to FT005. The idx are the indexes of the row in the peak table
+Let's dig more on this. For example, can we visualize the position of the peaks assigned to FT005. The idx are the indexes of the row in the peak table:
 
 
 ```{r}
 idx_F005 <- features["FT005","peakidx"][[1]]
 ```
 
-Let's plot them across the retention time
+Let's plot them across the retention time:
 
 ```{r}
 chromPeaks(raw_data) %>% 
@@ -201,9 +197,7 @@ Recalling what we discussed in the lecture, NAs can be there for two main reason
 * a compound is below the detection limit in one or more samples. No compounds, no features, no party ...
 * our peak picking could have been mistaken somewhere
 
-NAs will be discussed in more details by Maria in the afternoon, here we can anticipate that the two previous processes will result in different type of missingness (either random or non random) ...
-
-Anyway, `xcms` implement a clever strategy to try to fix, at least partially, the NAs. The function `fillChromPeaks` will take care of going back to the raw files and integrate the signal possibly present in the mz/rt region of each feature. If the peak was there and was missed by chance this will basically recover the lost signal
+Anyway, `xcms` implement a clever strategy to try to fix, at least partially, the NAs. The function `fillChromPeaks` will take care of going back to the raw files and integrate the signal possibly present in the mz/rt region of each feature. If the peak was there and was missed by chance this will basically recover the lost signal.
 
 
 ```{r}
@@ -215,16 +209,15 @@ DM <- featureValues(raw_data_filled, value = "into")
 head(DM)
 ```
 
-The definition of each feature can be extracted with a specific function
+The definition of each feature can be extracted with a specific function:
 
 ```{r}
 feat <- featureDefinitions(raw_data_filled)
-
 feat
 ```
 
 
-The situation improved, but it is not yet perfect. Wait until the afternoon to see what else can be done.
+The situation improved, but it is not yet perfect. 
 
 We now save the output which will be used for the subsequent statistical analysis
 
@@ -233,25 +226,20 @@ save(DM,feat, file = "processed_wines_data.RData")
 ```
 
 
-
-
-
-
 ## Checking Feature chromatograms
 
-A typical thing one wants to at some point in the analysis is to check if the chromatographic peaks of a really interesting feature are really there ...
+A typical thing one wants to DO at some point in the analysis is to check if the chromatographic peaks of a really interesting feature are really there ...
 
-In order to do that xcms provides a really handy function
+In order to do that `xcms` provides a really handy function:
 
 ```{r}
 ft_chr1 <- featureChromatograms(raw_data, 
-                                features = 10, 
-                               expandRt = 15, 
-                               filled = FALSE)
+                                features = "FT005", 
+                                expandRt = 15, 
+                                filled = FALSE)
 ```
 
-Now we plot it highlighting the integrated areas and the class of the samples 
-
+Now we plot it highlighting the integrated areas and the class of the samples: 
 
 ```{r}
 sample_colors <- group_colors[raw_data$color]
@@ -285,13 +273,10 @@ Here we see:
 * **multi_count**: how many multiple peaks you have in the data?
 * **relative standard deviation** 
 
-This can be also split by sample class
+This can be also split by sample class:
 
 ```{r}
-
-sample_vs_qc <- ifelse(raw_data$color == "X","QC","S")
-
-
+sample_vs_qc <- ifelse(raw_data$variety == "QC","QC","S")
 
 featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
   as_tibble() %>% 
@@ -303,28 +288,3 @@ But ...
 
 * marker of variety can suffer of dilution effects on the pooled QC
 * variety specific QC! ... but then the number of injections explodes
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
