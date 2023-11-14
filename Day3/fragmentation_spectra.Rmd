@@ -34,13 +34,13 @@ The importance of having reliable and efficient databases of chemical standards 
 Let's suppose that having a library of standards in our lab, we injected them with the same chromatography used for the wines. 
 Among the other compounds, our library contains 3 types of procyanidins B1, B2, B3. They are rather large polyphenols widely present in many matrices of vegetal origin.
 
-Suppose that our analytical facility told us that they were analysed (with other compounds) in three injections
+Suppose that our analytical facility told us that they were analysed (with other compounds) in three injections:  
+  
+- B3: y015_mix02_2_NEG_DDA.mzML  
+- B2: y016_mix03_2_NEG_DDA.mzML  
+- B1: y017_mix04_2_NEG_DDA.mzML  
 
-B3: y015_mix02_2_NEG_DDA.mzML
-B2: y016_mix03_2_NEG_DDA.mzML
-B1: y017_mix04_2_NEG_DDA.mzML
-
-we also know that in negative ion mode all these three molecules, will mainly yield the [M-H]- ion in negative ion mode MS (m/z 577.1352).
+We also know that in negative ion mode all these three molecules, will mainly yield the [M-H]- ion in negative ion mode MS (m/z 577.1352).
 
 Our task now is to confirm (or not) the presence of the three of them in the wine samples. Let's start with B1 ...
 

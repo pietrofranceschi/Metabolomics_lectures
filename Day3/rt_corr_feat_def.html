@@ -690,25 +690,19 @@ signal.</p>
 <pre class="r"><code>raw_data_filled &lt;- fillChromPeaks(raw_data)</code></pre>
 <pre><code>## Defining peak areas for filling-in .... OK
 ## Start integrating peak areas from original files
+## Requesting 146 peaks from x029_X_QC_X_6_NEG_DDA.mzML ... got 144.
+## 
+## Requesting 291 peaks from x012_wht_moscat_A_1_NEG_DDA.mzML ... got 154.
+## Requesting 281 peaks from x013_wht_ptgrig_C_1_NEG_DDA.mzML ... got 153.
+## Requesting 144 peaks from x015_X_QC_X_3_NEG_DDA.mzML ... got 140.
+## Requesting 151 peaks from x016_X_QC_X_4_NEG_DDA.mzML ... got 149.
+## Requesting 308 peaks from x017_wht_ptgrig_B_1_NEG_DDA.mzML ... got 186.
+## 
 ## Requesting 144 peaks from x002_X_QC_X_1_NEG_DDA.mzML ... got 139.
 ## Requesting 133 peaks from x003_X_QC_X_2_NEG_DDA.mzML ... got 133.
 ## Requesting 240 peaks from x004_red_sangio_B_1_NEG_DDA.mzML ... got 203.
 ## Requesting 325 peaks from x005_red_ptnoir_A_1_NEG_DDA.mzML ... got 236.
 ## Requesting 201 peaks from x006_red_merlot_A_1_NEG_DDA.mzML ... got 173.
-## 
-## Requesting 296 peaks from x007_wht_vermen_A_1_NEG_DDA.mzML ... got 190.
-## Requesting 234 peaks from x008_red_cannon_A_1_NEG_DDA.mzML ... got 201.
-## Requesting 292 peaks from x009_wht_chardo_B_1_NEG_DDA.mzML ... got 181.
-## Requesting 264 peaks from x010_wht_chardo_A_1_NEG_DDA.mzML ... got 144.
-## Requesting 376 peaks from x011_red_lagrei_B_1_NEG_DDA.mzML ... got 208.
-## 
-## Requesting 257 peaks from x023_wht_ptgrig_A_1_NEG_DDA.mzML ... got 147.
-## Requesting 323 peaks from x024_red_sangio_A_1_NEG_DDA.mzML ... got 239.
-## Requesting 368 peaks from x025_red_lagrei_A_1_NEG_DDA.mzML ... got 193.
-## Requesting 242 peaks from x026_wht_chardo_C_1_NEG_DDA.mzML ... got 147.
-## Requesting 130 peaks from x028_X_QC_X_5_NEG_DDA.mzML ... got 123.
-## 
-## Requesting 146 peaks from x029_X_QC_X_6_NEG_DDA.mzML ... got 144.
 ## 
 ## Requesting 230 peaks from x018_red_ptnoir_B_1_NEG_DDA.mzML ... got 192.
 ## Requesting 316 peaks from x019_wht_sauvig_A_1_NEG_DDA.mzML ... got 204.
@@ -716,11 +710,17 @@ signal.</p>
 ## Requesting 240 peaks from x021_red_merlot_B_1_NEG_DDA.mzML ... got 207.
 ## Requesting 234 peaks from x022_red_frappa_A_1_NEG_DDA.mzML ... got 189.
 ## 
-## Requesting 291 peaks from x012_wht_moscat_A_1_NEG_DDA.mzML ... got 154.
-## Requesting 281 peaks from x013_wht_ptgrig_C_1_NEG_DDA.mzML ... got 153.
-## Requesting 144 peaks from x015_X_QC_X_3_NEG_DDA.mzML ... got 140.
-## Requesting 151 peaks from x016_X_QC_X_4_NEG_DDA.mzML ... got 149.
-## Requesting 308 peaks from x017_wht_ptgrig_B_1_NEG_DDA.mzML ... got 186.</code></pre>
+## Requesting 257 peaks from x023_wht_ptgrig_A_1_NEG_DDA.mzML ... got 147.
+## Requesting 323 peaks from x024_red_sangio_A_1_NEG_DDA.mzML ... got 239.
+## Requesting 368 peaks from x025_red_lagrei_A_1_NEG_DDA.mzML ... got 193.
+## Requesting 242 peaks from x026_wht_chardo_C_1_NEG_DDA.mzML ... got 147.
+## Requesting 130 peaks from x028_X_QC_X_5_NEG_DDA.mzML ... got 123.
+## 
+## Requesting 296 peaks from x007_wht_vermen_A_1_NEG_DDA.mzML ... got 190.
+## Requesting 234 peaks from x008_red_cannon_A_1_NEG_DDA.mzML ... got 201.
+## Requesting 292 peaks from x009_wht_chardo_B_1_NEG_DDA.mzML ... got 181.
+## Requesting 264 peaks from x010_wht_chardo_A_1_NEG_DDA.mzML ... got 144.
+## Requesting 376 peaks from x011_red_lagrei_B_1_NEG_DDA.mzML ... got 208.</code></pre>
 <pre class="r"><code>DM &lt;- featureValues(raw_data_filled, value = &quot;into&quot;) 
 head(DM)</code></pre>
 <pre><code>##       x002_X_QC_X_1_NEG_DDA.mzML x003_X_QC_X_2_NEG_DDA.mzML
@@ -847,8 +847,8 @@ feat</code></pre>
 ## FT734         7         0         6  356,1075,1791,...         1</code></pre>
 <p>The situation improved, but it is not yet perfect.</p>
 <p>We now save the output which will be used for the subsequent
-statistical analysis</p>
-<pre class="r"><code>save(DM,feat, file = &quot;processed_wines_data.RData&quot;)</code></pre>
+statistical analysis and compound annotation:</p>
+<pre class="r"><code>save(raw_data_filled, DM, feat, file = &quot;processed_wines_data.RData&quot;)</code></pre>
 </div>
 <div id="checking-feature-chromatograms" class="section level2">
 <h2>Checking Feature chromatograms</h2>

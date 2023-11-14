@@ -219,10 +219,10 @@ feat
 
 The situation improved, but it is not yet perfect. 
 
-We now save the output which will be used for the subsequent statistical analysis
+We now save the output which will be used for the subsequent statistical analysis and compound annotation:
 
 ```{r}
-save(DM,feat, file = "processed_wines_data.RData")
+save(raw_data_filled, DM, feat, file = "processed_wines_data.RData")
 ```
 
 
