@@ -71,8 +71,8 @@ A full description of the parameters of the algorithm can be found in the [`xcms
 In xcms the parameters of the algorithm are stored into a specific object:
 
 ```{r}
-mf <- MatchedFilterParam(binSize = 0.1, 
-                         fwhm = 6, 
+mf <- MatchedFilterParam(binSize = 0.1,   ## in Daltons m/z
+                         fwhm = 6,        ## in seconds
                          snthresh = 5) 
 mf
 ```
