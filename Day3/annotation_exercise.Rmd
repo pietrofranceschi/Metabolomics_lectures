@@ -1,0 +1,285 @@
+---
+title: "Annotation"
+author: "Mar Garcia-Aloy, Pietro Franceschi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(MetaboCoreUtils)
+library(xcms)
+library(MetaboAnnotation)
+library(RColorBrewer)
+library(plotly)
+```
+
+## Introduction
+
+The objective of this demo is to perform compound annotation based on an in-house database created with the information gathered from the injection of a series of authentic standards under the same analytical protocol.  
+For that we will use the file from "mix 2", which contain the following compounds:  
+
+- Malvidine-3,5-diglucoside, C29H35O17+  
+- Quercitrin-3-rhamnoside, C21H20O11  
+- Laricitrin, C16H12O8
+- Quercetin-3-galactoside, C21H20O12  
+- o-Coumaric acid, C9H8O3  
+- Gallic acid, C7H6O5
+- Procyanidin B3, C30H26O12  
+- Procyanidin A2, C30H24O12
+
+
+## Create the in-house library
+
+The first step is to create our library with the information of the standards.  
+For that, we're going to create a reference database with the m/z values corresponding to [M-H]- ion, which is the most common adduct usually we see with our analytical setup.
+
+```{r}
+stds_tb <- data.frame(
+  rbind(
+    c("Malvidine-3,5-diglucoside", "C29H34O17"),  
+    c("Quercitrin-3-rhamnoside", "C21H20O11"),
+    c("Laricitrin", "C16H12O8"),
+    c("Quercetin-3-galactoside", "C21H20O12"),
+    c("o-Coumaric acid", "C9H8O3"),
+    c("Gallic acid", "C7H6O5"),
+    c("Procyanidin B3", "C30H26O12"),
+    c("Procyanidin A2", "C30H24O12"))
+)
+colnames(stds_tb) <- c("name", "formula")
+```
+
+To calculate masses and m/z values we are going to use different functions included in the package [`MetaboCoreUtils`](https://bioconductor.org/packages/release/bioc/html/MetaboCoreUtils.html):  
+
+```{r}
+stds_tb$mass <- calculateMass(stds_tb$formula)
+stds_tb$mz <- as.numeric(mass2mz(stds_tb$mass, "[M-H]-"))
+stds_tb
+```
+
+Ok, here we have the table with the theoretical m/z values that should be found in our sample considering the compounds included in it.  
+
+Next step is to determine their retention times. For that, now we are going to do chromatographic peak detection in the file from the injection that contains the mentioned analytical standards.  
+
+```{r}
+# Import the file
+std_files <- list.files("../data/wines/", pattern = "mix02", full.names = TRUE)
+std_raw <- readMSData(std_files, 
+                      msLevel. = 1, ## we read only MS1 
+                      mode = "onDisk")
+# Perform peak picking:
+cwp <- CentWaveParam(peakwidth = c(5, 30),    ## expected range of chromatographic peak width
+                     ppm = 5,                 ## tolerance to identify ROIs in the mz/rt plane
+                     prefilter = c(5, 50000),## number of consecutive scans showing a signal higher than 50000
+                     noise = 5000)   
+register(SerialParam()) ## Setting xcms in serial mode
+std_cw <- findChromPeaks(std_raw, param = cwp)
+```
+
+In total `r nrow(chromPeaks(std_cw))` chromatographic peaks have been identified. This is even more than would be expected since the sample represents a mixture of 8 pure standards.... Do you have any idea that could explain the reason(s) why a number of peaks much greater than the number of compounds contained in this sample has been detected?  
+
+Below we display some of the detected chromatographic peaks:  
+
+```{r}
+std_pks <- chromPeaks(std_cw)
+head(std_pks)
+```
+
+We next annotate these chromatographic peaks using only their m/z values. 
+For doing this we are going to use a series of functions included in the [`MetaboAnnotation`](https://bioconductor.org/packages/release/bioc/html/MetaboAnnotation.html).
+To annotate the detected peaks we use the function `matchMz` against the reference database we've just created:  
+
+```{r}
+pks_match <- matchMz(
+  std_pks, stds_tb, param = MzParam(ppm = 10)
+)
+pks_match
+```
+
+The result object handles the potential many-to-many matching between chromatographic peaks (*query*) and reference (*target*) and contains all information from both the query and the target object along with the score for the match (in this case the difference between the m/z values).   
+For example, here we can see that from the `r nrow(stds_tb)` reference compounds, 7 were found among the detected chromatographic peaks.    
+We can extract the full matching table with the function `matchedData`. This returns a table with all queries (i.e., chromatographic peaks) in the rows and the corresponding matches indicated in the columns which names start with "target_". Note that if a row in query (i.e., chromatographic peak) matches multiple elements in target (i.e., reference database), this row will be duplicated in the returned table. For rows that can not be matched NA values are reported.
+
+```{r}
+tb_match <- matchedData(pks_match)
+tb_match
+```
+
+As we can see, not all chromatographic peaks were annotated, whereas in other cases multiple chromatographic peaks were assigned to the same compound.  
+Let's subset this data only with annotated chromatographic peaks:
+
+```{r}
+tb_match <- tb_match[!is.na(tb_match$target_name),]
+tb_match
+```
+
+Column "score" provides the difference between the query and target m/z values (in Da) and "ppm_error" the ppm error.  
+As you can see, gallic acid was annotated twice, whereas malvidine-3,5-diglucoside was not detected. The second case was something already expected since usually anthocyanins do not ionizate so well in negative ion mode. Regarding gallic acid, we are going to consider the one with the highest intensity.  
+
+```{r}
+dupl <- which(duplicated(tb_match$target_name))
+idx <- which(tb_match$target_name == tb_match$target_name[dupl])
+tb_match <- rbind(tb_match[-idx,],
+                  tb_match[idx[which.max(tb_match$maxo[idx])],])
+```
+
+At this point we can expand our reference database with the retention time information for each analytical standard:
+
+```{r}
+stds_tb$RT <- NA
+for(i in seq(nrow(stds_tb))){
+  idx <- which(tb_match$target_name == stds_tb$name[i])
+  if(length(idx) > 0){
+    stds_tb$RT[i] <- tb_match$rt[idx]
+  }
+}
+stds_tb
+```
+
+Finally, below we are going to check if in this injection any MSMS spectra for the included standards was recorded:  
+
+```{r}
+# load MSMS data:
+std_MSMS <- readMSData(std_files, 
+                       msLevel. = 2, ## we read only MS1 
+                       mode = "onDisk")
+# create a query data.frame of MSMS data:
+std_MSMS_tb <- data.frame(
+  mz = precursorMz(std_MSMS),
+  rtime = rtime(std_MSMS)
+)
+# perform annoation based on precursorMz values:
+MSMS_match <- matchMz(
+  std_MSMS_tb, stds_tb, param = MzParam(ppm = 10)
+)
+MSMS_match
+MSMS_match_tb <- matchedData(MSMS_match)
+MSMS_match_tb <- MSMS_match_tb[!is.na(MSMS_match_tb$target_name),]
+MSMS_match_tb
+```
+
+We can see that in this sample it was recorded the MSMS of 3 of the included analytical standards. Let's keep this information because later it will be useful to compare these MSMS with the ones collected in the wine samples in case these compounds are found in them (in order to confirm their annotation with a higher confidence).
+
+```{r}
+std_MSMS <- std_MSMS[featureNames(std_MSMS) %in% rownames(MSMS_match_tb)]
+```
+
+
+## Annotation of study samples
+
+At this point we are ready to see if any of the compounds included in the "mix 2" are observed in the study samples.  
+
+Below we load the processed data:
+
+```{r}
+load("processed_wines_data.RData")
+head(feat)
+```
+
+We can now annotate the detected features using our reference table considering this time the information of both RT and m/z by the use of the functions `matchValues` and `MzRtParam`.
+
+```{r}
+ft_match <- matchValues(
+  feat, stds_tb, param = MzRtParam(ppm = 10, toleranceRt = 5),
+  mzColname = c("mzmed", "mz"),
+  rtColname  = c("rtmed", "RT")
+)
+ft_match
+```
+
+We can see that 4/8 compounds included in the standard mix 2 are observed in  wine samples. Let's see which compounds are they:
+
+```{r}
+tb_match <- matchedData(ft_match)
+tb_match <- tb_match[!is.na(tb_match$target_name),]
+tb_match
+```
+
+We can see that considering both m/z and RT values, gallic acid, laricitrin, quercetin-3-galactoside and procyanidin B3 are observed in the wine samples.  
+Below we plot the feature of gallic acid in study samples, indicating with a vertical line the RT determined by the injection of the corresponding analytical standard:
+
+```{r}
+ft_chr <- featureChromatograms(raw_data_filled, 
+                               features = "FT168", 
+                               expandRt = 15, 
+                               filled = FALSE)
+group_colors <- paste0(brewer.pal(3, "Set1"), "60")
+names(group_colors) <- c("red","wht","X")
+sample_colors <- group_colors[raw_data_filled$color]
+plot(ft_chr, col = group_colors[raw_data_filled$color],
+     peakBg = sample_colors[chromPeaks(ft_chr)[, "sample"]])
+abline(v = stds_tb$RT[stds_tb$name == "Gallic acid"], lwd = 10, col = "#D2D2D290")
+```
+
+Finally, let's compare the MSMS pattern of gallic acid observed in the analtyical standard with the MSMS of this feature recorded within the study samples:
+
+```{r}
+# get the MSMS of the standard:
+ga_MSMS <- std_MSMS[[which(featureNames(std_MSMS) == rownames(MSMS_match_tb)[MSMS_match_tb$target_name == "Gallic acid"])]]
+
+# get all MSMS in study samples with the m/z and RT of gallic acid:
+MSMS_data <- readMSData(
+  files = raw_data_filled$filepath, 
+  msLevel. = 2,
+  mode = "onDisk") 
+ga_MSMS_data <- MSMS_data %>%
+  filterPrecursorMz(169.0142, ppm = 10) %>%
+  filterRt(92.5 + 5 * c(-1, 1))
+ga_MSMS_data
+```
+
+Within study samples there are a total of 10 spectras with a precursor m/z value and RT similar to the one observed for gallic acid.  
+Below we compare through a mirror plot the MSMS observed in study samples (upper plot) versus the MSMS observe in the analytical standard (bottomp lot, red color):  
+
+```{r}
+ggplotly(ggplot() +
+           geom_segment(aes(x = mz(ga_MSMS), xend = mz(ga_MSMS), 
+                            y = 0, yend = (intensity(ga_MSMS)/max(intensity(ga_MSMS)))*(-1)), 
+                        color = "red") +
+           geom_segment(aes(x = mz(ga_MSMS_data)[[1]], xend = mz(ga_MSMS_data)[[1]], 
+                            y = 0, yend = intensity(ga_MSMS_data)[[1]]/max(intensity(ga_MSMS_data)[[1]]))) +
+           ylab("relative intensity") + xlab("m/z") +
+           annotate(geom = "text", x = 160, y = 0.8, cex = 3, 
+                    label = ga_MSMS_data@phenoData@data[ga_MSMS_data[[1]]@fromFile, 1]) +
+           annotate(geom = "text", x = 160, y = -0.8, cex = 3, 
+                    label = basename(fileNames(std_MSMS)[ga_MSMS@fromFile]), color = "red")
+)
+```
+
+
+### DIY
+
+* Check the peak shapes of the other annotated features.  
+* Compare the MSMS of the other annotated features for which at least one MSMS spectra from standards was recorded.    
+* Annotate other compounds based on the standards included in mix 03 and/or mix 04:  
+  - MIX 03:  
+    - Petunidine-3-glucoside, C22H23O12+  
+    - Malvidine, C17H15O7+  
+    - Cyanidin-3,5-diglucoside, C27H31O16+  
+    - Syringetin-3-glucoside, C23H24O13  
+    - Quercetin-3-o-glucopyranoside, C21H20O12  
+    - Kaempferol, C15H10O6  
+    - Myricetin, C15H10O8  
+    - Cinnamic acid, C9H8O2  
+    - Benzoic acid, C7H6O2  
+    - Ellagic acid, C14H6O8  
+    - (+)Catechin, C15H14O6  
+    - Procyanidin B2, C30H26O12  
+    - Malvidine-3,5-diglucoside, C29H35O17+  
+    - Epigallocatechine, C15H14O7  
+  
+   
+  - MIX 04:  
+    - Kaempferol-3-glucoside, C21H20O11  
+    - p-Coumaric acid, C9H8O3  
+    - 2,4-Dihidroxibenzoic acid, C7H6O4  
+    - Caffeic acid ethylester, C11H12O4  
+    - (-)Catechin-3-O-gallate, C22H18O10  
+    - Epigallocatechine gallate, C22H18O11  
+    - (-)Gallocatechin, C15H14O7  
+    - Isorhamnetin-3-rutinoside, C28H32O16  
+    - Procyanidin B1, C30H26O12  
+

@@ -121,7 +121,7 @@ b|a
 ## Get out your data
 
 * Metabolomics data are always stored in "formats" which are specifically developed by instrument vendors
-* In the case of MS data several open source standards are available (cdf, mzML, mzIML, ...)
+* In the case of MS data several open source standards are available (cdf, mzML, mzML, ...)
 
 [Proteowizard](https://proteowizard.sourceforge.io/)
 
@@ -185,7 +185,7 @@ include_graphics("../images/Total_ion_current.png")
 * correct for retention time shifts
 * identify [reliable]{style="color: red"} variables:
    * variance in QC should be smaller than in samples
-   * they should decrease during dilution
+   * their intensity should decrease during dilution
    *    ...
 * help in correcting for bath effects ...
 
@@ -303,7 +303,7 @@ include_graphics("../images/RStudio.png")
 ## ... Just a recap
 
 1.  We converted the data files in an open source format (here mzML)
-2.  We optimized the peak picking parameters working on a representative sample (Qc)
+2.  We optimized the peak picking parameters working on a representative sample (QC)
 3.  We have been running peak picking on the full set of samples
 4.  We have been saving the output somewhere, just to avoid re-starting from scratch ;-)
 
@@ -311,8 +311,8 @@ include_graphics("../images/RStudio.png")
 
 We have to merge the lists of [chromatographic peaks]{style="color: red"} into a consensus list of [ features peaks]{style="color: red"}, which will be the columns of our data matrix
 
-* *chromatographich peaks* what was detected in the individual samples (mz,rt,intensity)
-* *features* consensus variables which are *grouping* several peaks coming from the different injections (mz,rt, intensity)
+* *chromatographich peaks* what was detected in the individual samples (mz, rt, intensity)
+* *features* consensus variables which are *grouping* several peaks coming from the different injections (mz, rt, intensity)
 
 ## Grouping - Correspondence {.flexbox .vcenter}
 

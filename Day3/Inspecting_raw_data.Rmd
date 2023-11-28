@@ -34,13 +34,13 @@ In the last years a huge effort has been made to set up a full `xcms` centric ec
 
 ## The Data
 
-For our demo we will use a subset of a dataset on wines which have been recently acquired at the Fondazione E. Mach in Italy (many thanks to Dr. Mar Garcia Aloy). The dataset has been designed for training purposes and includes MS and DDA (MS2 e MS3) (in positive and negative polarity) acquisition of a 20 wines with the following characteristics:
+For our demo we will use a subset of a dataset on wines which have been recently acquired at the Fondazione E. Mach in Italy. The dataset has been designed for training purposes and includes MS and DDA (MS2 e MS3) (in positive and negative polarity) acquisition of a 20 wines with the following characteristics:
 
-* two colors: red(10), white(10)
+* 2 colors: red (n=10), white (n=10)
 * 12 varieties
 
 
-The acquisition sequences included blanks, pooled QC and samples. Al data were acquired with a UPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
+The acquisition sequences included blanks, pooled QC and samples. Al data were acquired with a HPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
 
 
 ## Reading one injection
@@ -67,7 +67,7 @@ We see ...
 * something called `phenoData`. More on that later!
 * something called `featureDatra`. More on that later!
 * the length of the LC method was 12 minutes
-* during this time 1638 spectra were collected
+* during this time `r length(raw_one)` spectra were collected
 
 
 It is important that along the process one can be able to visualize the raw data, so let's give a look to the structure of the R object we created.
@@ -158,7 +158,6 @@ ggplotly(tibble(rt = rt, mz = mz, I = I)  %>%
   geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
   scale_color_viridis_c() + 
   theme_light())
-
 ```
 
 We need to find the spectrum number which is close to 250 seconds ...
@@ -227,7 +226,7 @@ plot(chr_raw_2)
 Here we see a clear difference between the two traces, looking to the names we see that one datafile is a QC, while the second is one injection of a white wine (`wht`)... food for brains !  ;-)
 
 
-**Note** The previous plot shows a typical characteristics of Orbitrap (and in general FT) instruments: the signal off peaks is almost invariably zero. As we will see this can be a problem in presence of missing data, since no "real" noise can be integrated there.
+**Note** The previous plot shows a typical characteristic of Orbitrap (and in general FT) instruments: the signal off peaks is almost invariably zero. As we will see this can be a problem in presence of missing data, since no "real" noise can be integrated there.
 
 
 ## DIY
@@ -236,26 +235,3 @@ Here we see a clear difference between the two traces, looking to the names we s
 * Look how the quality of the mass spectrum is changing across one chromatographic peak (Advanced)
 * If you look to the map, can you say why the signal with high intensity are organized in vertical groups?
 * The trace around 289 seems to show two horizontal peaks. What does it mean? Can you interpret that?
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
