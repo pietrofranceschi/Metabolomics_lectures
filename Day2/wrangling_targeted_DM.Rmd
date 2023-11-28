@@ -497,20 +497,8 @@ Suppose that I'm reall yinterested in the comparison between Pipox and Null (wt)
 Could you make a PCA plot only of these classes of samples?
 
 
-```{r}
-DM_i_small <- DM_i %>% 
-  left_join(sample_meta_data %>% select(MouseID, Genotype, Gender)) %>% 
-  filter(Genotype %in% c("Null","Pipox"))
-```
 
 
-```{r}
-PCA_small <- DM_i_small %>% 
-  select(starts_with("CPD")) %>% 
-  PCA(., graph = FALSE) 
-
-fviz_pca_ind(PCA_small, geom = "point", habillage = factor(DM_i_small$Gender))
-```
 
 
 So, at least in the PCA, no clear separation between the genotypes
@@ -640,7 +628,7 @@ DM_i_nest <- DM_i_nest %>%
 since we have potentially false positive it is always a good idea to look to the distribution of the p-values
 
 ```{r}
-hist(DM_i_nest$ps, breaks = 15)
+hist(DM_i_nest$ps, breaks = 20)
 ```
 
 We see a clear enrichment of the "low" p values. One could ask what would be the distribution of the p-values if there would be no difference between males and females.
@@ -683,6 +671,7 @@ Let's stick to Cohen's d. In the same time I'll also calculate the p-values corr
 library(effsize)
 
 DM_i_nest <- DM_i_nest %>%  
+  mutate(pcorr = p.adjust(ps, method = "BH")) %>%    ## here I'm calculating the corrected p-values
   mutate(cohend = map_dbl(data, ~cohen.d(I ~ Gender, data = .x)$estimate))  ## here I'm calculating the effect size
 ```
 
@@ -705,7 +694,7 @@ Now we focus on the compound which are significant at the 0.01 level and we sort
 
 ```{r}
 markers <- DM_i_nest %>% 
-  filter(ps < 0.01) %>% 
+  filter(pcorr < 0.01) %>% 
   arrange(desc(abs(cohend))) %>% 
   left_join(metabolite_meta)
 
@@ -716,7 +705,7 @@ head(markers)
 This is the list of "biomarkers", let's plot one of them ...
 
 ```{r fig.height=3, fig.width=8}
-DM_nest$rawplots$`11,12-EpETrE`
+DM_nest$rawplots[[54]]
 ```
 Which exactly shows what we expect.
 
