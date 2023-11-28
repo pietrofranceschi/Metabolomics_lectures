@@ -1,0 +1,71 @@
+---
+title: "PCA Wines"
+author: "Pietro Franceschi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(FactoMineR)
+library(factoextra)
+library(tidyverse)
+```
+
+
+```{r}
+DM <- read_csv("data/wines.csv")
+```
+
+
+```{r}
+summary(DM)
+```
+
+
+```{r}
+DM %>% 
+  ggplot() + 
+  geom_point(aes(x = vintages, y = flavonoids, col = vintages), position = position_jitter(width = 0.1))
+```
+
+
+
+Proviamo a fare una PCA
+
+```{r}
+myPCA <- PCA(DM %>% select(-vintages) %>% log10(.), 
+             scale.unit = TRUE, graph = FALSE)
+```
+
+
+
+```{r}
+fviz_pca_ind(myPCA, habillage = factor(DM$vintages), geom = "point")
+```
+
+
+```{r}
+summary(myPCA)
+```
+
+
+
+
+
+```{r}
+fviz_pca_var(myPCA)
+```
+
+
+```{r}
+fviz_pca_biplot(myPCA, habillage = factor(DM$vintages), geom = "point", axes = c(1,3))
+```
+```{r}
+fviz_eig(myPCA)
+```
+

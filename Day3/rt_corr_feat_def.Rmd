@@ -278,9 +278,11 @@ This can be also split by sample class:
 ```{r}
 sample_vs_qc <- ifelse(raw_data$variety == "QC","QC","S")
 
-featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
+pp <- featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
   as_tibble() %>% 
   arrange(desc(QC_rsd))
+
+pp
 ```
 
 This useful to filter features with higher variability in the QC (more than in the samples).

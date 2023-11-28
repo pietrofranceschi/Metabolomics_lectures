@@ -30,13 +30,13 @@ text(3,5, cex = 1.5, expression(X[ij]))
 ```
 
 
-The element $X_{ij}$ contains the value of variable `j` in the sample `i`
+The element X[i,j] contains the value of variable `j` in the sample `i`
 
 ## Key ides {#notes}
 
 > 1. Each sample is a point in the _n_ dimensional space of the measured variables.
 > 2. The measured variables are often redundant
-> 3. To "see" what happens in the large space a clever idea is to **project** the samples in alower dimensional space
+> 3. To "see" what happens in the large space a clever idea is to ~~PROJECT~~ the samples in a lower dimensional space
 > 4. Projection will always show us a part of the reality
 > 5. There is always an ~~error~~ associated to a projection
 
@@ -107,9 +107,9 @@ This representation is constructed "projecting" the samples on the LVs
 * **Scores**: the representation of the samples in the LV space (_the new coordinates_)
 * **Loadings**: the "weight" of the original variables on the single LVs (_the recipe to construct the new variables from the measured ones)
 
-## Dummy Dataset
+## Dummy Dataset {.smaller}
 
-```{r fig.height=5, fig.width=5, out.width="60%", fig.align='center'}
+```{r fig.height=5, fig.width=5, out.width="50%", fig.align='center'}
 par(pty="s")
 mu1 <- c(-1,0)
 mu2 <- c(1,0)
@@ -375,6 +375,11 @@ cbind.data.frame(group = multigroup$group, dir1 = mytsne$Y[,1], dir2 = mytsne$Y[
 ```
  
  
+## Notes {#notes}
+
+* Complex methods can be attractive but they could be misleading
+* Methods will hardly work when the number of samples is too small!
+* Complex does not necessarily mean more powerful
 
 
 
