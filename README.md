@@ -47,7 +47,6 @@ The material (which is growing!) covers: the following topics:
 * Practical: Retention time correction and feature definition [html](Day3/rt_corr_feat_def.html), [Rmd](Day3/rt_corr_feat_def.Rmd)
 * Practical: Fragmentation Spectra [html](Day3/fragmentation_spectra.html), [Rmd](Day3/fragmentation_spectra.Rmd)
 * [Some words on annotation](Day3/annotation.html)
-* Practical: Compound Annotation [html](Day3/annotation_exercise.html), [Rmd](Day3/annotation_exercise.Rmd)  
 * [SW resources for preprocessing](Day3/software_resources_for_preprocessing.html)
 
 

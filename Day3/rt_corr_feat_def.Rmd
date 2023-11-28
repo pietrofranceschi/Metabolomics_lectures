@@ -23,8 +23,8 @@ The next step in the process is now to "match" these list of peaks in a consensu
 
 This process of matching is necessary to compensate:
 
-* measurement error in the m/z dimension
-* retention time shifts
+* measurement error in the m/z dimension (the instrument accuracy!)
+* retention time shifts (in general for LC ms this is the dimension with more problems ...)
 
 In general, the first phenomenon is less important than the second: when you buy a very expensive mass spectrometer, the instrument producer will do its best to keep *mass accuracy* as high as possible. On that dimension you, basically, do binning.
 Chromatographic stability, on the other, end is by far less easy to control.
@@ -256,6 +256,7 @@ That can be used to spot problems of integration, and, also, if a biomarker is r
 * If you go back to the feature tables, you will see that in some cases the number of peaks assigned to a features can be larger than the number of samples. How can this be? Try look to the extracted ion traces and understand what happens (ADVANCED)
 
 
+
 ## Feature Quality Assessment
 
 As we stressed along the full lecture, the best way to validate the outcomes of your analysis is to go back to the raw data and inspect the extracted ion traces. However it would be useful to get an overall feedback on "quality" of each feature. 
@@ -278,8 +279,13 @@ This can be also split by sample class:
 ```{r}
 sample_vs_qc <- ifelse(raw_data$variety == "QC","QC","S")
 
+<<<<<<< HEAD
 pp <- featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
   as_tibble() %>% 
+=======
+featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
+  as_tibble(rownames = "FeatureID") %>% 
+>>>>>>> 4e5c1e62efc8200454df50e28d8ecd45208097bf
   arrange(desc(QC_rsd))
 
 pp
@@ -290,3 +296,47 @@ But ...
 
 * marker of variety can suffer of dilution effects on the pooled QC
 * variety specific QC! ... but then the number of injections explodes
+
+
+
+
+## PCA
+
+
+```{r}
+DM1 <- DM %>% 
+  t(.) %>% 
+  as_tibble(rownames = "fname") %>% 
+  left_join(pData(raw_data)) %>% 
+  mutate(across(starts_with("FT"), ~ myimputer(.x)))
+```
+
+
+Let's try the PCA ...
+
+
+```{r}
+library(factoextra)
+library(FactoMineR)
+```
+
+
+```{r}
+myPCA <- PCA(DM %>% 
+               dplyr::select(starts_with("FT")), 
+             graph = FALSE, scale.unit = FALSE   ## to avoid factmineR producing a plot by default
+             )
+```
+
+
+```{r}
+
+library(plotly)
+
+fviz_pca_ind(myPCA, 
+             habillage = factor(raw_data$color), ## factor which will be used to color the dots
+             # geom = "point", 
+             pointsize = 2,
+             axes = c(1,2)) + 
+  scale_color_brewer(palette = "Set1")
+

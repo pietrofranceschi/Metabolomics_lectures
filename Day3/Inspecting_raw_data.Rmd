@@ -152,13 +152,24 @@ This is an alternative 2D visualization of the ion map
 ```{r}
 ggplotly(tibble(rt = rt, mz = mz, I = I)  %>% 
   unnest(c("mz","I")) %>%
-  filter(mz > 284 & mz < 300) %>% 
-  filter(rt > 200 & rt < 300) %>% 
+  filter(between(mz,280,310)) %>% 
+  filter(between(rt,200,300)) %>% 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
   scale_color_viridis_c() + 
   theme_light())
 ```
+
+We need to find the spectrum number which is close to 250 seconds ...
+
+
+```{r}
+ggplotly(fs_raw[[193]] %>% plot())
+```
+
+
+
+
 
 
 As we have discussed in the presentation, the different metabolites present in the sample will show-up as peaks in their ion chromatograms, basically because when more molecule of a specific type are reaching the ionization source, more ions associated to that molecule are produced.
@@ -168,7 +179,7 @@ The previous map shows that the ion around m/z 295.0445 could show an interestin
 ```{r}
 # extract the chromatogram
 chr_raw <- chromatogram(fs_raw, 
-                        mz = 295.0445 + 0.01*c(-1, 1), 
+                        mz = 289.07 + 0.01*c(-1, 1), 
                         rt = 250 + 60*c(-1, 1))
 
 chr_raw
