@@ -17,6 +17,328 @@ library(tidyverse)
 ```
 
 
+<<<<<<< HEAD
+=======
+## Multivariate data - the Data Matrix
+
+```{r fig.height=5, fig.width=5, out.width="60%", fig.align='center'}
+par(pty="s")
+plot(1:10,1:10, type = "n", xaxt='n', ann=FALSE, yaxt='n')
+mtext("Variables", side=3)
+mtext("Samples", side=2)
+arrows(3,1,3,4.5, length = 0.1, lwd = 2, col = "darkred")
+arrows(3,10,3,5.5, length = 0.1, lwd = 2, col = "darkred")
+arrows(1,5,2.5,5, length = 0.1, lwd = 2, col = "darkred")
+arrows(10,5,3.5,5, length = 0.1, lwd = 2, col = "darkred")
+text(3,5, cex = 1.5, expression(X[ij]))
+
+```
+
+
+The element $X_{ij}$ contains the value of variable `j` in the sample `i`
+
+## Key ides {#notes}
+
+> 1. Each sample is a point in the _n_ dimensional space of the measured variables.
+> 2. The measured variables are often redundant
+> 3. To "see" what happens in the large space a clever idea is to **project** the samples in alower dimensional space
+> 4. Projection will always show us a part of the reality
+> 5. There is always an ~~error~~ associated to a projection
+
+
+## Intrinsec Dimensionality
+
+In presence of correlation among the variables, the samples actually occupy only a "fraction" of the potential
+multidimensional space. Here a projection is highly informative
+
+<hr>
+
+```{r fig.width=8, fig.height=4, out.width="100%", fig.align='center'}
+library(plot3D)
+par(mfrow = c(1,3))
+scatter3D(runif(50), runif(50), runif(50), colvar = NULL, col = "#4682B480", pch = 19, main = "Intrinsic dim = 3", cex = 2)
+t <- seq(1,10,0.3)
+xl <- t+rnorm(length(t), sd = 0.3)
+yl <- t+rnorm(length(t), sd = 0.3)
+zl <- t+rnorm(length(t), sd = 0.3)
+scatter3D(xl, yl, zl, colvar = NULL, col = "#4682B480", pch = 19, main = "Intrinsic dim = 1", 
+          xlim = c(-3,10), ylim = c(-3,10), theta = 5, phi = 20, cex = 2)
+
+xp <- runif(50,0,10)
+yp <- runif(50,0,10)
+zp <- -xp-yp+1 + rnorm(length(xp), sd = 0.1)
+scatter3D(xp, yp, zp, colvar = NULL, col = "#4682B480", pch = 19, main = "Intrinsic dim = 2", theta = 50, cex = 2, phi = 30)
+
+```
+
+## Latent Variable
+
+~~Mathematical combination of several variables~~ 
+
+Projecting the data along **specific latent variables**, we highlight some desired property of the data. In a more broad sense, the latent variables can also be seen as the mathematical representation of the ~~hidden rules~~ which determine the sample behavior
+
+<hr>
+
+> 1. Separation of sample classes (e.g. LDA)
+> 2. Prediction of sample properties (e.g. PLS)
+> 3. Good representation of the multidimensional data structure (e.g PCA, PCoA)
+
+
+## Food for brains
+
+```{r, echo=FALSE, fig.align='center', out.width="50%"}
+include_graphics("../images/brain.jpg")
+```
+
+<br>
+
+* Some relevant "characteristics" of a system cannot be measures or are difficult to be defined (e.g. health, intelligence)
+* In this sense they are *latent*
+* We can measure several properties associated with them (e.g. for intelligence, math score, QI tests, school grades, ... ecc)
+* The latent variable "model" is exactly trying to formalize this ides
+
+
+ 
+## LVs and Projections
+A set of latent variable can be used to reconstruct an informative representation of the dataset which captures some
+relevant multidimensional aspects of the data.
+
+This representation is constructed "projecting" the samples on the LVs
+
+<hr>
+
+~~Each projection will result in:~~
+
+* **Scores**: the representation of the samples in the LV space (_the new coordinates_)
+* **Loadings**: the "weight" of the original variables on the single LVs (_the recipe to construct the new variables from the measured ones)
+
+## Dummy Dataset
+
+```{r fig.height=5, fig.width=5, out.width="60%", fig.align='center'}
+par(pty="s")
+mu1 <- c(-1,0)
+mu2 <- c(1,0)
+sigma <- matrix(c(0.1,0, 0, 2), 2)  # Covariance matrix
+dummy <- rbind(mvrnorm(20, mu = mu1, Sigma = sigma),
+              mvrnorm(20, mu = mu2, Sigma = sigma))
+
+plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-3,3))
+```
+
+> What LV will maximize the separation between the two groups? 
+> Can you guess something about the loadings?
+
+## LV for class discrimination (LDA) {.smaller}
+
+```{r fig.height=5, fig.width=5, out.width="50%", fig.align='center'}
+par(pty="s")
+grouping <- rep(c(1,2), each = 20)
+myLDA <- lda(x = dummy, grouping = grouping)
+s <- seq(-10,10,0.5)
+ldadirection <- myLDA$scaling[,1]/sqrt(sum(myLDA$scaling[,1]^2))
+
+
+projections <-ldadirection %*% t(dummy)
+
+
+
+plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), 
+     xlab = "Var a", ylab = "Var b", 
+     xlim = c(-3,3), ylim = c(-3,3))
+lines(s*myLDA$scaling[1,1], s*myLDA$scaling[2,1], col = "red", lwd = 2)
+points(projections*ldadirection[1], projections*ldadirection[2], col = rep(c("#4682B4","#8B0000"), each = 20), pch = 4, cex = 2)
+
+```
+
+* The red line represents the direction of maximal separation between the two classes
+* The crosses are the **scores** along this direction 
+
+## Loadings for class discrimination
+
+The loadings represent the weight of the initial variables along the discriminating direction
+
+* `Var a`: `r ldadirection[1]`
+* `Var b`: `r ldadirection[2]`
+
+## Principal Component Analysis (PCA) {.smaller}
+
+The aim of PCA is dimension reduction and PCA is the most frequently applied method for computing linear latent variables
+(components). 
+
+The transformation is defined in such a way way that the first principal component has the **largest possible variance** (that is, accounts for as much of the variability in the data as possible), and each succeeding component in turn has the highest variance possible under the constraint that it is **orthogonal** to the preceding components.
+
+* In PCA the “objective” of the projection is to maximize variance (spread of the point cloud)
+* PCA “view” will enhance the spread of the data
+* The key idea is that **variability means information** 
+
+## Animation!
+
+[PCA Animation](http://setosa.io/ev/principal-component-analysis/)
+
+## Dummy Dataset
+
+```{r fig.height=5, fig.width=5, out.width="50%", fig.align='center'}
+par(pty="s")
+mu1 <- c(-1,0)
+mu2 <- c(1,0)
+sigma <- matrix(c(0.1,0, 0, 2), 2)  # Covariance matrix
+dummy <- rbind(mvrnorm(20, mu = mu1, Sigma = sigma),
+              mvrnorm(20, mu = mu2, Sigma = sigma))
+
+
+plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-3,3))
+```
+
+> What LV will highlight the direction of maximal variance?
+
+## PCA of the dummy dataset {.smaller}
+
+```{r fig.height=5, fig.width=5, out.width="45%", fig.align='center'}
+par(pty="s")
+
+myPCA <- prcomp(x = dummy, center = TRUE)
+s <- seq(-10,10,0.5)
+pcadirection <- myPCA$rotation[,1]/sqrt(sum(myPCA$rotation[,1]^2))
+
+
+pcaprojections <-pcadirection %*% t(dummy)
+
+plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), 
+     xlab = "Var a", ylab = "Var b", 
+     xlim = c(-3,3), ylim = c(-3,3))
+lines(s*myPCA$rotation[1,1], s*myPCA$rotation[2,1], col = "red", lwd = 2)
+points(pcaprojections*pcadirection[1], pcaprojections*pcadirection[2], col = rep(c("#4682B4","#8B0000"), each = 20), pch = 4, cex = 2)
+
+```
+
+* The red line represents the direction of maximal variance (bad separation!)
+* The crosses are the **scores** along this direction 
+
+## Loadings for PC1
+
+The loadings represent the weight of the initial variables along PC1
+
+* `Var a`: `r abs(pcadirection[1])`
+* `Var b`: `r abs(pcadirection[2])`
+
+## LDA and PCA {#notes}
+
+* The latent variable are different!
+* They try to highlight different aspect of the data
+* PCA does not known anything about the groups (technically is _unsupervised_)
+
+
+## PCA uses
+
+* Visualization of multivariate data by scatter plots
+* Transformation of highly correlating x-variables into a smaller set of uncorrelated latent variables that can be used by other methods
+* Separation of relevant information (described by a few latent variables) from noise
+* Combination of several variables that characterize a chemical-technological-biological process into a single or a few "characteristic" variables
+* Make the “latent properties” actually measurable
+
+## Scaling and centering {.smaller}
+
+```{r fig.height=6, fig.width=8, fig.align='center', out.width="60%"}
+par(pty="s", mfrow = c(1,2))
+
+# Simulate bivariate normal data
+mu <- c(5,6)                         # Mean
+Sigma <- matrix(c(2,2, 2, 5), 2)  # Covariance matrix
+# > Sigma
+# [,1] [,2]
+# [1,]  1.0  0.1
+# [2,]  0.1  1.0
+ 
+# Generate sample from N(mu, Sigma)
+bivn <- mvrnorm(100, mu = mu, Sigma = Sigma )
+
+
+## non mean centered and non scaled
+myPCA1 <- prcomp(x = bivn)
+s <- seq(-15,15,0.5)
+pca1direction <- myPCA1$rotation[,1]/sqrt(sum(myPCA1$rotation[,1]^2))
+pca1projections <-pca1direction %*% t(bivn)
+
+
+## mean centered and scaled
+myPCA2 <- prcomp(x = scale(bivn))
+pca2direction <- myPCA2$rotation[,1]/sqrt(sum(myPCA2$rotation[,1]^2))
+pca2projections <-pca2direction %*% t(scale(bivn))
+
+plot(bivn, pch = 19, col = "#4682B480", xlab = "Var a", ylab = "Var b", xlim = c(-10,10), ylim = c(-10,10), main = "Raw")
+lines(s*myPCA1$rotation[1,1], s*myPCA1$rotation[2,1], col = "red", lwd = 2)
+points(pca1projections*pca1direction[1], pca1projections*pca1direction[2], col = "#8B0000", pch = 1)
+abline(v = 0, lty = 2)
+abline(h = 0, lty = 2)
+
+plot(scale(bivn), pch = 19, col = "#4682B480", xlab = "Var a", ylab = "Var b", xlim = c(-10,10), ylim = c(-10,10), main = "Scaled and Centered")
+lines(s*myPCA2$rotation[1,1], s*myPCA2$rotation[2,1], col = "red", lwd = 2)
+points(pca2projections*pca2direction[1], pca2projections*pca2direction[2], col = "#8B0000", pch = 1)
+abline(v = 0, lty = 2)
+abline(h = 0, lty = 2)
+
+
+```
+
+* To point in the direction of maximum variance the data ~~have to be centered~~
+* The spread of the projection depends on the scaling
+
+## Outliers
+
+```{r fig.height=6, fig.width=8, fig.align='center'}
+par(pty="s", mfrow = c(1,2))
+
+bivn_out <- rbind(bivn,c(30,-30),c(25,-25))
+
+
+## non mean centered and non scaled
+myPCA3 <- prcomp(x = scale(bivn_out))
+s <- seq(-15,15,0.5)
+pca3direction <- myPCA3$rotation[,1]/sqrt(sum(myPCA3$rotation[,1]^2))
+pca3projections <-pca3direction %*% t(scale(bivn_out))
+
+
+plot(scale(bivn), pch = 19, col = "#4682B480", xlab = "Var a", ylab = "Var b", xlim = c(-10,10), ylim = c(-10,10), main = "Scaled and Centered")
+lines(s*myPCA2$rotation[1,1], s*myPCA2$rotation[2,1], col = "red", lwd = 2)
+points(pca2projections*pca2direction[1], pca2projections*pca2direction[2], col = "#8B0000", pch = 1)
+abline(v = 0, lty = 2)
+abline(h = 0, lty = 2)
+
+plot(scale(bivn_out), pch = 19, col = "#4682B480", xlab = "Var a", ylab = "Var b", xlim = c(-10,10), ylim = c(-10,10), main = "Outliers!")
+lines(s*myPCA3$rotation[1,1], s*myPCA3$rotation[2,1], col = "red", lwd = 2)
+points(pca3projections*pca3direction[1], pca3projections*pca3direction[2], col = "#8B0000", pch = 1)
+abline(v = 0, lty = 2)
+abline(h = 0, lty = 2)
+
+
+```
+
+## Notes {#notes}
+
+* Sensitivity to outliers is useful if PCA is used to spot them ;-)
+* *robust* versions of PCA are available to keep all data in
+* PCA show the big “structure” of my data and this can help in interpretation
+* PCA will change if you add points !!!
+* The loadings are not always easy to interpret
+
+## A projection can be non flat ... 
+
+ * All the projection methods discussed so far are based on *linear algebra* 
+ * Projection subspaces are then **flat** (lines, planes, hyperplanes, ...)
+ * Flat projections could fail to capture the overall structure of the dataset
+ * The challenge would be to ~~capture at the same time the large scale and small scale structure~~ of the data.
+ 
+ 
+ 
+## Possible appraoches {#notes}
+
+* t-SNE
+* UMAP
+
+
+## 10 normal groups, 3D | PCA
+ 
+>>>>>>> parent of dff4180 (update)
 ```{r}
 DM <- read_csv("data/wines.csv")
 ```
@@ -25,6 +347,7 @@ DM <- read_csv("data/wines.csv")
 ```{r}
 summary(DM)
 ```
+<<<<<<< HEAD
 
 
 ```{r}
@@ -52,6 +375,10 @@ fviz_pca_ind(myPCA, habillage = factor(DM$vintages), geom = "point")
 ```{r}
 summary(myPCA)
 ```
+=======
+ 
+ 
+>>>>>>> parent of dff4180 (update)
 
 
 

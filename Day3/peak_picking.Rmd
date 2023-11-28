@@ -66,7 +66,7 @@ The "older" and most sounding way of finding peaks implemented in `xcms` is the 
 
 A full description of the parameters of the algorithm can be found in the [`xcms` manual](https://bioconductor.org/packages/release/bioc/manuals/xcms/man/xcms.pdf), here we focus on:
 
-* **rbinSize:** the "width" of the bins used to extract the ionic traces where we look for peaks
+* **binSize:** the "width" of the bins used to extract the ionic traces where we look for peaks
 * **fwhm:** the "expected" width of the peak in the chromatographic direction
 * **snthresh:** the signal-to-noise threshold used to say: "yeah, this is a peak and not a bump in the noise" 
 

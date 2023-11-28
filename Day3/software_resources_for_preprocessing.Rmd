@@ -62,9 +62,9 @@ PhenoMeNal (Phenome and Metabolome aNalysis) is a comprehensive and standardised
 ## Human Friendly Open Solutions
 
 ### MZmine
-MZmine 3 is an open-source software for mass-spectrometry data processing, with the main focus on LC-MS data.
+MZmine 2 is an open-source software for mass-spectrometry data processing, with the main focus on LC-MS data.
 
-[`MZmine3`](https://mzmine.github.io/)
+[`MZmine2`](http://mzmine.github.io/)
 
 ## MS-Dial
 MS-DIAL was launched as a universal program for untargeted metabolomics that supports multiple instruments (GC/MS, GC/MS/MS, LC/MS, and LC/MS/MS) and MS vendors (Agilent, Bruker, LECO, Sciex, Shimadzu, Thermo, and Waters)
