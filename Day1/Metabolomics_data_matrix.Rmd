@@ -120,7 +120,20 @@ rect(xleft = 0.3, xright = 0.31, ybottom = -0.1, ytop = 1.1, border = "steelblue
 rect(xleft = 0.7, xright = 0.71, ybottom = -0.1, ytop = 1.1, border = "steelblue", lwd = 2)
 ```
 
-## Multivariate Approach
+## Multiple testing
+
+* We measure many variables (features,metabolites) in the same set of samples
+* We run a battery of statistical tests looking for the significance of what we see in the individual variables 
+* **We ask ourselves if at least one variable is significant in the overall set of variables**
+
+<br>
+<hr>
+
+~~We run individual tests, but we have question about the full set of variables ...~~
+
+
+
+## Multivariate approach
 
 Each samples is represented as a point in the multidimesional variable space. The dataset is a **cloud** of points in that space.
 

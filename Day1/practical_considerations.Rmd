@@ -84,13 +84,20 @@ tibble(order = 1:14,
 * Also the design of the sequence can be validated
 
 
+## Other relevant points of discussion
+
+* Standards and blanks
+* Analytical batches and batch effect
+* Randomization, analytical batches and large studies in clinical settings 
+
+
 ## DDA and Fragmentation
 
 ```{r out.width="100%", fig.align="center"}
 include_graphics("../images/tandemMS.jpg")
 ```
 
-Experiment combining full scan and fragmentation experiment are quite popular, because fragmentation patterns are needed for metabolite annotation
+Experiment combining full scan and fragmentation experiment are quite popular, because fragmentation patterns are needed for metabolite annotation and for setting-up quantitative methods
 
 
 ## Use wisely your time

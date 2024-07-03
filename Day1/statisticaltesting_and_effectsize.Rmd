@@ -22,7 +22,7 @@ Is what I’m observing **true beyond my sample**. Can I draw general conclusion
 
 <hr>
 
-In presence of variability, there will be always the possibility that what I observe in my data cannot be generalized at the population level.
+In presence of variability, there will  always be the possibility that what I observe in my data cannot be generalized at the population level.
 
 * measure more sample
 * validate
@@ -42,7 +42,11 @@ include_graphics("../images/varianceadditivity.png")
 ## Sampling Distribution
 
 * We are always dealing with a group of "individuals" extracted from an unknown population: a **Sample**
-* Fro each sample we calculate summary **statistics**, typically the **mean**
+* From each sample we calculate summary **statistics**, typically the **mean**
+* And we ask ourselves isomething significant happens to the mean (e.g. are the two meand different?)
+
+<br>
+
 * ~~The distribution of the sample means is always normally distributed~~
 * The width of the distribution of the sample mean decreases as the sample size increases
 
@@ -54,11 +58,11 @@ samplings <- tibble(samp = paste0("s",1:500)) %>%
   mutate(means = map_dbl(samp, ~mean(sample(twopop,20))))
 
 par(mfrow = c(1,2))
-hist(twopop, breaks = 30)
+hist(twopop, breaks = 30, border = "white", col = "gray60", xlab = "var")
 abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
 abline(v = mean(twopop), col = "green")
 
-hist(samplings$means, col = "steelblue", main = "Histrogram of the sample means", breaks  = 15, xlim = c(0,25))
+hist(samplings$means, col = "steelblue", main = "Histrogram of the sample means", breaks  = 15, xlim = c(0,25), border = "white", xlab = "var")
 abline(v = mean(twopop), col = "green")
 
 
@@ -78,9 +82,11 @@ tibble(samp = paste0("s",1:500)) %>%
   mutate(name = factor(name, levels = c("s5","s10","s50"))) %>% 
   ggplot() + 
   geom_histogram(aes(x = value, fill = name), col  ="white") + 
+  geom_vline(xintercept = mean(twopop), col = "red", lty = 2) + 
+  xlab("var") + 
   facet_wrap(~name, nrow = 1) + 
   theme_light() + 
-  theme(aspect.ratio = 1)
+  theme(aspect.ratio = 1, legend.position = "none")
 
 ```
 
@@ -104,14 +110,14 @@ Statistical testing is a procedure which allows us to quantify this level of con
 * Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
 * We claim that a new secret drug reduces significantly the cholesterol level in the population
 * To prove that we get a sample of 50 people, we treat them with the drug and we measure their average cholesterol level.  This mean turns out to be 193.
-* Is this pilot study supporting my claim?
+* Is this pilot study supporting my claim ? i.e. is the difference between 193 and 200 significant?
 
 ## Let's test that!
 
-1. Suppose that the drug has no effect (H0), so my 50 people are a random drawing from the population
-2. Calculate the distribution of the mean level of cholesterol in groups of 50 people (mind the gap! ... it is not the distribution of cholesterol in the population!)
-3. Calculate the probability of obtaining at least the observed value from this distribution (*p-value*)
-4. Reject the H0 if the p-value is lower than the selected threshold
+1. Suppose that the drug has no effect (H0) ... but then my 50 people are a random drawing from the population
+2. Calculate the distribution of the mean level of cholesterol in groups of 50 people coming from the population.(mind the gap! ... this is not the distribution of cholesterol in the population!)
+3. Calculate the probability of obtaining less than 193 from this distribution (*p-value*)
+4. Reject the H0 if the p-value is lower than the selected threshold (typically 0.05)
 
 ## Let's plot it!
 
@@ -128,7 +134,7 @@ mycols <- rep("#C8081570",100)
 mycols[means50 < 193] <- "#377eb870"
 
 plot(x = 1:100, means50, ylim = c(150, 250), pch = 19, col = mycols, 
-     ylab = "mean of 50 individuals", xlab = "Replicated sampling from theoretical population")
+     ylab = "mean of 50 individuals", xlab = "Replicated sampling from the population")
 abline(h = 193, col = "steelblue", lty = 2)
 abline(h = 200, col = "darkred")
 
@@ -136,8 +142,11 @@ abline(h = 200, col = "darkred")
 
 ## What we see
 
+* The means of the different groups are different
 * The distribution of the means is nicely centered around the population mean!
 * The blue line represents the mean of my sample 50 people (193!)
+* The blue dots are "random" draws from the population which show an average level of cholesterol lower than the one we observed
+* For blue dots we observe less than 193 by chance
 * Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (p = 0.14 !)
 * I cannot reject H0 at the 0.05 level ...
 
@@ -159,7 +168,7 @@ but they are significant at the 0.15 level!
 
 ## More samples! {.smaller}
 
-I'm stubborn ... We redo the same study with a test group of 500 people ...
+I'm stubborn, so I'm convinced that the drug is really working. We redo the same study with a test group of 500 people and we observe another time an average level of 193
 
 ```{r out.width="70%", fig.align='center'}
 means50 <- rep(0,50)
@@ -179,7 +188,7 @@ abline(h = 200, col = "darkred")
 
 ```
 
-Magic! Now it is significant at the 0.05!  No more blue dots, so it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect
+Magic! Now it is significant at the 0.05!  No more blue dots! So it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect
 
 
 ## Take home messages
@@ -234,7 +243,7 @@ text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000",
 
 * Is a reduction of 0.01% really useful/relevant?
 * Big number of samples will make tiny differences statistically significant!
-* Statistical significance does not mean biological/agronomic relevance
+* Statistical significance does not mean biological/agronomic/medical relevance
 * The *p-value* alone cannot be used to judge the relevance of a research ...
 
 
@@ -395,6 +404,6 @@ x %>%
 
 * With three samples variability is large
 * Also the possibility of calling non significant the difference is large
-* the effect size does not tell to me if something is biologically/ecologically relevant
+* The effect size does not tell to me if something is relevant
 
 

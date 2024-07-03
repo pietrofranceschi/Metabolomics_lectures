@@ -1,7 +1,7 @@
 # Metabolomics Lectures
 
 This repository contains material for a full metabolomics course ideally organized in four days.
-The material (which is growing!) covers: the following topics:
+The material (which is growing!) covers the following topics:
 
 * General Introduction to metabolomics and study design
 * General analytical considerations

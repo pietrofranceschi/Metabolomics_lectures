@@ -40,8 +40,14 @@ The chemical diversity results in different properties which would require diffe
 ### 3 - Huge differences in ~~concentrations~~
 Some of the metabolite are present in high concentration, while other highly relevant compounds are present only in small traces. Our analytical method should be able to ~~see them at the same time~~
 
+
+## Challenges of Metabolomics cont ...{.smaller .build}
+
 ### 4. - ~~Coverage~~
 The chemical diversity makes extremely difficult to have only **one** analytical method able to analyze everything
+
+### 5. - ~~Pre analytics~~
+The approach is so sensitive that every un reproducible pre-analytical issue will affect the data
 
 ## How Metabolomics
 
@@ -109,10 +115,18 @@ Even with the perfect instrument the "numbers" will change. Try measuring your t
 ### 2 - Chromatographic drifts
 When chromatographic separation is present, elution times will slightly change from run to run. For GC the situation is better, but far from being perfect
 
+
+
+## Sources of Analytical Variability {.smaller}
+
 ### 3 - Matrix effects
 In metabolomics we are loading on the instruments a complex mixture of chemicals. This complex chemical environment will affect the _response_ of the molecules in an often unpredictable way. The importance of this effect is so strong in MS that this technique is almost always coupled with chromatography
 
-With chromatography the differnt molecules reach the ionization source at different times, reducing the matrix effect
+With chromatography the different molecules reach the ionization source at different times, reducing the matrix effect.
+
+### 4 - Sample handling
+The approach is so powerful that all aspect related to sample handling/storage/extraction will affect the final result 
+
 
 ## NMR vs LC/GC MS {.build}
 
@@ -138,11 +152,15 @@ We use the analytical method of choice to analyze a selected set of metabolites.
 
 ~~The measured variables are metabolites~~
 
+The numbers we collect is the concentration of the individual metabolites
+
 
 ### Untargeted
 We "throw" a raw extract in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown. 
 
 ~~The measured variables are **not** metabolites~~
+
+The numbers we get are the peak areas of the individual features
 
 
 ## Why targeted, why untargeted {.smaller .build }
@@ -190,7 +208,7 @@ include_graphics("../images/annotation.png")
 
 ## Annotation in Untargeted Metabolomics
 
-As you have already understood, in untargeted metabolomics
+As you have already understood, in untargeted metabolomics:
 
 - We do not measure the concentration of metabolites
 - If I have the metabolite is easier to understand what are the signals we actually measure (ions, NMR peaks, features)
@@ -204,7 +222,7 @@ _~~Most likely, chemical annotation is the current bottleneck in untargeted meta
 > * In house db of standards
 > * On-line db of standards
 > * Chemoinformatics
-> * ML (prediction of chemical structures from spectra )
+> * ML (prediction of chemical structures from spectra)
 
 
 ## Sampling and sample handling {.build}
@@ -229,6 +247,14 @@ _e.g. how to sample in a representative way in GC? How to quench the metabolism 
 
 1. Hypothesis generation
 2. Validation
+
+## Domain Specific Validation
+
+Are my results fitting inside the established (domain specific) body of knowledge?
+
+
+_e.g. Are my markers reasonable under the light of the human metabolism?_
+
 
 ## Key Elements to design a succesfull metabolomics investigation {.build .smaller}
 
