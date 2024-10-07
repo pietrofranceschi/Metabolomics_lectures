@@ -39,14 +39,11 @@ include_graphics("../images/varianceadditivity.png")
 ```
 
 
-## Sampling Distribution
+## Sampling Distribution {.smaller}
 
 * We are always dealing with a group of "individuals" extracted from an unknown population: a **Sample**
 * From each sample we calculate summary **statistics**, typically the **mean**
-* And we ask ourselves isomething significant happens to the mean (e.g. are the two meand different?)
-
-<br>
-
+* And we ask ourselves something significant happens to the mean (e.g. are the two means different?)
 * ~~The distribution of the sample means is always normally distributed~~
 * The width of the distribution of the sample mean decreases as the sample size increases
 
