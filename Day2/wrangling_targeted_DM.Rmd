@@ -97,6 +97,8 @@ DM <- DM %>%
   as_tibble(rownames = "Sampname") %>% 
   separate(Sampname, c("One","MouseID"),"_") %>% ## split the column
   dplyr::select(-One) 
+
+DM
   
 ```
 
@@ -149,7 +151,7 @@ For example, the number of NAs in relation of the median intensity can be visual
 
 ```{r}
 DM_nest %>% 
-  mutate(nnas = map_dbl(data,function(p) sum(is.na(p$I))),                  ## calculate the univariate statistics "on the fly"
+  mutate(nnas = map_dbl(data,function(p) sum(is.na(p$I))),      ## calculate the univariate statistics "on the fly"
          medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
   filter(nnas > 0) %>% ## we keep only features with at least one NA!
   ggplot() +   ## plot them
@@ -247,7 +249,7 @@ Now I can visualize (or save) the plot I want ...
 
 This one, in particular show the trend of one of the features with a large fraction of NAs
 ```{r fig.height=3, fig.width=8}
-DM_nest$rawplots[[5]]
+DM_nest$rawplots$progesterone
 ```
 
 As it can be expected, progesterone is lower in males, and, most likely close to the detection limit. It is worth remarking that progesterone was the steroid showing the lower intensity. Its behavior is then not odd.
@@ -441,7 +443,7 @@ library(factoextra)
 myPCA <- PCA(DM_i %>% 
                column_to_rownames("MouseID") %>% 
                dplyr::select(starts_with("CPD")), 
-             graph = FALSE, scale.unit = FALSE   ## to avoid factmineR producing a plot by default
+             graph = FALSE, scale.unit = TRUE   ## to avoid factmineR producing a plot by default
              )
 ```
 
@@ -460,6 +462,13 @@ fviz_pca_ind(myPCA,
 Even if the amount of variability captured in this representation is only the 30%, the previous plot shows the presence of a separation between males and females.
 
 It would be nice to have a similar plot highlighting the role of the different genetic backgrounds, but we do not have enough colors to put everything in the same plot. 
+
+
+```{r}
+facto_summarize(myPCA, "var", axes = 2, result = "contrib") %>% 
+  arrange(desc(contrib))
+```
+
 
 
 
@@ -495,9 +504,6 @@ PC_12_scores %>%
 
 Suppose that I'm reall yinterested in the comparison between Pipox and Null (wt) ...
 Could you make a PCA plot only of these classes of samples?
-
-
-
 
 
 

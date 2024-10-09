@@ -12,8 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r message=FALSE, warning=FALSE}
 library(xcms)
+library(MsExperiment)
 library(tidyverse)
 library(plotly)
+library(Spectra)
 ```
 
 ## Introduction
@@ -48,10 +50,9 @@ The acquisition sequences included blanks, pooled QC and samples. Al data were a
 To understand how the data behaves, let's start reading in the data coming from one injection
 
 ```{r}
-raw_one <- readMSData(
-  files = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
-  msLevel. = c(1,2), ## we read only MS1 and MS2
-  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+
+raw_one <- readMsExperiment(
+  spectraFiles = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML", mode = "ondisk")  
 ```
 
 
@@ -82,8 +83,8 @@ rtime(raw_one)[1:20]
 The variable names should be read as "F(ile)x.S(can)000y". Since we are dealing with a DDA experiment, the data contains a combination of full scan and fragmentation spectra, so each one of the previous Scans should show either the full family of ions coming from the source, or what is produced by fragmenting a specific **precursor**
 
 ```{r}
-## this gives the type of the corresponding 10 scans
-msLevel(raw_one)[1:10]
+## this gives the type of experiment of the 
+msLevel(spectra(raw_one))[1:10]
 ```
 
 As you see, they are interleaved. 
@@ -104,8 +105,8 @@ We already now how the `rt` will look like, but what about `mz` and `intensity`
 
 ```{r}
 rt <- rtime(fs_raw)
-mz <- mz(fs_raw)
-I <-  intensity(fs_raw)
+mz <- mz(spectra(fs_raw))
+I <-  intensity(spectra(fs_raw))
 ```
 
 And their structure ...
@@ -131,31 +132,39 @@ plot(mz[[1]], I[[1]], type = "h")
 The first spectrum can be extracted by standard list subsetting
 
 ```{r}
-s1 <- fs_raw[[1]]
+s1 <- spectra(fs_raw)[1]
 s1
 ```
 
 So a method for this type of object is already in place
 
 ```{r}
-plot(s1)
+plotSpectra(s1)
 ```
 
-This can be also made interactive with a little (and inelegant) trick
-
-```{r}
-ggplotly(plot(s1))
-```
 
 This is an alternative 2D visualization of the ion map
 
 ```{r}
-ggplotly(tibble(rt = rt, mz = mz, I = I)  %>% 
-  unnest(c("mz","I")) %>%
+
+raw_spectra <- spectra(fs_raw)
+
+## we create a tibble of spectra ...
+spectra_tibble <- tibble(spc_id = 1:length(rt)) %>% 
+  mutate(rtime = map_dbl(spc_id, ~ rt[.x])) %>% 
+  mutate(data = map(spc_id, ~ tibble(mz = mz(raw_spectra[.x])[[1]],
+                                     I = intensity(raw_spectra[.x])[[1]]))
+  )
+```
+
+
+```{r}
+
+ggplotly(spectra_tibble  %>% unnest(data) %>% 
   filter(mz > 284 & mz < 300) %>% 
-  filter(rt > 200 & rt < 300) %>% 
+  filter(rtime > 200 & rtime < 300) %>% 
   ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
+  geom_point(aes(x = rtime, y = mz, col = log10(I), size = I)) + 
   scale_color_viridis_c() + 
   theme_light())
 ```
@@ -185,8 +194,8 @@ Note: the structure of the `Mchromatograms` is "matrix like" because it is desig
 Just to show what I mean let's read in the data coming from two different injections
 
 ```{r}
-two_raw <- readMSData(
-  files = c("../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
+two_raw <- readMsExperiment(
+  spectraFiles = c("../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
             "../data/wines/x020_wht_gewurz_A_1_NEG_DDA.mzML"),
   msLevel. = 1, ## we read only MS1 and MS2
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM

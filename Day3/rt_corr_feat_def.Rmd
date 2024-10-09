@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r message=FALSE, warning=FALSE}
 library(xcms)
+library(MsExperiment)
+library(Spectra)
 library(tidyverse)
 library(plotly)
 ```
@@ -40,11 +42,11 @@ We already know that our dataset contains blank injections. They could be used t
 
 ```{r}
 ## identify non blank indices
-no_blank_id <- which(raw_data$variety != "blank")
+no_blank_id <- which(sampleData(raw_data)$variety != "blank")
 ## subset the data with a specific xcms function
 raw_data <- filterFile(raw_data, file = no_blank_id)
 ## check the metadata
-pData(raw_data)
+sampleData(raw_data)
 ```
 
 Let's now visualize the amount of retention time shift looking to the ionic trace of compound which should be present in almost all samples:
@@ -73,7 +75,7 @@ sub_peaks <- chromPeaks(raw_data) %>%
 library(RColorBrewer)
 group_colors <- paste0(brewer.pal(3, "Set1"), "60")
 names(group_colors) <- c("red","wht","X")
-plot(chr_raw, col = group_colors[raw_data$color])
+plot(chr_raw, col = group_colors[sampleData(raw_data)$color])
 legend("topright", legend = c("red","white", "X"), col = group_colors, lty = 1)
 abline(v = sub_peaks$rt, col = "red", lty = 3)
 ```

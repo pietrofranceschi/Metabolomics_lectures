@@ -18,7 +18,7 @@ library(tidyverse)
 
 - The Normal (Gaussian) distribution has a prominent role in statistics
 - Some sort of "normality" is often the prerequisite of many statistical tools
-- With normal data, ~~the mean is the value with higher likelihood~~
+- With normal data, ~~the mean is the value with higher probability~~
 - Reasoning on the mean is equivalent is reasoning on the most probable value ...
 
 ```{r out.width= "50%", fig.align='center'}
@@ -39,7 +39,7 @@ xvalues %>% ggplot(aes(x = x)) +
   geom_hline(yintercept = 0, lwd = 1) + 
   geom_vline(xintercept = 0, lty = 2, col = "red") + 
   geom_text(x = 0, y = 0.1, label = "mean", size =7) + 
-  ylab("Likelihood")
+  ylab("Probability")
 
 
 ```

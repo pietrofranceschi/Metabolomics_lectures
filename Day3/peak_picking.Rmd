@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r message=FALSE, warning=FALSE}
 library(xcms)
+library(MsExperiment)
+library(Spectra)
 library(tidyverse)
 library(plotly)
 ```
@@ -51,8 +53,8 @@ Working on a representative file will help you in fine tuning and benchmarking y
 Let's start reading in a raw file: 
 
 ```{r}
-raw_one <- readMSData(
-  files = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
+raw_one <- readMsExperiment(
+  spectraFiles = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
   msLevel. = 1, ## we read only MS1
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
@@ -121,9 +123,17 @@ mf_peaks %>%
 If you go back to the previous demo, we were focusing on a specific area of the raw signal which was particularly promising
 
 ```{r}
-rt <- rtime(raw_one)
-mz <- mz(raw_one)
-I <- intensity(raw_one)
+rt <- rtime(spectra(raw_one))
+
+raw_spectra <- spectra(raw_one)
+
+## we create a tibble of spectra ...
+spectra_tibble <- tibble(spc_id = 1:length(rt)) %>% 
+  mutate(rt = map_dbl(spc_id, ~ rt[.x])) %>% 
+  mutate(data = map(spc_id, ~ tibble(mz = mz(raw_spectra[.x])[[1]],
+                                     I = intensity(raw_spectra[.x])[[1]]))
+  )
+
 ```
 
 
@@ -133,8 +143,8 @@ sub_peaks_mf <- mf_peaks %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) 
 
-ggplotly(tibble(rt = rt, mz = mz, I = I)  %>% 
-  unnest(c("mz","I")) %>%
+ggplotly(spectra_tibble %>% 
+           unnest(data) %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
@@ -154,8 +164,8 @@ What we see:
 This view gives an idea of the boundaries of the peaks:
 
 ```{r}
-tibble(rt = rt, mz = mz, I = I)  %>% 
-  unnest(c("mz","I")) %>%
+spectra_tibble %>% 
+           unnest(data) %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
@@ -231,8 +241,8 @@ sub_peaks_cw <- cw_peaks %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) 
 
-ggplotly(tibble(rt = rt, mz = mz, I = I)  %>% 
-  unnest(c("mz","I")) %>%
+ggplotly( spectra_tibble %>% 
+           unnest(data) %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
@@ -273,20 +283,19 @@ phenodata <- tibble(filepath = list.files("../data/wines/", pattern = ".mzML", f
   filter(!grepl("mix",filepath)) %>%     ## remove the injections of the standard mixes 
   mutate(fname = file_path_sans_ext(basename(filepath))) %>% 
   separate(fname, into = c("inj_ord", "color", "variety", "bottle", "rep", "polarity", "mode"), 
-           sep = "_", remove = FALSE) %>% 
-  as(.,"AnnotatedDataFrame")
+           sep = "_", remove = FALSE) 
 
 ## to see the content 
-pData(phenodata)
+phenodata
 ```
 
 Here we read the data in: 
 
 ```{r}
-raw_data <- readMSData(
-  files = phenodata$filepath, 
+raw_data <- readMsExperiment(
+  spectraFiles = phenodata$filepath, 
   msLevel. = 1,
-  pdata = phenodata, ## this is the structure of xcms holding phenotypic data
+  sampleData = phenodata, ## this is the structure of xcms holding phenotypic data
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
 
@@ -331,7 +340,7 @@ We now plot them, with colors matching the sample class:
 mypalette <- c("steelblue", "coral", "darkgreen")
 names(mypalette) <- c("red","X","wht")
 
-plot(tics, col = mypalette[raw_data$color])  ## raw_data$color is getting out the phenodata column called color
+plot(tics, col = mypalette[sampleData(raw_data)$color])  ## raw_data$color is getting out the phenodata column called color
 legend("topright", legend = c("red","Blank & QC","white"), col = mypalette, lty = 1)
 ```
 
@@ -344,10 +353,11 @@ The trend with the injection can be visualized as follows:
 
 ```{r}
 ## Visualize the overall trend in TIC along the injections
-tc <- split(tic(raw_data), f = fromFile(raw_data))
+tc <- split(tic(spectra(raw_data)), f = fromFile(raw_data))
 full_tics <- sapply(tc, sum)
 
-pData(raw_data) %>% 
+sampleData(raw_data) %>% 
+  data.frame(.) %>% 
   tibble() %>% 
   add_column(full_tics = full_tics) %>% 
   ggplot() + 

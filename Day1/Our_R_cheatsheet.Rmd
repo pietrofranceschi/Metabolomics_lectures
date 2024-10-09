@@ -35,7 +35,7 @@ b1 <- a %>%
   log(.) %>%   ### here I'm taking the log of a+2
   sqrt(.)
 
-## the "dot" represent what is coming from the pipe
+## the "dot" represents what is coming from the pipe
 
 ```
 
@@ -131,11 +131,73 @@ To draw from different distributions:
 * `runif` for uniform distribution
 * `rlnorm` for the lognormal distribution
 
-
 This is a brute force demonstration of the **central limit theorem**
 
+
+
+What we need: 
+
+a tibble to store the data, to be used to run the sampling ...
+
+
 ```{r}
-## We need a function to sample from the unigorm distribution
+dt <- tibble(sid = paste0("s_",1:1000))
+```
+
+
+then we perform the actual sampling
+
+
+```{r}
+dt <- dt %>% 
+  mutate(data = map(sid, function(s) runif(500)))
+```
+
+
+
+then we need a column with the means of the samplings
+
+
+```{r}
+dt <- dt %>% 
+  mutate(avg = map_dbl(data, function(t) mean(t)))
+```
+
+
+Let's make it more nice ...
+
+
+```{r}
+tibble(sid = paste0("s_",1:1000)) %>%                                  ## create the id
+  mutate(data = map(sid, function(s) runif(1000))) %>%                  ## make the sampling  
+  mutate(avg = map_dbl(data, function(t) mean(t))) %>%                 ## calculate the means
+  ggplot() + 
+  geom_histogram(aes(x = avg), fill = "steelblue", col = "white") + 
+  theme_bw() + 
+  theme(aspect.ratio = 0.5)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+## We need a function to sample from the uniform distribution
 
 data_uniform <- runif(50)
 
@@ -146,7 +208,7 @@ data_uniform <- runif(50)
 ## here I'm creating the tibble which will contain the data
 my_samplings <- tibble(id = 1:100)
 
-## I want to add a column with the amplings
+## I want to add a column with the samplings
 
 my_samplings <- my_samplings %>% 
   mutate(sampling = map(id, function(x) runif(50)))
