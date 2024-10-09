@@ -440,6 +440,7 @@ library(factoextra)
 ```
 
 ```{r}
+
 myPCA <- PCA(DM_i %>% 
                column_to_rownames("MouseID") %>% 
                dplyr::select(starts_with("CPD")), 
@@ -450,11 +451,11 @@ myPCA <- PCA(DM_i %>%
 
 ```{r}
 
-library(plotly)
+
 
 fviz_pca_ind(myPCA, 
              habillage = factor(sample_meta_data$Gender), ## factor which will be used to color the dots
-             # geom = "point", 
+             geom = "point", 
              pointsize = 2,
              axes = c(1,2)) + 
   scale_color_brewer(palette = "Set1")
@@ -464,17 +465,11 @@ Even if the amount of variability captured in this representation is only the 30
 It would be nice to have a similar plot highlighting the role of the different genetic backgrounds, but we do not have enough colors to put everything in the same plot. 
 
 
-```{r}
-facto_summarize(myPCA, "var", axes = 2, result = "contrib") %>% 
-  arrange(desc(contrib))
-```
-
-
-
 
 ```{r}
 ## we get out the scores
-PC_12_scores <- facto_summarize(myPCA, "ind", 
+PC_12_scores <- facto_summarize(myPCA, 
+                                "ind", 
                                 axes = c(1,2),
                                 result = "coord"
                                 ) %>%    ## get the data from the PCA object
@@ -484,7 +479,8 @@ PC_12_scores <- facto_summarize(myPCA, "ind",
   dplyr::rename("MouseID" = "name") %>%     ## align the name with the correct name
   left_join(sample_meta_data)        ## join with the sample data
 
-PC_12_scores
+PC_12_scores %>% 
+  arrange(desc(Dim.2))
 ```
 
 ```{r fig.height=6, fig.width=8}
@@ -502,9 +498,8 @@ PC_12_scores %>%
 
 ## Something for You
 
-Suppose that I'm reall yinterested in the comparison between Pipox and Null (wt) ...
+Suppose that I'm really interested in the comparison between Pipox and Null (wt) ...
 Could you make a PCA plot only of these classes of samples?
-
 
 
 So, at least in the PCA, no clear separation between the genotypes
@@ -529,7 +524,7 @@ Since the partial separation is visible along PC1 we could visualize the variabl
 
 
 ```{r}
-fviz_contrib(myPCA, "var", axes = 1)
+fviz_contrib(myPCA, "var", axes = c(1,2))
 ```
 
 These plots are really informative, let's give a look inside the PCA object to see how these number could be get out. 
@@ -565,15 +560,15 @@ Suppose, for example, that you would like to construct a more informative variab
 
 
 ```{r fig.height=8, fig.width=6}
-facto_summarize(myPCA, "var", axes = 1) %>% 
+facto_summarize(myPCA, "var", axes = c(1,2)) %>% 
   as_tibble() %>% 
-  dplyr::select(name, `Dim.1`) %>% 
+  dplyr::select(name, contrib) %>% 
   left_join(metabolite_meta, by = c("name" = "CompoundID")) %>% 
-  arrange(`Dim.1`) %>% 
+  arrange(contrib) %>% 
   mutate(CompoundName = factor(CompoundName, levels = CompoundName)) %>% 
   ggplot() + 
-  geom_point(aes(x = CompoundName,  y= `Dim.1`, col = Assay), size = 2) + 
-  geom_segment(aes(x = CompoundName,  yend = `Dim.1`, col = Assay, xend = CompoundName, y = 0)) + 
+  geom_point(aes(x = CompoundName,  y= contrib, col = Assay), size = 2) + 
+  geom_segment(aes(x = CompoundName,  yend = contrib, col = Assay, xend = CompoundName, y = 0)) + 
   scale_color_brewer(palette = "Set2") + 
   coord_flip() + 
   theme_light()
@@ -764,7 +759,5 @@ DM_i %>%
 
 **Something For you**
 
-1. Could you try to use ANOVA to look to metabolites potentially different in the genotypes?
-2. Do you think that the ANOVA assumption here are fulfilled?
-3. Run a similar analysis on the rubus targeted data
+1. Could you try to use the previous univariate approach to look to metabolites potentially different between two genotypes of your choice? 
 

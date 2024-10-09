@@ -107,7 +107,7 @@ The parameters here are:
 ```{r}
 raw_data <- groupChromPeaks(
   raw_data, 
-  param = PeakDensityParam(sampleGroups = raw_data$color,
+  param = PeakDensityParam(sampleGroups = sampleData(raw_data)$color,
                            minFraction = 2/3,           
                            binSize = 0.02,  ## width of the slices
                            bw = 3))  ## bandwidth of the density used to find the consensus position
