@@ -629,7 +629,7 @@ DM_i_nest <- DM_i_nest %>%
 since we have potentially false positive it is always a good idea to look to the distribution of the p-values
 
 ```{r}
-hist(DM_i_nest$ps, breaks = 20)
+hist(DM_i_nest$ps, breaks = 10)
 ```
 
 We see a clear enrichment of the "low" p values. One could ask what would be the distribution of the p-values if there would be no difference between males and females.
@@ -654,7 +654,7 @@ DM_i_nest <- DM_i_nest %>%
 And now we plot the histogram
 
 ```{r}
-hist(DM_i_nest$ps_p, breaks = 20)
+hist(DM_i_nest$ps_p, breaks = 10)
 ```
 
 This is clearly demonstrating that there is a difference between males and females and that this difference is "statistically significant"
@@ -706,7 +706,7 @@ head(markers)
 This is the list of "biomarkers", let's plot one of them ...
 
 ```{r fig.height=3, fig.width=8}
-DM_nest$rawplots[[54]]
+DM_nest$rawplots$progesterone
 ```
 Which exactly shows what we expect.
 
@@ -760,4 +760,8 @@ DM_i %>%
 **Something For you**
 
 1. Could you try to use the previous univariate approach to look to metabolites potentially different between two genotypes of your choice? 
+
+Note: since if you are not considering null genetic bg, you will have to deal with 12 samples, you should not rely on non parametric tests to make statistical testing. I would rather use t-test
+
+
 
