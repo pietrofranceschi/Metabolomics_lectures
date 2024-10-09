@@ -120,12 +120,12 @@ After this grouping, the retention time correction is performed working:
 raw_data <- adjustRtime(
   raw_data, 
   param = PeakGroupsParam(minFraction = 1,
-                          subset = which(raw_data$variety == "QC"), span = 0.4))
+                          subset = which(sampleData(raw_data)$variety == "QC"), span = 0.4))
 ```
 
 
 ```{r}
-plotAdjustedRtime(raw_data, col = group_colors[raw_data$color])
+plotAdjustedRtime(raw_data, col = group_colors[sampleData(raw_data)$color])
 ```
 
 So the retention time correction here really small, speaking of a remarkable analytical reproducibility. In general the reproducibility of the chromatography is considered good if the required shift is smaller than the typical chromatographic width. This is anyway a rule of thumb since everything is very much dependent on the analytical method.
@@ -138,7 +138,7 @@ Features are obtained by a further grouping of the chromatographic peaks after r
 ```{r}
 raw_data <- groupChromPeaks(
   raw_data, 
-  param = PeakDensityParam(sampleGroups = raw_data$color,
+  param = PeakDensityParam(sampleGroups = sampleData(raw_data)$color,
                            minFraction = 2/3,           
                            binSize = 0.02,  ## width of the slices
                            bw = 3))  ## bandwidth of the density used to find the consensus position
@@ -203,7 +203,7 @@ Anyway, `xcms` implement a clever strategy to try to fix, at least partially, th
 
 
 ```{r}
-raw_data_filled <- fillChromPeaks(raw_data)
+raw_data_filled <- fillChromPeaks(raw_data, param = ChromPeakAreaParam())
 ```
 
 ```{r}
@@ -244,8 +244,8 @@ ft_chr1 <- featureChromatograms(raw_data,
 Now we plot it highlighting the integrated areas and the class of the samples: 
 
 ```{r}
-sample_colors <- group_colors[raw_data$color]
-plot(ft_chr1, col = group_colors[raw_data$color],
+sample_colors <- group_colors[sampleData(raw_data)$color]
+plot(ft_chr1, col = group_colors[sampleData(raw_data)$color],
      peakBg = sample_colors[chromPeaks(ft_chr1)[, "sample"]])
 ```
 
@@ -278,7 +278,7 @@ Here we see:
 This can be also split by sample class:
 
 ```{r}
-sample_vs_qc <- ifelse(raw_data$variety == "QC","QC","S")
+sample_vs_qc <- ifelse(sampleData(raw_data)$variety == "QC","QC","S")
 
 featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
   as_tibble() %>% 

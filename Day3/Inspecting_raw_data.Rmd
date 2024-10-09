@@ -150,21 +150,20 @@ This is an alternative 2D visualization of the ion map
 raw_spectra <- spectra(fs_raw)
 
 ## we create a tibble of spectra ...
-spectra_tibble <- tibble(spc_id = 1:length(rt)) %>% 
-  mutate(rtime = map_dbl(spc_id, ~ rt[.x])) %>% 
-  mutate(data = map(spc_id, ~ tibble(mz = mz(raw_spectra[.x])[[1]],
-                                     I = intensity(raw_spectra[.x])[[1]]))
-  )
+
+spectra_tibble <- tibble(rt = rt, 
+                         mz = as.list(mz),
+                         I = as.list(I))
 ```
 
 
 ```{r}
 
-ggplotly(spectra_tibble  %>% unnest(data) %>% 
+ggplotly(spectra_tibble  %>% unnest(c(mz, I)) %>% 
   filter(mz > 284 & mz < 300) %>% 
-  filter(rtime > 200 & rtime < 300) %>% 
+  filter(rt > 200 & rt< 300) %>% 
   ggplot() + 
-  geom_point(aes(x = rtime, y = mz, col = log10(I), size = I)) + 
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
   scale_color_viridis_c() + 
   theme_light())
 ```

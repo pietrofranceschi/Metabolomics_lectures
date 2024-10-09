@@ -123,16 +123,16 @@ mf_peaks %>%
 If you go back to the previous demo, we were focusing on a specific area of the raw signal which was particularly promising
 
 ```{r}
-rt <- rtime(spectra(raw_one))
 
-raw_spectra <- spectra(raw_one)
 
-## we create a tibble of spectra ...
-spectra_tibble <- tibble(spc_id = 1:length(rt)) %>% 
-  mutate(rt = map_dbl(spc_id, ~ rt[.x])) %>% 
-  mutate(data = map(spc_id, ~ tibble(mz = mz(raw_spectra[.x])[[1]],
-                                     I = intensity(raw_spectra[.x])[[1]]))
-  )
+rt <- rtime(raw_one)
+mz <- mz(spectra(raw_one))
+I <-  intensity(spectra(raw_one))
+
+spectra_tibble <- tibble(rt = rt, 
+                         mz = as.list(mz),
+                         I = as.list(I))
+
 
 ```
 
@@ -144,7 +144,7 @@ sub_peaks_mf <- mf_peaks %>%
   filter(rt > 200 & rt < 300) 
 
 ggplotly(spectra_tibble %>% 
-           unnest(data) %>%
+           unnest(c(mz,I)) %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
@@ -165,7 +165,7 @@ This view gives an idea of the boundaries of the peaks:
 
 ```{r}
 spectra_tibble %>% 
-           unnest(data) %>%
+           unnest(c(mz,I)) %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
@@ -242,7 +242,7 @@ sub_peaks_cw <- cw_peaks %>%
   filter(rt > 200 & rt < 300) 
 
 ggplotly( spectra_tibble %>% 
-           unnest(data) %>%
+           unnest(c(mz,I)) %>%
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
@@ -382,7 +382,7 @@ chromPeaks(raw_data) %>%
 ```
 
 
-Here we see the peak maps of the different files. It is clear that each map is expected to be slightly different, but rally outlying samples will show up clearly. Look to the blanks (i.e., samples `r which(raw_data$variety == "blank")`), for example, or to the horizontal lines which are present in many files.
+Here we see the peak maps of the different files. It is clear that each map is expected to be slightly different, but rally outlying samples will show up clearly. Look to the blanks (i.e., samples `r which(sampleData(raw_data)$variety == "blank")`), for example, or to the horizontal lines which are present in many files.
 
 
 ## DIY
