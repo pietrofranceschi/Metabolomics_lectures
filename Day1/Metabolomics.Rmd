@@ -32,31 +32,31 @@ Metabolomics aims at measuring the metabolites in a ~~quantitative~~ way and to 
 ## Challenges of Metabolomics {.smaller .build}
 
 ### 1 - ~~Size~~ of the metabolic chemical space
-The molecules included in the metabolome can be extremely diverse in particular if plants/microorganisms are concerned
+The molecules included in the metabolome can be extremely diverse in particular if plants/microorganisms are concerned.
 
 ### 2 - Diversity in the ~~chemical properties~~ of the metabolites
-The chemical diversity results in different properties which would require different methods of analysis
+The chemical diversity results in different properties which would require different methods of analysis.
 
 ### 3 - Huge differences in ~~concentrations~~
-Some of the metabolite are present in high concentration, while other highly relevant compounds are present only in small traces. Our analytical method should be able to ~~see them at the same time~~
+Some of the metabolite are present in high concentration, while other highly relevant compounds are present only in small traces. Our analytical method should be able to ~~see them at the same time~~.
 
 
 ## Challenges of Metabolomics cont ...{.smaller .build}
 
 ### 4. - ~~Coverage~~
-The chemical diversity makes extremely difficult to have only **one** analytical method able to analyze everything
+The chemical diversity makes extremely difficult to have only **one** analytical method able to analyze everything.
 
 ### 5. - ~~Pre analytics~~
-The approach is so sensitive that every un reproducible pre-analytical issue will affect the data
+The approach is so sensitive that every un reproducible pre-analytical issue will affect the data.
 
 ## How Metabolomics
 
 We need an analytic technique:
 
-> 1. Sensitive to the **chemical structure**
-> 2. **Universal** - able to see almost all classes of molecules
-> 3. **Sensitive** - able to see metabolites with low concentrations 
-> 4. With an high **dynamic range** - able to measure at the same time low and high abundant compounds
+> 1. Sensitive to the **chemical structure**.
+> 2. **Universal** - able to see almost all classes of molecules.
+> 3. **Sensitive** - able to see metabolites with low concentrations.
+> 4. With an high **dynamic range** - able to measure at the same time low and high abundant compounds.
 
 # Analytical Techniques in Metabolomics
 
@@ -99,13 +99,18 @@ include_graphics("../images/MS_NMR_multi.png")
 ```
 
 ## Molecules and features
-In all the techniques presented so far, ~~each metabolite~~ give rise to a large set of ~~different signals~~ 
 
-* **MS** - the different ions produced in the ionization of the metabolite
-* **NMR** - the different peaks coming from the resonance of the nuclei present in the molecule
-* **LC/GC-MS** - the different ions which are eluted at different time. These mz/rt couples are called *features*
+In all the techniques presented so far, ~~each metabolite~~ give rise to a large set of ~~different signals~~: 
 
-All the variables coming from the same molecule are ~~highly correlated~~
+* **MS** - the different ions produced in the ionization of the metabolite.
+* **NMR** - the different peaks coming from the resonance of the nuclei present in the molecule.
+* **LC/GC-MS** - the different ions which are eluting at different time. These mz/rt couples are called *features*
+
+<br><br>
+
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Warning:</strong> All the variables coming from the same molecule are ~~highly correlated~~.
+</div>
 
 ## Sources of Analytical Variability {.smaller}
 
@@ -131,17 +136,17 @@ The approach is so powerful that all aspect related to sample handling/storage/e
 ## NMR vs LC/GC MS {.build}
 
 ### NMR
-> 1. :-) Reproducible
-> 2. :-) Inherently quantitative
-> 3. :-) Sensitive to the chemical structure
-> 4. :-( Relatively insensitive
-> 5. :-( Dynamic range
+> 1. 😀 Reproducible
+> 2. 😀 Inherently quantitative
+> 3. 😀 Sensitive to the chemical structure
+> 4. 😞 Relatively insensitive
+> 5. 😞 Dynamic range
 
 ### LC/GC - MS
-> 1. :-) Sensitive
-> 2. :-) Universal
-> 3. :-) With high dynamic range
-> 3. :-( Less reproducible (euphemysm)
+> 1. 😀 Sensitive
+> 2. 😀 Universal
+> 3. 😀 With high dynamic range
+> 3. 😞 Less reproducible (😉)
 
 # Doing Metabolomics
 
@@ -152,32 +157,41 @@ We use the analytical method of choice to analyze a selected set of metabolites.
 
 ~~The measured variables are metabolites~~
 
-The numbers we collect is the concentration of the individual metabolites
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Warning:</strong> The numbers we collect is the concentration of the individual metabolites.
+</div>
+
+
 
 
 ### Untargeted
-We "throw" a raw extract in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown. 
+We "throw" a raw sample in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown. 
 
 ~~The measured variables are **not** metabolites~~
 
-The numbers we get are the peak areas of the individual features
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Warning:</strong> The numbers we get are the peak areas of the individual features.
+</div>
+
+
 
 
 ## Why targeted, why untargeted {.smaller .build }
 
 ### Targeted
 
-> 1. :-) ~~quantitative~~ results are obtained "by definition"
-> 2. :-) results can be interpreted under the light of the ~~known metabolic pathways~~
-> 3. :-) the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited _batch effect_) 
-> 4. :- ( we basically look only to the expected
+> 1. 😀 ~~quantitative~~ results are obtained "by definition"
+> 2. 😀 results can be interpreted under the light of the ~~known metabolic pathways~~
+> 3. 😀 the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited _batch effect_) 
+> 4. 😞 we basically look only to the expected
 
 ### Untargeted
 
-> 1. :-) ~~holistic~~
-> 2. :-) open to ~~unexpected~~
-> 3. :-( tricky
-> 4. :-( hardly quantitative
+> 1. 😀 ~~holistic~~
+> 2. 😀 open to ~~unexpected~~
+> 3. 😞 tricky
+> 4. 😞 hardly quantitative
+> 5. 😞 not standardized
 
 
 ## The ideal Metabolomics road-map
@@ -214,7 +228,7 @@ As you have already understood, in untargeted metabolomics:
 - If I have the metabolite is easier to understand what are the signals we actually measure (ions, NMR peaks, features)
 - ... the reverse (called ~~annotation~~) is not at all trivial
 
-_~~Most likely, chemical annotation is the current bottleneck in untargeted metabolomics~~_
+_~~Chemical annotation is the current bottleneck in untargeted metabolomics~~_
 
 ## Annotation strategies {.build}
 
@@ -268,7 +282,7 @@ _e.g. Are my markers reasonable under the light of the human metabolism?_
 > - _The Strength Of The Chain Is In The Weakest Link_
 
 ### 3 - Interdisciplinarity
-> - The analyst and the data analyst are your best friends ...
+> - The analyst and/or the data analyst are your best friends ...
 
 
 

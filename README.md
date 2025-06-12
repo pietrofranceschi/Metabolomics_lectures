@@ -17,7 +17,7 @@ The material (which is growing!) covers the following topics:
 * [Our R cheatsheet](Day1/Our_R_cheatsheet.html) - [Rmd](Day1/Our_R_cheatsheet.Rmd)
     - Practical: `tidyverse` & `purrr` hands on
 * [What is Metabolomics](Day1/Metabolomics.html)
-* [Experimental design](Day1/experimental_design.pdf )
+* [Experimental design](Day1/experimental_design.html )
     - Practical: [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
 * [Practical Considerations on the study design](Day1/practical_considerations.html)
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)

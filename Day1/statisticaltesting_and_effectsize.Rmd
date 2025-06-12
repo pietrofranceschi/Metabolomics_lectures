@@ -17,10 +17,13 @@ library(MASS)
 
 ## The BIG question
 
-Is what I’m observing **true beyond my sample**. Can I draw general conclusions from a limited set samples?
 
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>The question:</strong> <br> Is what I’m observing **true beyond my sample**. Can I draw general conclusions from a limited set samples?
+</div>
 
-<hr>
+<br><br>
+
 
 In presence of variability, there will  always be the possibility that what I observe in my data cannot be generalized at the population level.
 
@@ -28,66 +31,6 @@ In presence of variability, there will  always be the possibility that what I ob
 * validate
 * give a measure of my **confidence** on the results
 
-
-## On Variability
-The overall variability comes from the *sum* of the different sources of variability
-
-<br>
-
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
-include_graphics("../images/varianceadditivity.png")
-```
-
-
-## Sampling Distribution {.smaller}
-
-* We are always dealing with a group of "individuals" extracted from an unknown population: a **Sample**
-* From each sample we calculate summary **statistics**, typically the **mean**
-* And we ask ourselves something significant happens to the mean (e.g. are the two means different?)
-* ~~The distribution of the sample means is always normally distributed~~
-* The width of the distribution of the sample mean decreases as the sample size increases
-
-
-```{r fig.height=3, fig.width=8, out.width= "100%", fig.align="center"}
-twopop <- c(rnorm(1000,10,3),rnorm(1000,20,3))
-
-samplings <- tibble(samp = paste0("s",1:500)) %>% 
-  mutate(means = map_dbl(samp, ~mean(sample(twopop,20))))
-
-par(mfrow = c(1,2))
-hist(twopop, breaks = 30, border = "white", col = "gray60", xlab = "var")
-abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
-abline(v = mean(twopop), col = "green")
-
-hist(samplings$means, col = "steelblue", main = "Histrogram of the sample means", breaks  = 15, xlim = c(0,25), border = "white", xlab = "var")
-abline(v = mean(twopop), col = "green")
-
-
-```
-
-
-## More samples ...
-
-
-```{r, out.width= "100%", fig.align="center"}
-tibble(samp = paste0("s",1:500)) %>% 
-  mutate(s5 = map_dbl(samp, ~mean(sample(twopop,5))),
-         s10 = map_dbl(samp, ~mean(sample(twopop,10))),
-         s50 = map_dbl(samp, ~mean(sample(twopop,50)))
-         ) %>% 
-  pivot_longer(c("s5","s10","s50")) %>% 
-  mutate(name = factor(name, levels = c("s5","s10","s50"))) %>% 
-  ggplot() + 
-  geom_histogram(aes(x = value, fill = name), col  ="white") + 
-  geom_vline(xintercept = mean(twopop), col = "red", lty = 2) + 
-  xlab("var") + 
-  facet_wrap(~name, nrow = 1) + 
-  theme_light() + 
-  theme(aspect.ratio = 1, legend.position = "none")
-
-```
-
-More samples, ~~narrower~~ distribution.
 
 ## Statistical testing
 
@@ -101,20 +44,25 @@ Statistical testing is a procedure which allows us to quantify this level of con
 2. Use statistics to calculate the probability of getting at least what we observe under H0 (by chance!) (*p-value*)
 3. Set a threshold of reasonable confidence (0.05,0.01, ...)
 
+---
 
-## Example: lowering cholesterol
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+include_graphics("../images/pvalueworship.png")
+```
 
-* Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
-* We claim that a new secret drug reduces significantly the cholesterol level in the population
-* To prove that we get a sample of 50 people, we treat them with the drug and we measure their average cholesterol level.  This mean turns out to be 193.
-* Is this pilot study supporting my claim ? i.e. is the difference between 193 and 200 significant?
+## Example: lowering cholesterol {.build}
 
-## Let's test that!
+>* Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
+>* We claim that a new secret drug we recently invented reduces **significantly** the cholesterol level in the population
+>* To prove that we get a group of 50 people, we treat them with the drug and we measure their average cholesterol level.  This mean turns out to be **193**.
+>* Is this pilot study supporting my claim ? i.e. is the ~~difference between 193 and 200 significant~~?
 
-1. Suppose that the drug has no effect (H0) ... but then my 50 people are a random drawing from the population
-2. Calculate the distribution of the mean level of cholesterol in groups of 50 people coming from the population.(mind the gap! ... this is not the distribution of cholesterol in the population!)
-3. Calculate the probability of obtaining less than 193 from this distribution (*p-value*)
-4. Reject the H0 if the p-value is lower than the selected threshold (typically 0.05)
+## Let's test that! {.build}
+
+>1. Suppose that the drug has no effect (H0) ... but then my 50 people are a random drawing from the population
+>2. Calculate the distribution of the mean level of cholesterol in groups of 50 people coming from the population.(mind the gap! ... this is not the distribution of cholesterol in the population!)
+>3. Calculate the probability of obtaining less than **193** from this distribution (*p-value*)
+>4. Reject the H0 if the p-value is lower than the selected threshold (typically 0.05)
 
 ## Let's plot it!
 
@@ -137,35 +85,34 @@ abline(h = 200, col = "darkred")
 
 ```
 
-## What we see
+## What we see {.build}
 
-* The means of the different groups are different
-* The distribution of the means is nicely centered around the population mean!
-* The blue line represents the mean of my sample 50 people (193!)
-* The blue dots are "random" draws from the population which show an average level of cholesterol lower than the one we observed
-* For blue dots we observe less than 193 by chance
-* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (p = 0.14 !)
-* I cannot reject H0 at the 0.05 level ...
+>* The means of the different groups are different
+>* The distribution of the means is nicely centered around the population mean!
+>* The blue line represents the mean of my sample 50 people (193!)
+>* The blue dots are "random" draws from the population which show an average level of cholesterol lower than the one we observed
+>* For blue dots we observe less than 193 by chance
+>* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (p = 0.14 !)
+>* ~~I cannot reject H0 at the 0.05 level ... ~~
 
 
-## More on this ...
+## More on this ...{.build}
 
 So you see ... we need a **probability** and we also need a **threshold** (0.05)
 
 <br>
 
-The correct warding in my paper should be 
-
+The correct wording in my paper should be 
 
 *" ... the results are not statistically significant at the 0.05 level of confidence"* ... 
 
-but they are significant at the 0.15 level!  
+~~but they are significant at the 0.15 level! ~~
 
 
 
 ## More samples! {.smaller}
 
-I'm stubborn, so I'm convinced that the drug is really working. We redo the same study with a test group of 500 people and we observe another time an average level of 193
+I'm stubborn, so I'm convinced that the drug is really working. We redo the same study with a test group of **500** people and we observe another time an average level of 193 ...
 
 ```{r out.width="70%", fig.align='center'}
 means50 <- rep(0,50)
@@ -185,7 +132,7 @@ abline(h = 200, col = "darkred")
 
 ```
 
-Magic! Now it is significant at the 0.05!  No more blue dots! So it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect
+~~Magic! Now it is significant at the 0.05!  No more blue dots! So it is extremely unlikely to get an average cholesterol level of 193 in a group of 500 people if the drug has no lowering effect~~
 
 
 ## Take home messages
@@ -202,12 +149,6 @@ include_graphics("../images/important.png")
 * We are never sure!
 * Is statistical significance the only thing we are looking for?
 
-
----
-
-```{r, echo=FALSE, fig.align='center', out.width="100%"}
-include_graphics("../images/pvalueworship.png")
-```
 
 
 ## Back to our magic drug ...
@@ -236,12 +177,12 @@ text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000",
 
 ```
 
-## Is a low *p-value* the only thing we need?
+## Is a low *p-value* the only thing we need? {.build}
 
-* Is a reduction of 0.01% really useful/relevant?
-* Big number of samples will make tiny differences statistically significant!
-* Statistical significance does not mean biological/agronomic/medical relevance
-* The *p-value* alone cannot be used to judge the relevance of a research ...
+>* Is a reduction of 0.01% really useful/relevant?
+>* Big number of samples will make tiny differences statistically significant!
+>* Statistical significance does not mean biological/agronomic/medical relevance
+>* The *p-value* alone cannot be used to judge the relevance of a research ...
 
 
 ## Erroneous ...
@@ -249,7 +190,7 @@ text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000",
 * _p-values_ deals with probability of obtaining by chance, not with the strength of an effect
 * strong effects with low variability **will** result in low _ps_
 * the reverse is not necessarily true!
-* "look, I have a low p value!" is not the only thing to look for
+* "look, I have a low _p-value_!" is not the only thing to look for
 
 ## Measuring the _effect size_
 
@@ -318,7 +259,7 @@ Where
 * $\bar{x}$ are the estimates of the population means
 * $s$ is the estimate of the population standard deviation (pooled)
 
-<hr>
+
 
 ## Let's _see_
 
@@ -401,6 +342,6 @@ x %>%
 
 * With three samples variability is large
 * Also the possibility of calling non significant the difference is large
-* The effect size does not tell to me if something is relevant
+* Even the effect size does not tell to me if something is relevant!
 
 

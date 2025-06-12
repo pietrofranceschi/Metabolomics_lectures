@@ -1,7 +1,6 @@
 ---
 title: "Inspecting raw LC-MS Data"
 author: "Pietro Franceschi"
-date: "`r Sys.Date()`"
 output: html_document
 ---
 
@@ -62,14 +61,6 @@ Let's look to the object
 raw_one
 ```
 
-We see ...
-
-* the file name!
-* something called `phenoData`. More on that later!
-* something called `featureDatra`. More on that later!
-* the length of the LC method was 12 minutes
-* during this time `r length(raw_one)` spectra were collected
-
 
 It is important that along the process one can be able to visualize the raw data, so let's give a look to the structure of the R object we created.
 
@@ -124,7 +115,7 @@ So both object are lists: for every scan we have a vector of `mz` and a vector o
 ### Plot by hand
 
 ```{r}
-plot(mz[[1]], I[[1]], type = "h")
+plot(mz[[100]], I[[100]], type = "h")
 ```
 
 ### Plot with `xcms`
@@ -132,14 +123,14 @@ plot(mz[[1]], I[[1]], type = "h")
 The first spectrum can be extracted by standard list subsetting
 
 ```{r}
-s1 <- spectra(fs_raw)[1]
+s1 <- spectra(fs_raw)[100]
 s1
 ```
 
 So a method for this type of object is already in place
 
 ```{r}
-plotSpectra(s1)
+plotSpectra(spectra(fs_raw)[220])
 ```
 
 
@@ -196,7 +187,7 @@ Just to show what I mean let's read in the data coming from two different inject
 two_raw <- readMsExperiment(
   spectraFiles = c("../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
             "../data/wines/x020_wht_gewurz_A_1_NEG_DDA.mzML"),
-  msLevel. = 1, ## we read only MS1 and MS2
+  msLevel. = 1, ## we read only MS1
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
 
@@ -232,3 +223,15 @@ Here we see a clear difference between the two traces, looking to the names we s
 * Look how the quality of the mass spectrum is changing across one chromatographic peak (Advanced)
 * If you look to the map, can you say why the signal with high intensity are organized in vertical groups?
 * The trace around 289 seems to show two horizontal peaks. What does it mean? Can you interpret that?
+
+
+
+```{r}
+
+```
+
+
+
+
+
+

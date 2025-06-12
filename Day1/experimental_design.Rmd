@@ -1,15 +1,9 @@
 ---
 title: "Experimental Design"
-author: |
-  | Pietro Franceschi 
-  | pietro.franceschi@fmach.it
-institute: "FEM - UBC"
-
+author: "Pietro Franceschi"
 output: 
-  beamer_presentation:
-    theme: "Warsaw"
-    colortheme: "orchid"
-    incremental: false
+  ioslides_presentation:
+    css: "../mycss.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -28,32 +22,31 @@ options(knitr.table.format = "latex")
 ## How data are collected ...
 
 
-::: {.columns align=center}
-:::: {.column width=.6}
+
+<div style="display: flex; align-items: center; gap: 30px;">
+<div style="flex: 1;">
+
 * Random samplings
 * Observational studies
 * Experiments
-::::
-:::: {.column width=.4}
-```{r, echo=FALSE, fig.align='center', out.width="100%"}
+
+</div>
+  <div style="flex: 1;">
+```{r, echo=FALSE, fig.align='center', out.width="80%"}
   include_graphics("../images/picking_flowers.png")
 ```
-::::
-:::
-
-
-
+  </div>
+</div>
 
 
 
 ## Random Samplings (polls)
 
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Definition:</strong> <br> Random samplings allow to characterize the properties of a finite population without measuring all of its members.
+</div>
 
-::: {.block}
-### Definition
-Random samplings allow to characterize the properties of a finite population without measuring all of its members.
-:::
-
+<br><br>
 
 **Examples**
 
@@ -64,10 +57,11 @@ Random samplings allow to characterize the properties of a finite population wit
 
 ## Observational Studies
 
-::: {.block}
-### Definition
-Observational studies are designed with the objective of **identifying relationships** between the different properties of a conceptual population. The role of the experimenter is to perform the **selection of the sample**.
-:::
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Definition:</strong> <br> Observational studies are designed with the objective of **identifying relationships** between the different properties of a conceptual population. The role of the experimenter is to perform the **selection of the sample**.
+</div>
+
+<br><br>
 
 **Examples**
 
@@ -77,10 +71,11 @@ Observational studies are designed with the objective of **identifying relations
 
 ## Experiments
 
-::: {.block}
-### Definition
-**Experiments** are designed with the objective of identifying **causal relations** between the properties of a conceptual population. The role of the experimenter is to **modify the conditions** to verify the presence of causal relationship between the observed properties.
-:::
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Definition:</strong> <br> **Experiments** are designed with the objective of identifying **causal relations** between the properties of a conceptual population. The role of the experimenter is to **modify the conditions** to verify the presence of causal relationship between the observed properties.
+</div>
+
+<br><br>
 
 **Examples**
 
@@ -91,46 +86,47 @@ Observational studies are designed with the objective of **identifying relations
 
 ## Important notes
 
-::: {.columns align=center}
-:::: {.column width=.6}
+<div style="display: flex; align-items: center; gap: 30px;">
+<div style="flex: 1;">
+
 * Causal relations can be assessed only in **experiments**
 * This is really Galileian ;-)
 * Experiments are impossible in many relevant fields like human health and ecology
-::::
-:::: {.column width=.4}
+
+  </div>
+  <div style="flex: 1;">
 ```{r, echo=FALSE, fig.align='center', out.width="70%"}
   include_graphics("../images/fieldnotes.jpg")
 ```
-::::
-:::
-
+  </div>
+</div>
 
 `r text_spec("Should we then give up on obtaining causal information there?", color = "red")`
 
 
 ## Mind the chocolate ... 
 
-
 ```{r, echo=FALSE, fig.align='center', out.width="50%"}
   include_graphics("../images/chocolate.png")
 ```
-\tiny
 
+<div style="font-size: 0.5em;text-align: right;">
 *New England Journal of Medicine, 2012*
+</div>
 
-\normalsize
-
+<div style="font-size: 0.8em;">
 *" ... Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country ..."*
 
-
 [**...and more!**](https://tylervigen.com/spurious-correlations)
+</div>
 
+## Planning a sampling {.smaller}
 
-## Planning a sampling
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Key question</strong> <br> What is the best way to sample my population in a _representative_ way?
+</div>
 
-::: {.block}
-**Key question**: what is the best way to sample my population in a _representative_ way?
-:::
+<br><br>
 
 * Do it _randomly_ to avoid any intentional or unintentional bias (**Randomized Sampling**)
 * Take into account known subpopulations and confounding factors (**Stratified Random Sampling**)
@@ -150,20 +146,19 @@ The most reasonable way to "smear out" the effects of unknown biases is to do ev
 
 `r text_spec("Random is not a synonym of HAPHAZARD", color = "red")`
 
-
 ```{r, echo=FALSE, fig.align='center', out.width="40%"}
 include_graphics("../images/Random-Numbers-Cloud.png")
 ```
 
 ## Planning an observational study
 
-::: {.block}
-### Keep in mind ... 
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  <strong>Objective:</strong> get an useful and clear answer.
+  
+  <strong>Mean:</strong> start from a clear, useful and often simple question.
+</div>
 
-**Objective**: get an useful and clear answer
-
-**Mean**: start from a clear, useful and often simple question
-:::
+<br><br>
 
 * Identify the **sampling unit**
 * Decide the number of samples (money, power, ...)
@@ -193,36 +188,34 @@ include_graphics("../images/Confounding.png")
 
 ## Notes
 
-::: {.columns align=center}
-:::: {.column width=.6}
-
+<div style="display: flex; align-items: center; gap: 30px;">
+<div style="flex: 1;">
 
 * Some confounders can be controlled by careful sampling 
   * Eg. *Age and Gender on the relation between happiness and chocolate*
 * Some others are impossible to control 
   * Eg. *Presence of chemical pollution in the water streams and altitude of sampling*
 
-::::
-:::: {.column width=.4}
 
+  </div>
+  <div style="flex: 1;">
 ```{r, echo=FALSE, fig.align='center', out.width="70%"}
   include_graphics("../images/fieldnotes.jpg")
 ```
+  </div>
+</div>
 
-::::
-:::
 
 
 ## Planning one experiment
 
-::: {.block}
-### Keep in mind ... 
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  <strong>Objective:</strong> get an useful and clear answer.
+  
+  <strong>Mean:</strong> start from a clear, useful and often simple question.
+</div>
 
-**Objective**: get an useful and clear answer
-
-**Mean**: start from a clear, useful and often simple question
-:::
-
+<br><br>
 
 * What is my **experimental unit**?
 * How many samples should I measure?
@@ -230,15 +223,16 @@ include_graphics("../images/Confounding.png")
 
 ## Experimental Design
 
-::: {.block}
-A strategy to assign the experimental units to the different *treatments* to optimize my capacity of inferring **causal relationships**
-:::
+<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
+  ⚠️ <strong>Definition</strong> <br> A strategy to assign the experimental units to the different *treatments* to optimize my capacity of inferring **causal relationships**
+</div>
 
+<br><br>
 
 `r text_spec("Control of unwanted sources of variability (technical/biological) to highlight the effects of the intervention", color = "red")`
 
 
-## Key tool : Blocking
+## Key tool : Blocking {.smaller}
 
 * Group experimental units in homogeneous groups (blocks)
 * Study the variability inside the blocks
@@ -251,20 +245,15 @@ A strategy to assign the experimental units to the different *treatments* to opt
 include_graphics("../images/blocks.png")
 ```
 
+`r text_spec("Block what you can; randomize what you cannot ...", color = "red", bold = TRUE)`
 
---- 
-
-`r text_spec("Block what you can; randomize what you cannot", color = "red", bold = TRUE)`
-
-Blocking is “better” than randomization because statistics allows to “subtract” the variability coming from the blocking factor
 
 
 ## Examples of common blocking factors
 
 
-
-::: {.columns align=center}
-:::: {.column width=.6}
+<div style="display: flex; align-items: center; gap: 30px;">
+<div style="flex: 1;">
 
 * Location  
 * Analytical batch
@@ -272,15 +261,13 @@ Blocking is “better” than randomization because statistics allows to “subt
 * Operator 
 * ...
 
-::::
-:::: {.column width=.4}
-
+</div>
+  <div style="flex: 1;">
 ```{r, echo=FALSE, fig.align='center', out.width="70%"}
   include_graphics("../images/usual_suspects.jpg")
 ```
-
-::::
-:::
+  </div>
+</div>
 
 
 ## Randomized Complete Designs 
@@ -313,23 +300,23 @@ include_graphics("../images/exp_des_4.png")
 
 ## Notes
 
-::: {.columns align=center}
-:::: {.column width=.6}
+## Notes
+
+<div style="display: flex; align-items: center; gap: 30px;">
+<div style="flex: 1;">
 
 * Block as much as possible!
 * Repeated measures are more "powerful" because each unit is the control of itself
 * Crossovers can be tricky for the wash-out
 * Repeated measures design are the key in presence of large variability in the population (e.g. plants in the field/greenhouse)
 
-::::
-:::: {.column width=.4}
-
+</div>
+<div style="flex: 1;">
 ```{r, echo=FALSE, fig.align='center', out.width="70%"}
   include_graphics("../images/fieldnotes.jpg")
 ```
-
-::::
-:::
+</div>
+</div>
 
 
 

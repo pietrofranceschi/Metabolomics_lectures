@@ -238,7 +238,7 @@ In order to do that `xcms` provides a really handy function:
 ft_chr1 <- featureChromatograms(raw_data, 
                                 features = "FT005", 
                                 expandRt = 15, 
-                                filled = FALSE)
+                                filled = TRUE)
 ```
 
 Now we plot it highlighting the integrated areas and the class of the samples: 
@@ -281,9 +281,17 @@ This can be also split by sample class:
 sample_vs_qc <- ifelse(sampleData(raw_data)$variety == "QC","QC","S")
 
 featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
-  as_tibble() %>% 
+  as_tibble(rownames = "feat_id") %>% 
   arrange(desc(QC_rsd))
 ```
+
+```{r}
+featureSummary(raw_data, group = sample_vs_qc, skipFilled = FALSE) %>% 
+  as_tibble(rownames = "feat_id") %>% 
+  filter(S_rsd < QC_rsd)
+```
+
+
 
 This useful to filter features with higher variability in the QC (more than in the samples).
 But ...

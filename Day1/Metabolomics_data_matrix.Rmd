@@ -42,12 +42,12 @@ As in all _omic_ experiments, a metabolomic assay allows to measure a large numb
 include_graphics("../images/Matrix.svg")
 ```
 
-## Variables (columns) are not independent
+## Variables are not independent {.smaller}
 
 * Biological relations
 * Chemical/Analytical reasons
 
-```{r fig.align='center'}
+```{r fig.align='center', out.width="100%"}
 x <- 1:20
 y <- x*2 + rnorm(20,0,3)
 par(pty="s")
@@ -64,8 +64,8 @@ include_graphics("../images/important.png")
 
 <br>
 
-<div style="background-color:#73AD21;padding:20px;border-radius: 15px;color:black;">
-  <p>Analytical correlation are always stronger than biological ones!</p>
+<div style="background-color:#73AD21;padding:20px;border-radius: 15px;color:black;text-align: center;">
+  <p>Analytical correlation are always stronger than the biological one!</p>
 </div>
 
 <br>
@@ -88,18 +88,17 @@ The design of the study can result in a ~~multilevel hierarchical structure~~  o
 In the typical "happy" statistical context, the number of variable we measure is smaller than the number of samples. 
 
 In _omics_ the number of variables normally outperforms the number of samples
-
 <br>
-<hr>
-
+<br>
 ~~*FAT DATA MATRIX*~~
-
-
-
-```{r fig.align='center', fig.height=2.5, fig.width=10, out.width="100%"}
+```{r fig.align='center', fig.height=4, fig.width=12, out.width="100%"}
 mymat <- matrix(rnorm(20*300), nrow = 20)
-par(mar=rep(0, 4), xpd = NA) 
-image(t(mymat), asp = 20/300, xaxt='n', ann=FALSE, yaxt='n', bty="n")
+image(t(mymat), asp = 20/300, xlab = "", ylab = "", axes = FALSE)
+# Add closer x label
+mtext("Variables", side = 1, line = -3)  # smaller line = closer
+
+# Add closer y label
+mtext("Samples", side = 2, line = 0)
 ```
 
 ## Univariate approach
@@ -108,7 +107,7 @@ The **Univariate** approach considers each variable separately and it applies "s
 
 1. Statistical testing 
 2. Linear modeling (`lm`, `glm`, ...)
-3. ANOVA
+3. ANOVAs
 4. Hierarchical Modeling
 
 ```{r fig.align='center', fig.height=2.5, fig.width=6, out.width="60%"}
@@ -145,17 +144,46 @@ include_graphics("../images/Coord_planes_color.svg")
 
 ## Why multivariate
 
-```{r echo=FALSE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE, fig.align='center',out.width="50%"}
-library(cowplot)
-library(ggpubr)
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.width=5, fig.height=6, out.width="50%"}
+library(tidyverse)
 
-ggscatterhist(
-  iris, x = "Sepal.Length", y = "Sepal.Width",
-  color = "Species", # comment out this and last line to remove the split by species
-  margin.plot = "histogram", # I'd suggest removing this line to get density plots
-  margin.params = list(fill = "Species", color = "black", size = 0.2)
-) 
+# Function to generate points on an ellipse
+generate_ellipse <- function(center = c(0, 0), axes = c(1, 0.5), angle = 0, n_points = 100) {
+  theta <- seq(0, 2 * pi, length.out = n_points)
+  # Parametric ellipse before rotation
+  x <- axes[1] * cos(theta)
+  y <- axes[2] * sin(theta)
+  # Rotation matrix
+  rot <- matrix(c(cos(angle), -sin(angle), sin(angle), cos(angle)), nrow = 2)
+  rotated <- t(rot %*% rbind(x, y))
+  # Translate to center
+  data.frame(
+    x = rotated[, 1] + center[1],
+    y = rotated[, 2] + center[2]
+  )
+}
 
+# Create two ellipses
+ellipse1 <- generate_ellipse(center = c(-1.5, 0), axes = c(2, 1), angle = pi / 6)
+ellipse1$group <- "Ellipse 1"
+
+ellipse2 <- generate_ellipse(center = c(1.5, 1), axes = c(2, 1), angle = pi / 6)
+ellipse2$group <- "Ellipse 2"
+
+# Combine into one data frame
+ellipses <- rbind(ellipse1, ellipse2)
+
+# Plot
+ggplot(ellipses, aes(x = x, y = y, fill = group, col = group)) +
+  geom_path(size = 1.2) +
+  geom_polygon(alpha = 0.7) + 
+  geom_text(aes(x = -1.5, y = 0, label = "A"), col = "black") + 
+  geom_text(aes(x = 1.5, y = 1, label = "B"), col = "black") + 
+  xlab("Var 1") + 
+  ylab("Var 2") + 
+  coord_equal() +
+  theme_bw() +
+  theme(legend.position = "none", aspect.ratio = 1)
 ```
 
 Group separation is clearer in the 2d space ...
@@ -163,7 +191,7 @@ Group separation is clearer in the 2d space ...
 ## Multivariate
 
 
-~~**PRO**~~
+~~**PRO**~~ 😀
 
 1. Potentially more powerful
 2. Explicit use of variable correlation
@@ -171,7 +199,7 @@ Group separation is clearer in the 2d space ...
 
 <hr>
 
-~~**CONS**~~
+~~**CONS**~~ 😞
 
 
 1. Chance correlations in fat matrices
@@ -181,7 +209,7 @@ Group separation is clearer in the 2d space ...
 ## Univariate
 
 
-~~**PRO**~~
+~~**PRO**~~ 😀
 
 
 1. Statistical modeling is there!
@@ -189,7 +217,7 @@ Group separation is clearer in the 2d space ...
 
 <hr>
 
-~~**CONS**~~
+~~**CONS**~~ 😞
 
 
 1. Multiple testing
@@ -221,11 +249,7 @@ plot(y = runif(100,0,10), x = runif(100,0,10), xlab = "D1", ylab = "D2", main = 
 3. Can you imagine 20 samples in 10000 dimensions? ;-)
 
  
-## Practical !
 
-```{r, echo=FALSE, fig.align='center', out.width="50%"}
-include_graphics("../images/drill.svg")
-```
 
 
 

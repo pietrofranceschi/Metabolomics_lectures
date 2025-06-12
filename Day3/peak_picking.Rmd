@@ -75,8 +75,8 @@ A full description of the parameters of the algorithm can be found in the [`xcms
 In `xcms` the parameters of the algorithm are stored into a specific object:
 
 ```{r}
-mf <- MatchedFilterParam(binSize = 0.1, 
-                         fwhm = 6, 
+mf <- MatchedFilterParam(binSize = 0.1, ## width of the mz slice
+                         fwhm = 6,      ## estimated width of the peaks in seconds
                          snthresh = 5) 
 mf
 ```
@@ -331,7 +331,12 @@ tics <- chromatogram(raw_data,
                      include = "none")     ## this argument is required to avoid 
                                            ## including all the chromatograms of the picked peaks
 ```
-
+```{r}
+bpi <- chromatogram(raw_data, 
+                     aggregationFun = "max", ## "sum" for "TIC" / "max" for "BPC"
+                     include = "none")     ## this argument is required to avoid 
+                                           ## including all the chromatograms of the picked peaks
+```
 
 We now plot them, with colors matching the sample class:
 
@@ -343,6 +348,13 @@ names(mypalette) <- c("red","X","wht")
 plot(tics, col = mypalette[sampleData(raw_data)$color])  ## raw_data$color is getting out the phenodata column called color
 legend("topright", legend = c("red","Blank & QC","white"), col = mypalette, lty = 1)
 ```
+```{r}
+plot(bpi, col = mypalette[sampleData(raw_data)$color])
+```
+
+
+
+
 
 The plot shows already nice things: 
 
@@ -374,7 +386,7 @@ Another type of visualization that I find useful with reasonably small datasets 
 chromPeaks(raw_data) %>% 
   as_tibble() %>% 
   ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = log10(maxo)), size = 1, alpha = 0.5) + 
+  geom_point(aes(x = rt, y = mz, col = log10(maxo)), size = 0.5, alpha = 0.5) + 
   scale_color_viridis_c() + 
   facet_wrap(~factor(sample)) + 
   theme_bw() + 
@@ -396,3 +408,34 @@ Something for you now:
 
 
 ## Exercise
+
+```{r}
+pk_24 <- chromPeaks(raw_data) %>% 
+  as_tibble() %>% 
+  filter(sample == 24)
+  
+```
+
+
+
+```{r}
+ggplotly(pk_24 %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz)) + 
+  theme_bw())
+```
+
+
+```{r}
+# extract the chromatogram
+chr_raw <- chromatogram(raw_data, 
+                        mz = 115.040 + 0.02*c(-1, 1),
+                        rt = c(200,700))
+
+chr_raw
+```
+
+```{r}
+plot(chr_raw)
+```
+
