@@ -232,13 +232,14 @@ include_graphics("../images/Confounding.png")
 `r text_spec("Control of unwanted sources of variability (technical/biological) to highlight the effects of the intervention", color = "red")`
 
 
+The tools: randomization and blocking
+
 ## Key tool : Blocking {.smaller}
 
-* Group experimental units in homogeneous groups (blocks)
-* Study the variability inside the blocks
+* Group experimental units in homogeneous groups (**blocks**)
+* Perform a  "full" experiment within each block (the blocks and study factors will be **orthogonal**)
 * Identify and subtract the variability across the blocks
-* Blocking allows to *subtract* the difference between the blocks
-* Blocks and study factors should be *orthogonal*
+* Blocking allows to **subtract** the difference between the blocks
 
 
 ```{r, echo=FALSE, fig.align='center', out.width="50%"}

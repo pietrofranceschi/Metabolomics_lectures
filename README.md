@@ -18,7 +18,7 @@ The material (which is growing!) covers the following topics:
     - Practical: `tidyverse` & `purrr` hands on
 * [What is Metabolomics](Day1/Metabolomics.html)
 * [Experimental design](Day1/experimental_design.html )
-    - Practical: [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
+    - Practical: stratified random sampling [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
 * [Practical Considerations on the study design](Day1/practical_considerations.html)
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)

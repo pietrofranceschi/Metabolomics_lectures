@@ -140,7 +140,7 @@ This is an alternative 2D visualization of the ion map
 
 raw_spectra <- spectra(fs_raw)
 
-## we create a tibble of spectra ...
+## we create a tibble of spectra ...effsize
 
 spectra_tibble <- tibble(rt = rt, 
                          mz = as.list(mz),

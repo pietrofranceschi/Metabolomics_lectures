@@ -48,7 +48,8 @@ Ok, we see what we expect, the two groups are different, and there is an unbalan
 
 ## The problem
 
-Ok suppose now that I'm interested in estimating well the population mean. In my case this parameter is known ...
+Ok suppose now that I'm interested in estimating well the population mean. 
+In my case this parameter is known ...
 
 ```{r}
 pop_mu <- mean(mypop$height)
@@ -65,7 +66,7 @@ mypop %>%
   theme_light()
 ```
 
-Suppose also that I do not have money to cover the full population, so the best I can do is to interview 30 people. So I'll use their mean height to estimate the mean of the population.  
+Suppose also that I do not have money to cover the full population, so the best I can do is to measure 30 people. So I'll use their mean height to estimate the mean of the population.  
 
 What I can do in my simulation (and that I cannot do in my real life) is to ask myself how **variable** is my estimation of the population mean when I repeat the sampling several times
 
@@ -116,7 +117,7 @@ x %>%
   theme_light()
 ```
 
-As we can see, the estimate has variability (:-P), and it is centered around the correct value for the population mean. It is also normally distributed, but this you already know from the previous practical ...
+As we can see, the estimate has variability (:-P), and it is centered around the correct value for the population mean. It is also normally distributed
 
 ## Stratified sampling
 
@@ -250,7 +251,7 @@ mean(mypop)
 I can also plot it
 
 ```{r}
-## this plot is mad by using "base" R plotting utilities
+## this plot is made by using "base" R plotting utilities
 hist(mypop)
 abline(v = mean(mypop), 
        col = "red", 

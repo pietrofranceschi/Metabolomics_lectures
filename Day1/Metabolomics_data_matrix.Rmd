@@ -9,6 +9,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(knitr)
+library(tidyverse)
 ```
 
 
@@ -42,6 +43,104 @@ As in all _omic_ experiments, a metabolomic assay allows to measure a large numb
 include_graphics("../images/Matrix.svg")
 ```
 
+
+## {.flexbox .vcenter}
+
+~~**The objective of our analysis is to find "organization" inside the matrix**~~
+
+
+~~**Our organization should be also statistically robust**~~
+
+
+## Organization: Correlations
+
+```{r}
+
+# --- Parameters ---
+rho_target <- 0.8  # Desired correlation coefficient
+n <- 150           # Number of data points
+
+# Set seed for reproducibility
+set.seed(42)
+
+# 1. Generate Correlated Data
+# X is a standard normal variable
+X <- rnorm(n)
+# Epsilon is independent standard normal noise
+Epsilon <- rnorm(n)
+
+# Y is created such that the correlation between X and Y is approximately rho
+# Formula: Y = rho * X + sqrt(1 - rho^2) * Epsilon
+Y <- rho_target * X + sqrt(1 - rho_target^2) * Epsilon
+
+# Create a data frame
+data_plot <- data.frame(X = X, Y = Y)
+
+# Calculate the actual correlation for the plot label
+actual_rho <- cor(data_plot$X, data_plot$Y)
+
+# 2. Create the Plot using ggplot2
+ggplot(data_plot, aes(x = X, y = Y)) +
+  # Add scatter points
+  geom_point(color = "#0072B2", alpha = 0.7, size = 3) + # Blue points
+  # Add a linear regression line (geom_smooth(method = "lm"))
+  geom_smooth(method = "lm", se = TRUE, color = "#D55E00", linetype = "solid", linewidth = 1) + # Orange regression line
+  # Customize plot theme and labels
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "Variable X",
+    y = "Variable Y"
+  ) +
+  # Customize title alignment and font
+  theme(plot.title = element_text(face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5, size = 12))
+
+```
+
+
+## Organization: Biomarkers
+
+```{r}
+set.seed(123) # For reproducibility
+n <- 50 # Number of observations per group
+
+# Group 1 (Lower Mean)
+group1_data <- rnorm(n, mean = 10, sd = 2) 
+
+# Group 2 (Higher Mean - designed to be significantly different)
+group2_data <- rnorm(n, mean = 13, sd = 2) 
+
+# Create the final data frame
+data_sig <- data.frame(
+  Group = factor(c(rep("Control", n), rep("Treatment", n))),
+  Variable_A = c(group1_data, group2_data)
+)
+
+
+
+# --- 3. Create the Jitter Plot with Boxplots and Significance ---
+ggplot(data_sig, aes(x = Group, y = Variable_A, fill = Group)) +
+  
+  # A. Boxplot (to show quartiles, median, and outliers)
+  geom_boxplot(width = 0.3, alpha = 0.5, outlier.shape = NA) +
+  
+  # B. Jitter Plot (to show individual data points)
+  geom_jitter(width = 0.2, alpha = 0.7, size = 2) +
+  
+  # D. Customization
+  scale_fill_manual(values = c("Control" = "#E69F00", "Treatment" = "#56B4E9")) + # Colorblind-friendly colors
+  labs(
+    x = "Group",
+    y = "Variable A (Continuous)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5))
+```
+
+
+
+
 ## Variables are not independent {.smaller}
 
 * Biological relations
@@ -65,7 +164,7 @@ include_graphics("../images/important.png")
 <br>
 
 <div style="background-color:#73AD21;padding:20px;border-radius: 15px;color:black;text-align: center;">
-  <p>Analytical correlation are always stronger than the biological one!</p>
+  <p>Analytical correlation is always stronger than the biological one!</p>
 </div>
 
 <br>
@@ -119,11 +218,11 @@ rect(xleft = 0.3, xright = 0.31, ybottom = -0.1, ytop = 1.1, border = "steelblue
 rect(xleft = 0.7, xright = 0.71, ybottom = -0.1, ytop = 1.1, border = "steelblue", lwd = 2)
 ```
 
-## Multiple testing
+## Where is the problem: Multiple testing
 
 * We measure many variables (features,metabolites) in the same set of samples
 * We run a battery of statistical tests looking for the significance of what we see in the individual variables 
-* **We ask ourselves if at least one variable is significant in the overall set of variables**
+* **We ask ourselves if at least one test is significant in the overall set of tests**
 
 <br>
 <hr>
@@ -131,10 +230,9 @@ rect(xleft = 0.7, xright = 0.71, ybottom = -0.1, ytop = 1.1, border = "steelblue
 ~~We run individual tests, but we have question about the full set of variables ...~~
 
 
-
 ## Multivariate approach
 
-Each samples is represented as a point in the multidimesional variable space. The dataset is a **cloud** of points in that space.
+Each samples is represented as a point in the multidimensional variable space. The dataset is a **cloud** of points in that space.
 
 The size of the space equals the number of variables we are measuring. **Multivariate methods** (PCA, PLS, ASCA, ...) are able to exploit the correlation between the variables to highlight/extract the organization of the data
 
@@ -142,7 +240,7 @@ The size of the space equals the number of variables we are measuring. **Multiva
 include_graphics("../images/Coord_planes_color.svg")
 ```
 
-## Why multivariate
+## Why multivariate ...
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.width=5, fig.height=6, out.width="50%"}
 library(tidyverse)

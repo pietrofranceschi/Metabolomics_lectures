@@ -11,56 +11,58 @@ knitr::opts_chunk$set(echo = FALSE)
 library(knitr)
 ```
 
-
 ## What is Metabolomics
 
 The objective of ~~metabolomics~~ is to characterize in the most complete and comprehensive way the pool of small molecules which are the end product of the metabolism.
 
-The pool of these molecules is known as ~~metabolome~~. 
+The pool of these molecules is known as ~~metabolome~~.
 
 Metabolomics aims at measuring the metabolites in a ~~quantitative~~ way and to characterize their relations and associations.
 
+## Why Metabolomics
 
-## Why Metabolomics 
-
-> 1. For the quest of ~~molecular markers~~ (_e.g. nutrition, health, cancer_ )
-> 2. To perform ~~molecular phenotyping~~ (_e.g. personalized medicine_)
-> 3. To associate a ~~genes~~ to its ~~function~~ (_e.g. to support breeding_)
-> 4. To study the ~~chemical interaction~~ in complex systems (_e.g. ecological interaction are often mediated by chemicals_) 
-
+> 1.  For the quest of ~~molecular markers~~ (*e.g. nutrition, health, cancer* )
+> 2.  To perform ~~molecular phenotyping~~ (*e.g. personalized medicine*)
+> 3.  To associate a ~~genes~~ to its ~~function~~ (*e.g. to support breeding*)
+> 4.  To study the ~~chemical interaction~~ in complex systems (*e.g. ecological interaction are often mediated by chemicals*)
 
 ## Challenges of Metabolomics {.smaller .build}
 
 ### 1 - ~~Size~~ of the metabolic chemical space
+
 The molecules included in the metabolome can be extremely diverse in particular if plants/microorganisms are concerned.
 
 ### 2 - Diversity in the ~~chemical properties~~ of the metabolites
+
 The chemical diversity results in different properties which would require different methods of analysis.
 
 ### 3 - Huge differences in ~~concentrations~~
+
 Some of the metabolite are present in high concentration, while other highly relevant compounds are present only in small traces. Our analytical method should be able to ~~see them at the same time~~.
 
-
-## Challenges of Metabolomics cont ...{.smaller .build}
+## Challenges of Metabolomics cont ... {.smaller .build}
 
 ### 4. - ~~Coverage~~
+
 The chemical diversity makes extremely difficult to have only **one** analytical method able to analyze everything.
 
 ### 5. - ~~Pre analytics~~
+
 The approach is so sensitive that every un reproducible pre-analytical issue will affect the data.
 
 ## How Metabolomics
 
 We need an analytic technique:
 
-> 1. Sensitive to the **chemical structure**.
-> 2. **Universal** - able to see almost all classes of molecules.
-> 3. **Sensitive** - able to see metabolites with low concentrations.
-> 4. With an high **dynamic range** - able to measure at the same time low and high abundant compounds.
+> 1.  Sensitive to the **chemical structure**.
+> 2.  **Universal** - able to see almost all classes of molecules.
+> 3.  **Sensitive** - able to see metabolites with low concentrations.
+> 4.  With an high **dynamic range** - able to measure at the same time low and high abundant compounds.
 
 # Analytical Techniques in Metabolomics
 
 ## Nuclear Magnetic Resonance
+
 ```{r out.width="100%", fig.align="center"}
 include_graphics("../images/NMR.png")
 ```
@@ -77,20 +79,17 @@ include_graphics("../images/NMR1.png")
 include_graphics("../images/MS.png")
 ```
 
-
 ## Molecules and Ions
 
 ```{r out.width="100%", fig.align="center"}
 include_graphics("../images/MS1.png")
 ```
 
-
 ## Chromatographic Separation
 
 ```{r out.width="100%", fig.align="center"}
 include_graphics("../images/LC-MS.png")
 ```
-
 
 ## Molecules and features
 
@@ -100,118 +99,125 @@ include_graphics("../images/MS_NMR_multi.png")
 
 ## Molecules and features
 
-In all the techniques presented so far, ~~each metabolite~~ give rise to a large set of ~~different signals~~: 
+In all the techniques presented so far, ~~each metabolite~~ give rise to a large set of ~~different signals~~:
 
-* **MS** - the different ions produced in the ionization of the metabolite.
-* **NMR** - the different peaks coming from the resonance of the nuclei present in the molecule.
-* **LC/GC-MS** - the different ions which are eluting at different time. These mz/rt couples are called *features*
+-   **MS** - the different ions produced in the ionization of the metabolite.
+-   **NMR** - the different peaks coming from the resonance of the nuclei present in the molecule.
+-   **LC/GC-MS** - the different ions which are eluting at different time. These mz/rt couples are called *features*
 
 <br><br>
 
-<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
-  ⚠️ <strong>Warning:</strong> All the variables coming from the same molecule are ~~highly correlated~~.
-</div>
+::: {style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;"}
+⚠️ <strong>Warning:</strong> All the variables coming from the same molecule are ~~highly correlated~~.
+:::
 
 ## Sources of Analytical Variability {.smaller}
 
 ### 1 - The measurement itself
+
 Even with the perfect instrument the "numbers" will change. Try measuring your temperature 10 times in a row ;-)
 
 ### 2 - Chromatographic drifts
+
 When chromatographic separation is present, elution times will slightly change from run to run. For GC the situation is better, but far from being perfect
-
-
 
 ## Sources of Analytical Variability {.smaller}
 
 ### 3 - Matrix effects
-In metabolomics we are loading on the instruments a complex mixture of chemicals. This complex chemical environment will affect the _response_ of the molecules in an often unpredictable way. The importance of this effect is so strong in MS that this technique is almost always coupled with chromatography
+
+In metabolomics we are loading on the instruments a complex mixture of chemicals. This complex chemical environment will affect the *response* of the molecules in an often unpredictable way. The importance of this effect is so strong in MS that this technique is almost always coupled with chromatography
 
 With chromatography the different molecules reach the ionization source at different times, reducing the matrix effect.
 
 ### 4 - Sample handling
-The approach is so powerful that all aspect related to sample handling/storage/extraction will affect the final result 
 
+The approach is so powerful that all aspect related to sample handling/storage/extraction will affect the final result
 
 ## NMR vs LC/GC MS {.build}
 
 ### NMR
-> 1. 😀 Reproducible
-> 2. 😀 Inherently quantitative
-> 3. 😀 Sensitive to the chemical structure
-> 4. 😞 Relatively insensitive
-> 5. 😞 Dynamic range
+
+> 1.  😀 Reproducible
+> 2.  😀 Inherently quantitative
+> 3.  😀 Sensitive to the chemical structure
+> 4.  😞 Relatively insensitive
+> 5.  😞 Dynamic range
 
 ### LC/GC - MS
-> 1. 😀 Sensitive
-> 2. 😀 Universal
-> 3. 😀 With high dynamic range
-> 3. 😞 Less reproducible (😉)
+
+> 1.  😀 Sensitive
+> 2.  😀 Universal
+> 3.  😀 With high dynamic range
+> 4.  😞 Less reproducible (😉)
 
 # Doing Metabolomics
 
 ## Targeted vs Untargeted {.smaller .build}
 
 ### Targeted
-We use the analytical method of choice to analyze a selected set of metabolites. The list can go from around 10 to something around 500.  
+
+We use the analytical method of choice to analyze a selected set of metabolites. The list can go from around 10 to something around 500.
 
 ~~The measured variables are metabolites~~
 
-<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
-  ⚠️ <strong>Warning:</strong> The numbers we collect is the concentration of the individual metabolites.
-</div>
-
-
-
+::: {style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;"}
+⚠️ <strong>Warning:</strong> The numbers we collect is the concentration of the individual metabolites.
+:::
 
 ### Untargeted
-We "throw" a raw sample in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown. 
+
+We "throw" a raw sample in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown.
 
 ~~The measured variables are **not** metabolites~~
 
-<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
-  ⚠️ <strong>Warning:</strong> The numbers we get are the peak areas of the individual features.
-</div>
+::: {style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;"}
+⚠️ <strong>Warning:</strong> The numbers we get are the peak areas of the individual features.
+:::
 
-
-
-
-## Why targeted, why untargeted {.smaller .build }
+## Why targeted, why untargeted {.smaller .build}
 
 ### Targeted
 
-> 1. 😀 ~~quantitative~~ results are obtained "by definition"
-> 2. 😀 results can be interpreted under the light of the ~~known metabolic pathways~~
-> 3. 😀 the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited _batch effect_) 
-> 4. 😞 we basically look only to the expected
+> 1.  😀 ~~quantitative~~ results are obtained "by definition"
+> 2.  😀 results can be interpreted under the light of the ~~known metabolic pathways~~
+> 3.  😀 the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited *batch effect*)
+> 4.  😞 we basically look only to the expected
 
 ### Untargeted
 
-> 1. 😀 ~~holistic~~
-> 2. 😀 open to ~~unexpected~~
-> 3. 😞 tricky
-> 4. 😞 hardly quantitative
-> 5. 😞 not standardized
-
+> 1.  😀 ~~holistic~~
+> 2.  😀 open to ~~unexpected~~
+> 3.  😞 tricky
+> 4.  😞 hardly quantitative
+> 5.  😞 not standardized
 
 ## The ideal Metabolomics road-map
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/workflow.png")
+```{r out.width="70%", fig.align="center"}
+include_graphics("../images/metabolomics_workflow.png")
 ```
 
 # Pitfalls and caveats
 
-## Poor planning {.build }
+## Poor planning {.build}
 
-_~~Aka ... I have a refrigerator of samples ... shall we give a look?~~_
+~~*Aka ... I have a refrigerator of samples ... shall we give a look?*~~
 
-> 1. Unclear scientific question
-> 2. Suboptimal experimental design (no replicates, no proper definition of the study factors)
-> 2. Erratic analytical planning (unreliable sample extraction, disorganized analytical runs)
-> 4. ... 
+> 1.  Unclear scientific question
+> 2.  Suboptimal experimental design (no replicates, no proper definition of the study factors)
+> 3.  Erratic analytical planning (unreliable sample extraction, disorganized analytical runs)
+> 4.  ...
 
-Remember that ~~instruments are sensitive~~, so errors will unavoidably show-up in the final data (_garbage in, garbage out_)
+Remember that ~~instruments are sensitive~~, so errors will unavoidably show-up in the final data (*garbage in, garbage out*)
+
+## Sampling and sample handling {.build}
+
+> -   The analytical techniques used in metabolomics are extremely sensitive
+> -   More often than not the samples are complex mixtures of chemicals
+> -   Poor preparation, handling and storage will hamper the overall investigation
+
+*e.g. how to sample in a representative way in GC? How to quench the metabolism of microorganisms? how to store biofluids?*
+
 
 ## Annotation ...
 
@@ -219,71 +225,62 @@ Remember that ~~instruments are sensitive~~, so errors will unavoidably show-up 
 include_graphics("../images/annotation.png")
 ```
 
-
 ## Annotation in Untargeted Metabolomics
 
 As you have already understood, in untargeted metabolomics:
 
-- We do not measure the concentration of metabolites
-- If I have the metabolite is easier to understand what are the signals we actually measure (ions, NMR peaks, features)
-- ... the reverse (called ~~annotation~~) is not at all trivial
+-   We do not measure the concentration of metabolites
+-   If I have the metabolite is easier to understand what are the signals we actually measure (ions, NMR peaks, features)
+-   ... the reverse (called ~~annotation~~) is not at all trivial
 
-_~~Chemical annotation is the current bottleneck in untargeted metabolomics~~_
+~~*Chemical annotation is the current bottleneck in untargeted metabolomics*~~
 
 ## Annotation strategies {.build}
 
-> * Fragmentation experiments (in MS!)
-> * In house db of standards
-> * On-line db of standards
-> * Chemoinformatics
-> * ML (prediction of chemical structures from spectra)
+> -   Fragmentation experiments (in MS!)
+> -   In house db of standards
+> -   On-line db of standards
+> -   Chemoinformatics
+> -   Molecular Networks
+> -   ML/AI (prediction of chemical structures from spectra)
 
-
-## Sampling and sample handling {.build}
-
-> - The analytical techniques used in metabolomics are extremely sensitive
-> - More often than not the samples are complex mixtures of chemicals
-> - Poor preparation, handling and storage will hamper the overall investigation
-
-_e.g. how to sample in a representative way in GC? How to quench the metabolism of microorganisms? how to store biofluids?_ 
 
 ## Statistical Validation {.build}
 
-> 1. Unfavorable variables-to-samples ratio
-> 2. Unexpected subpopulations
-> 3. Not always easy to place the results inside the established body of knowledge
+> 1.  Unfavorable variables-to-samples ratio
+> 2.  Unexpected subpopulations
+> 3.  Not always easy to place the results inside the established body of knowledge
 
 <br>
+
 <hr>
+
 <br>
 
-**~~Two stage design:~~** 
+~~**Two stage design:**~~
 
-1. Hypothesis generation
-2. Validation
+1.  Hypothesis generation
+2.  Validation
 
 ## Domain Specific Validation
 
 Are my results fitting inside the established (domain specific) body of knowledge?
 
-
-_e.g. Are my markers reasonable under the light of the human metabolism?_
-
+*e.g. Are my markers reasonable under the light of the human metabolism?*
 
 ## Key Elements to design a succesfull metabolomics investigation {.build .smaller}
 
 ### 1 - Planning
-> - Scientific question
-> - Experimental design
-> - Analytical platform and analytical run
-> - Data analysis strategy
+
+> -   Scientific question
+> -   Experimental design
+> -   Analytical platform and analytical run
+> -   Data analysis strategy
 
 ### 2 - Awareness
-> - _The Strength Of The Chain Is In The Weakest Link_
+
+> -   *The Strength Of The Chain Is In The Weakest Link*
 
 ### 3 - Interdisciplinarity
-> - The analyst and/or the data analyst are your best friends ...
 
-
-
-
+> -   The analyst and/or the data analyst are your best friends ...

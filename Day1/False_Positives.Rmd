@@ -14,7 +14,7 @@ library(tidyverse)
 ```
 
 
-This demo deals with "random organization". As we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization" 
+This demo deals with "random organization". As we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization". 
 
 * can mirror a population level property
 * can be the result of a "unlucky" sampling
@@ -37,7 +37,7 @@ That's the battery of data matrices of growing size. Do I have some "true" resul
 
 **NO!**
 
-OK, let's calculate the correlation among the different variables in all the 40 scenarios
+OK, let's calculate the correlation among the different variables in all the 6 scenarios
 
 ```{r}
 ## I'm using purrr

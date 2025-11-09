@@ -19,15 +19,18 @@ library(tidyverse)
 ~~**Start from a clear question**~~
 
 
-## Quantify analytical variability {.build}
+## First things first {.build}
 
 > * What is the best strategy to quench metabolism?
 > * What is the best way to extract my samples?
+> * What is the best way to store my samples?
 > * **MS performance degrade with time**: how long can I run my sample list before cleaning
+
+## Controlling analytical variability {.build}
+
 > * **Block** your experimental design on the analytical batch 
 > * Reduce as much as possible the length of the chromatographic run
-
-##
+> * **Measure the analytical variability**
 
 ```{r fig.height=4, fig.width=8}
 sample_list <- tibble(batch = rep(c("Batch 1","Batch 2"), each = 20),
@@ -53,9 +56,9 @@ sample_list %>%
 
 
 
-## Quality Contro Samples (QC) {.build}
+## Your silver bullet: Quality Contro Samples (QC) {.build}
 
-> Reference samples should be regularly injected along the sequence.  
+> Reference samples which are regularly injected along the sequence.  
 
 > They measure analytical stability because the sample itself is the same.
 
@@ -64,7 +67,7 @@ sample_list %>%
 > **Pooled samples** are often the preferred choice
 
 
-## 
+## A fairly good sample list
 
 ```{r fig.height=3, fig.width=4, fig.align="center"}
 
@@ -79,7 +82,7 @@ tibble(order = 1:14,
 ```
 
 * The usefulness of blanks is disputed
-* The first repeated QCs are use to allow column equilibration
+* The first repeated QCs are use to allow the column to equilibrate
 * One could add QC dilutions
 * Also the design of the sequence can be validated
 

@@ -60,7 +60,7 @@ include_graphics("../images/pvalueworship.png")
 ## Let's test that! {.build}
 
 >1. Suppose that the drug has no effect (H0) ... but then my 50 people are a random drawing from the population
->2. Calculate the distribution of the mean level of cholesterol in groups of 50 people coming from the population.(mind the gap! ... this is not the distribution of cholesterol in the population!)
+>2. Calculate the distribution of the mean level of cholesterol in groups of 50 people coming from the population ... mind the gap! ... this is not the distribution of cholesterol in the population!
 >3. Calculate the probability of obtaining less than **193** from this distribution (*p-value*)
 >4. Reject the H0 if the p-value is lower than the selected threshold (typically 0.05)
 
@@ -93,7 +93,7 @@ abline(h = 200, col = "darkred")
 >* The blue dots are "random" draws from the population which show an average level of cholesterol lower than the one we observed
 >* For blue dots we observe less than 193 by chance
 >* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (p = 0.14 !)
->* ~~I cannot reject H0 at the 0.05 level ... ~~
+>* I cannot reject H0 at the 0.05 level ... 
 
 
 ## More on this ...{.build}
@@ -106,7 +106,7 @@ The correct wording in my paper should be
 
 *" ... the results are not statistically significant at the 0.05 level of confidence"* ... 
 
-~~but they are significant at the 0.15 level! ~~
+but they are significant at the 0.15 level! 
 
 
 
