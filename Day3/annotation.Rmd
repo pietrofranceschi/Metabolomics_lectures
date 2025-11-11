@@ -38,7 +38,8 @@ In the case of MS based experiments, the process of annotation requires the inte
 1. Chemical expertise
 2. Database of standards (in-house or on-line)
 3. Fragmentation experiments
-4. Chemoinformatics and predictive models
+4. Molecular Networks
+5. Chemoinformatics and predictive models
 
 
 ## Fragmentation Experiments
@@ -66,6 +67,6 @@ include_graphics("../images/tandemMS.jpg")
 * [Sirius](https://bio.informatik.uni-jena.de/software/sirius/)
 * [Metfrag](https://ipb-halle.github.io/MetFrag/)
 
-
-
+## Molecular Networks
+* [GNPS](https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp?redirect=auth)
 

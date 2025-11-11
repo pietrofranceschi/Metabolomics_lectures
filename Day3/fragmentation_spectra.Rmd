@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r message=FALSE, warning=FALSE}
+library(MsExperiment)
 library(xcms)
 library(tidyverse)
 library(plotly)
@@ -19,7 +20,7 @@ library(plotly)
 
 The objective of this demo is to show how `xcms` can be used to read the results of fragmentation experiments and using of them to perform annotation.
 
-Annotation is the process of going back from features to compounds and it can be considered one (or may be the bigger) challenge in metabolomics. In real life world, annotation is an effort which integrate a lot of different expertises ranging from chemistry, informatics, chemoinformatics,....
+Annotation is the process of going back from features to compounds and it can be considered one (or may be the bigger) challenge in metabolomics. In real life world, annotation is an effort which integrate a lot of different expertise ranging from chemistry, informatics, chemoinformatics,....
 
 Annotation in MS is particularly challenging due to the fact that a mass spectrometer is basically a tool able to measure only mass to charge ratios ... I mean can you imagine how difficult would be to distinguish people on the bases only of their weight?
 
@@ -32,9 +33,9 @@ The importance of having reliable and efficient databases of chemical standards 
 ## Reading MS/MS
 
 Let's suppose that having a library of standards in our lab, we injected them with the same chromatography used for the wines. 
-Among the other compounds, our library contains 3 types of procyanidins B1, B2, B3. They are rather large polyphenols widely present in many matrices of vegetal origin.
+Among the other compounds, our library contains 3 types of procyanidins B1, B2, B3. They are rather large polyphenols widely present in many matrices of plant origin.
 
-Suppose that our analytical facility told us that they were analysed (with other compounds) in three injections:  
+Suppose that our analytical facility told us that they were analyses (with other compounds) in three injections:  
   
 - B3: y015_mix02_2_NEG_DDA.mzML  
 - B2: y016_mix03_2_NEG_DDA.mzML  
@@ -56,9 +57,11 @@ The automatic way is to do peak picking ... but this will be part of your assign
 std_files <- list.files("../data/wines/", pattern = "mix", full.names = TRUE)
 
 
-std_raw <- readMSData(std_files, 
-                    msLevel. = 1, ## we read only MS1 
-                    mode = "onDisk")
+std_raw <- readMsExperiment(
+  spectraFiles = std_files, mode = "ondisk", 
+  msLevel. = 1   ## only full scan
+  )  
+
 ```
 
 
@@ -66,17 +69,16 @@ Since we know what we are looking for let's get the extracted ion trace
 
 
 ```{r}
-proc_chrom <- chromatogram(std_raw, mz = 577.1352 + 0.01*c(-1, 1))
+proc_chrom <- chromatogram(std_raw, mz = 577.1352 + 0.02*c(-1, 1))
 
 plot(proc_chrom, col = seq(3)+1)
 ```
 
-
-So three large peaks are visible in the three files, just to have an idea let's look to the three profiles in interactive mode:
+So three large peaks are visible in the three files, just to have an idea and spot the right retention time let's look to the three profiles in interactive mode:
 
 ```{r}
 ggplotly(ggplot() + 
-  geom_line(aes(x = rtime(proc_chrom[1,1]), intensity(proc_chrom[1,1]), col = "red")) + 
+  geom_line(aes(x = rtime(proc_chrom[1,1]), intensity(proc_chrom[1,1])), col = "red") + 
   geom_line(aes(x = rtime(proc_chrom[1,2]), intensity(proc_chrom[1,2])), col = "green") + 
   geom_line(aes(x = rtime(proc_chrom[1,3]), intensity(proc_chrom[1,3])), col = "blue") + 
   theme_bw())
@@ -93,16 +95,35 @@ Let's find the spectrum on the top of the blue trace:
 ```{r}
 blue_id <- which(rtime(std_raw) == 233.9871)
 
-ggplotly(plot(std_raw[[blue_id]]))
+```
+
+We extract the spectra from the MsExperiment object
+
+```{r}
+std_raw_spectra <- spectra(std_raw)
+```
+
+Let's plot the spectrum
+
+```{r}
+ggplotly(
+  ggplot() + 
+    geom_segment(aes(x = mz(std_raw_spectra[blue_id])[[1]],
+                     xend = mz(std_raw_spectra[blue_id])[[1]],
+                     y = 0,
+                     yend = intensity(std_raw_spectra[blue_id])[[1]])) +
+    theme_bw()
+)
 ```
 
 
 So the full scan does not give a clear fingerprint of the fragmentation spectrum, to understand that we have to query MS2 spectra:
 
 ```{r}
-std_MS_MS <- readMSData(std_files, 
-                    msLevel. = 2, ## we read only MS1 and MS2
-                    mode = "onDisk")
+std_MS_MS <- readMsExperiment(
+  spectraFiles = std_files, mode = "ondisk", 
+  msLevel. = 2   ## only fragmentation
+  )  
 ```
 
 
@@ -111,7 +132,11 @@ The question to be addressed, now is: do we have fragmentation spectra of the io
 The list of precursor ions can be directly accessed with
 
 ```{r}
-precursorMz(std_MS_MS)[1:10]
+std_MS_MS %>% 
+  spectra() %>% 
+  precursorMz() %>% 
+  .[1:10]
+
 ```
 
 
@@ -120,7 +145,8 @@ But two handy methods can be used to filter the list of precursors
 
 ```{r}
 focus_MS_MS <- std_MS_MS %>% 
-  filterPrecursorMz(577.1352, ppm = 10) %>% 
+  spectra() %>%
+  filterPrecursorMzValues(577.1352, ppm = 10) %>% 
   filterRt(rt = c(224,280))
 
 
@@ -133,19 +159,24 @@ So here we have four spectra compatible with the rules ...Let's look to their re
 rtime(focus_MS_MS)
 ```
 
-The first two are OK (File1 and File2), for the third file we have two fragmentations. This is not unreasonable since the blue peak is large, the ion at m/z 577 was, most likely fragmented in two consecutive scans. To understand which is the good one one should rely on DBs or interpretation of mass spectra.
+The first two are OK (File1 and File2), for the third file we have two fragmentation. This is not unreasonable since the blue peak is large, the ion at m/z 577 was, most likely fragmented in two consecutive scans. To understand which is the good one one should rely on DBs or interpretation of mass spectra.
 
 
 Let's now make a nice plot with the MS/MS spectra:
 
 ```{r}
-plot(mz(focus_MS_MS[[1]]), 
-     intensity(focus_MS_MS[[1]])/max(intensity(focus_MS_MS[[1]])), 
+
+mz_focusMSMS <- mz(focus_MS_MS)
+i_focus_MSMS <- intensity(focus_MS_MS)
+
+
+plot(mz_focusMSMS[[1]], 
+     i_focus_MSMS[[1]]/max(i_focus_MSMS[[1]]), 
      type = "h",
      xlab = "mz", col = "red",
      ylab = "normalized Intensity")
-points(mz(focus_MS_MS[[2]])+2, intensity(focus_MS_MS[[2]])/max(intensity(focus_MS_MS[[2]])), col = "green", type = "h")
-points(mz(focus_MS_MS[[4]])-2, intensity(focus_MS_MS[[4]])/max(intensity(focus_MS_MS[[4]])), col = "blue", type = "h")
+points(mz_focusMSMS[[2]]+2, i_focus_MSMS[[2]]/max(i_focus_MSMS[[2]]), col = "green", type = "h")
+points(mz_focusMSMS[[4]]-2, i_focus_MSMS[[4]]/max(i_focus_MSMS[[4]]), col = "blue", type = "h")
 ```
 
 So, as expected the three procyanidins are giving substantially the same fragmentation spectrum and are eluting at three different retention times.  
@@ -153,4 +184,7 @@ So, as expected the three procyanidins are giving substantially the same fragmen
 
 ### DIY
 
-Try to check if these compounds are visible inside one of our wine samples. Hint, (1) check the extracted ion trace of the 577 ion (2) check if this ion was fragmented.  
+Try to check if these compounds are visible inside one of our wine samples. Hints, 
+
+(1) check the extracted ion trace of the 577 ion 
+(2) check if this ion was fragmented

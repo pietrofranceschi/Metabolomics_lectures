@@ -67,9 +67,10 @@ Next step is to determine their retention times. For that, now we are going to d
 ```{r}
 # Import the file
 std_files <- list.files("../data/wines/", pattern = "mix02", full.names = TRUE)
-std_raw <- readMSData(std_files, 
-                      msLevel. = 1, ## we read only MS1 
-                      mode = "onDisk")
+std_raw <- readMsExperiment(
+  spectraFiles = std_files, mode = "ondisk", 
+  msLevel. = 1   ## only full scan
+  )  
 # Perform peak picking:
 cwp <- CentWaveParam(peakwidth = c(5, 30),    ## expected range of chromatographic peak width
                      ppm = 5,                 ## tolerance to identify ROIs in the mz/rt plane
@@ -143,13 +144,16 @@ Finally, below we are going to check if in this injection any MSMS spectra for t
 
 ```{r}
 # load MSMS data:
-std_MSMS <- readMSData(std_files, 
-                       msLevel. = 2, ## we read only MS1 
-                       mode = "onDisk")
+std_MSMS <- readMsExperiment(
+  spectraFiles = std_files[1], mode = "ondisk", 
+  msLevel. = 2   ## only fragmentation
+  )  
+
+
 # create a query data.frame of MSMS data:
 std_MSMS_tb <- data.frame(
-  mz = precursorMz(std_MSMS),
-  rtime = rtime(std_MSMS)
+  mz = precursorMz(spectra(std_MSMS)),
+  rtime = rtime(spectra(std_MSMS))
 )
 # perform annoation based on precursorMz values:
 MSMS_match <- matchMz(
@@ -161,11 +165,7 @@ MSMS_match_tb <- MSMS_match_tb[!is.na(MSMS_match_tb$target_name),]
 MSMS_match_tb
 ```
 
-We can see that in this sample it was recorded the MSMS of 3 of the included analytical standards. Let's keep this information because later it will be useful to compare these MSMS with the ones collected in the wine samples in case these compounds are found in them (in order to confirm their annotation with a higher confidence).
-
-```{r}
-std_MSMS <- std_MSMS[featureNames(std_MSMS) %in% rownames(MSMS_match_tb)]
-```
+We can see that in this sample it was recorded the MSMS of 5 of the included analytical standards. Let's keep this information because later it will be useful to compare these MSMS with the ones collected in the wine samples in case these compounds are found in them (in order to confirm their annotation with a higher confidence).
 
 
 ## Annotation of study samples
@@ -190,7 +190,7 @@ ft_match <- matchValues(
 ft_match
 ```
 
-We can see that 4/8 compounds included in the standard mix 2 are observed in  wine samples. Let's see which compounds are they:
+We can see that 4/8 compounds included in the standard mix 2 were observed in  wine samples. Let's see which compounds are they:
 
 ```{r}
 tb_match <- matchedData(ft_match)
@@ -208,25 +208,33 @@ ft_chr <- featureChromatograms(raw_data_filled,
                                filled = FALSE)
 group_colors <- paste0(brewer.pal(3, "Set1"), "60")
 names(group_colors) <- c("red","wht","X")
-sample_colors <- group_colors[raw_data_filled$color]
-plot(ft_chr, col = group_colors[raw_data_filled$color],
+sample_colors <- group_colors[sampleData(raw_data_filled)$color]
+plot(ft_chr, col = group_colors[sampleData(raw_data_filled)$color],
      peakBg = sample_colors[chromPeaks(ft_chr)[, "sample"]])
 abline(v = stds_tb$RT[stds_tb$name == "Gallic acid"], lwd = 10, col = "#D2D2D290")
 ```
 
-Finally, let's compare the MSMS pattern of gallic acid observed in the analtyical standard with the MSMS of this feature recorded within the study samples:
+Finally, let's compare the MSMS pattern of gallic acid observed in the analytical standard with the MSMS of this feature recorded within the study samples:
 
 ```{r}
 # get the MSMS of the standard:
-ga_MSMS <- std_MSMS[[which(featureNames(std_MSMS) == rownames(MSMS_match_tb)[MSMS_match_tb$target_name == "Gallic acid"])]]
+ga_MSMS <- std_MSMS %>% 
+  spectra() %>% 
+  filterPrecursorMzValues(MSMS_match_tb[MSMS_match_tb$target_name == "Gallic acid","mz"], ppm = 10) %>%
+  filterRt(MSMS_match_tb[MSMS_match_tb$target_name == "Gallic acid","rtime"] + 5 * c(-1, 1))
+
+
 
 # get all MSMS in study samples with the m/z and RT of gallic acid:
-MSMS_data <- readMSData(
-  files = raw_data_filled$filepath, 
+MSMS_data <- readMsExperiment(
+  files = sampleData(raw_data_filled)$filepath, 
   msLevel. = 2,
   mode = "onDisk") 
+
+
 ga_MSMS_data <- MSMS_data %>%
-  filterPrecursorMz(169.0142, ppm = 10) %>%
+  spectra() %>% 
+  filterPrecursorMzValues(169.0142, ppm = 10) %>%
   filterRt(92.5 + 5 * c(-1, 1))
 ga_MSMS_data
 ```
@@ -236,18 +244,22 @@ Below we compare through a mirror plot the MSMS observed in study samples (upper
 
 ```{r}
 ggplotly(ggplot() +
-           geom_segment(aes(x = mz(ga_MSMS), xend = mz(ga_MSMS), 
-                            y = 0, yend = (intensity(ga_MSMS)/max(intensity(ga_MSMS)))*(-1)), 
+           geom_segment(aes(x = mz(ga_MSMS)[[1]], xend = mz(ga_MSMS)[[1]], 
+                            y = 0, yend = (intensity(ga_MSMS)[[1]]/max(intensity(ga_MSMS)[[1]]))*(-1)), 
                         color = "red") +
-           geom_segment(aes(x = mz(ga_MSMS_data)[[1]], xend = mz(ga_MSMS_data)[[1]], 
-                            y = 0, yend = intensity(ga_MSMS_data)[[1]]/max(intensity(ga_MSMS_data)[[1]]))) +
-           ylab("relative intensity") + xlab("m/z") +
-           annotate(geom = "text", x = 160, y = 0.8, cex = 3, 
-                    label = ga_MSMS_data@phenoData@data[ga_MSMS_data[[1]]@fromFile, 1]) +
-           annotate(geom = "text", x = 160, y = -0.8, cex = 3, 
-                    label = basename(fileNames(std_MSMS)[ga_MSMS@fromFile]), color = "red")
+           geom_segment(aes(x = mz(ga_MSMS_data)[[10]], xend = mz(ga_MSMS_data)[[10]], 
+                            y = 0, yend = intensity(ga_MSMS_data)[[10]]/max(intensity(ga_MSMS_data)[[10]]))) +
+           ylab("relative intensity") + xlab("m/z") 
+         #  annotate(geom = "text", x = 160, y = 0.8, cex = 3, 
+          #          label = ga_MSMS_data@phenoData@data[ga_MSMS_data[[1]]@fromFile, 1]) +
+         #  annotate(geom = "text", x = 160, y = -0.8, cex = 3, 
+          #          label = basename(fileNames(std_MSMS)[ga_MSMS@fromFile]), color = "red")
 )
 ```
+
+
+## 
+
 
 
 ### DIY
