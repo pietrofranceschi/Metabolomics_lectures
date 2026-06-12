@@ -1,9 +1,13 @@
 ---
 title: "Statistical Testing and Effect Size"
-author: "Pietro Franceschi" 
-output: 
-  ioslides_presentation:
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
     css: "../mycss.css"
+    transition: slide
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -18,8 +22,8 @@ library(MASS)
 ## The BIG question
 
 
-<div style="border: 2px solid #e74c3c; background-color: #fdecea; padding: 10px; border-radius: 5px;">
-  ⚠️ <strong>The question:</strong> <br> Is what I’m observing **true beyond my sample**. Can I draw general conclusions from a limited set samples?
+<div class="box-red">
+  ⚠️ <strong>The question:</strong> <br> Is what I'm observing **true beyond my sample**. Can I draw general conclusions from a limited set samples?
 </div>
 
 <br><br>
@@ -38,7 +42,7 @@ Due to variability, it is impossible to get **certain** answers from an experime
 
 Statistical testing is a procedure which allows us to quantify this level of confidence
 
-## The concept 
+## The concept
 
 1. Suppose that what we observe is the result of chance alone (Null Hypothesis - H0)
 2. Use statistics to calculate the probability of getting at least what we observe under H0 (by chance!) (*p-value*)
@@ -50,19 +54,23 @@ Statistical testing is a procedure which allows us to quantify this level of con
 include_graphics("../images/pvalueworship.png")
 ```
 
-## Example: lowering cholesterol {.build}
+## Example: lowering cholesterol
 
->* Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
->* We claim that a new secret drug we recently invented reduces **significantly** the cholesterol level in the population
->* To prove that we get a group of 50 people, we treat them with the drug and we measure their average cholesterol level.  This mean turns out to be **193**.
->* Is this pilot study supporting my claim ? i.e. is the ~~difference between 193 and 200 significant~~?
+::: incremental
+* Suppose that the level of cholesterol in the population is normally distributed with mean 200 and standard deviation 50
+* We claim that a new secret drug we recently invented reduces **significantly** the cholesterol level in the population
+* To prove that we get a group of 50 people, we treat them with the drug and we measure their average cholesterol level.  This mean turns out to be **193**.
+* Is this pilot study supporting my claim ? i.e. is the ~~difference between 193 and 200 significant~~?
+:::
 
-## Let's test that! {.build}
+## Let's test that!
 
->1. Suppose that the drug has no effect (H0) ... but then my 50 people are a random drawing from the population
->2. Calculate the distribution of the mean level of cholesterol in groups of 50 people coming from the population ... mind the gap! ... this is not the distribution of cholesterol in the population!
->3. Calculate the probability of obtaining less than **193** from this distribution (*p-value*)
->4. Reject the H0 if the p-value is lower than the selected threshold (typically 0.05)
+::: incremental
+1. Suppose that the drug has no effect (H0) ... but then my 50 people are a random drawing from the population
+2. Calculate the distribution of the mean level of cholesterol in groups of 50 people coming from the population ... mind the gap! ... this is not the distribution of cholesterol in the population!
+3. Calculate the probability of obtaining less than **193** from this distribution (*p-value*)
+4. Reject the H0 if the p-value is lower than the selected threshold (typically 0.05)
+:::
 
 ## Let's plot it!
 
@@ -78,35 +86,37 @@ for(i in (1:100)){
 mycols <- rep("#C8081570",100)
 mycols[means50 < 193] <- "#377eb870"
 
-plot(x = 1:100, means50, ylim = c(150, 250), pch = 19, col = mycols, 
+plot(x = 1:100, means50, ylim = c(150, 250), pch = 19, col = mycols,
      ylab = "mean of 50 individuals", xlab = "Replicated sampling from the population")
 abline(h = 193, col = "steelblue", lty = 2)
 abline(h = 200, col = "darkred")
 
 ```
 
-## What we see {.build}
+## What we see
 
->* The means of the different groups are different
->* The distribution of the means is nicely centered around the population mean!
->* The blue line represents the mean of my sample 50 people (193!)
->* The blue dots are "random" draws from the population which show an average level of cholesterol lower than the one we observed
->* For blue dots we observe less than 193 by chance
->* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (p = 0.14 !)
->* I cannot reject H0 at the 0.05 level ... 
+::: incremental
+* The means of the different groups are different
+* The distribution of the means is nicely centered around the population mean!
+* The blue line represents the mean of my sample 50 people (193!)
+* The blue dots are "random" draws from the population which show an average level of cholesterol lower than the one we observed
+* For blue dots we observe less than 193 by chance
+* Apparently getting at least that value only by chance is not extremely unlikely ... 14 blue dots out 100 (p = 0.14 !)
+* I cannot reject H0 at the 0.05 level ...
+:::
 
 
-## More on this ...{.build}
+## More on this ...
 
 So you see ... we need a **probability** and we also need a **threshold** (0.05)
 
 <br>
 
-The correct wording in my paper should be 
+The correct wording in my paper should be
 
-*" ... the results are not statistically significant at the 0.05 level of confidence"* ... 
+*" ... the results are not statistically significant at the 0.05 level of confidence"* ...
 
-but they are significant at the 0.15 level! 
+but they are significant at the 0.15 level!
 
 
 
@@ -125,7 +135,7 @@ for(i in (1:50)){
 mycols <- rep("#C8081570",50)
 mycols[means50 < 193] <- "#377eb870"
 
-plot(x = 1:50, means50, ylim = c(180, 220), pch = 19, col = mycols, 
+plot(x = 1:50, means50, ylim = c(180, 220), pch = 19, col = mycols,
      ylab = "mean of 50 individuals", xlab = "Replicated sampling from theoretical population")
 abline(h = 193, col = "steelblue", lty = 2)
 abline(h = 200, col = "darkred")
@@ -177,12 +187,14 @@ text(x = c(0,100,200,300,400), y = rep(220,5), labels = c("5","50","500","5000",
 
 ```
 
-## Is a low *p-value* the only thing we need? {.build}
+## Is a low *p-value* the only thing we need?
 
->* Is a reduction of 0.01% really useful/relevant?
->* Big number of samples will make tiny differences statistically significant!
->* Statistical significance does not mean biological/agronomic/medical relevance
->* The *p-value* alone cannot be used to judge the relevance of a research ...
+::: incremental
+* Is a reduction of 0.01% really useful/relevant?
+* Big number of samples will make tiny differences statistically significant!
+* Statistical significance does not mean biological/agronomic/medical relevance
+* The *p-value* alone cannot be used to judge the relevance of a research ...
+:::
 
 
 ## Erroneous ...
@@ -218,19 +230,19 @@ normal4 <- function(x){
 
 
 
-xvalues %>% ggplot(aes(x = x)) + 
-  stat_function(fun = normal1, lwd = 1, col = "darkblue") + 
+xvalues %>% ggplot(aes(x = x)) +
+  stat_function(fun = normal1, lwd = 1, col = "darkblue") +
   stat_function(fun = normal1, geom = "area", fill = "steelblue", alpha = 0.5) +
-  stat_function(fun = normal2, lwd = 1, col = "darkred") + 
+  stat_function(fun = normal2, lwd = 1, col = "darkred") +
   stat_function(fun = normal2, geom = "area", fill = "red", alpha = 0.5) +
-  stat_function(fun = normal3, lwd = 1, col = "darkblue") + 
+  stat_function(fun = normal3, lwd = 1, col = "darkblue") +
   stat_function(fun = normal3, geom = "area", fill = "steelblue", alpha = 0.5) +
-  stat_function(fun = normal4, lwd = 1, col = "darkred") + 
+  stat_function(fun = normal4, lwd = 1, col = "darkred") +
   stat_function(fun = normal4, geom = "area", fill = "red", alpha = 0.5) +
-  geom_hline(yintercept = 0, lwd = 1) + xlab("") + ylab("") + 
-  geom_text(x = -14, y = 0.25, label = "Small Effect") + 
-  geom_text(x = 10, y = 0.25, label = "Large Effect") + 
-  theme_light() + 
+  geom_hline(yintercept = 0, lwd = 1) + xlab("") + ylab("") +
+  geom_text(x = -14, y = 0.25, label = "Small Effect") +
+  geom_text(x = 10, y = 0.25, label = "Large Effect") +
+  theme_light() +
   ylim(c(0,0.3)) +
   theme(aspect.ratio = 0.3)
 
@@ -281,7 +293,7 @@ x <- tibble(size = c(3,5,20,50,100))
 
 ## now we create the dataset
 
-x <- x %>% 
+x <- x %>%
   mutate(
     g1 = map(size, function(s) {
       out <- matrix(0,nrow = s, ncol = 100)
@@ -297,12 +309,12 @@ x <- x %>%
       }
       out
     })
-  ) 
-    
+  )
+
   ## Now we calculate the pvalues
 
 
-x <- x %>% 
+x <- x %>%
   mutate(ps = map2(g1,g2, function(x,y){
     ps <- rep(0,ncol(x))
     for(i in 1:ncol(x)){
@@ -313,7 +325,7 @@ x <- x %>%
 
 ## Now the cohen's d
 
-x <- x %>% 
+x <- x %>%
   mutate(ds = map2(g1,g2, function(x,y){
     ds <- rep(0,ncol(x))
     for(i in 1:ncol(x)){
@@ -323,19 +335,19 @@ x <- x %>%
   }))
 
 
-x %>% 
+x %>%
   unnest(c("ps","ds")) %>%
-  mutate(size = factor(size)) %>% 
-  dplyr::select(size,ps,ds) %>% 
-  pivot_longer(-size) %>% 
-  ggplot() + 
+  mutate(size = factor(size)) %>%
+  dplyr::select(size,ps,ds) %>%
+  pivot_longer(-size) %>%
+  ggplot() +
   geom_jitter(aes(x = size, y = value), width = 0.2, col = "steelblue", alpha = 0.7) +
   geom_hline(aes(yintercept = if_else(name == "ds",-1,0.05)), col  ="red", lty = 2) +
-  facet_wrap(~name, scales = "free") + 
-  xlab("Sample Size") + 
-  theme_light() + 
+  facet_wrap(~name, scales = "free") +
+  xlab("Sample Size") +
+  theme_light() +
   theme(aspect.ratio = 0.7)
-  
+
 ```
 
 ## Notes
@@ -343,5 +355,3 @@ x %>%
 * With three samples variability is large
 * Also the possibility of calling non significant the difference is large
 * Even the effect size does not tell to me if something is relevant!
-
-

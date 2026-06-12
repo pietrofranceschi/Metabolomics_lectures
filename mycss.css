@@ -3,6 +3,48 @@ slides > slide {
   background-color: white;
 }
 
+/* revealjs: reduce base font so content fits the slide */
+.reveal {
+  font-size: 30px;
+}
+
+/* title slide: push title down from the top */
+#title-slide .title {
+  margin-top: 2em;
+}
+
+/* title slide: smaller author / email, with breathing room below the title */
+.reveal h2.author {
+  font-size: 0.45em;
+  font-weight: normal;
+  margin-top: 1.2em;
+}
+
+/* slide titles: breathing room above */
+.reveal .slides section h2 {
+  margin-top: 0.6em;
+}
+
+/* bullet lists: always left-aligned and anchored to full width so multiple
+   lists on the same slide share the same left edge */
+.reveal ul,
+.reveal ol {
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* revealjs: tighten up vertical spacing */
+.reveal .slides section {
+  padding: 20px 40px;
+}
+
+/* revealjs: prevent code blocks from blowing up the slide */
+.reveal pre {
+  font-size: 0.55em;
+  line-height: 1.3;
+}
+
 
 #notes {
   color: #377eb8;
@@ -20,8 +62,27 @@ del {
 
 strong {
   color: #377eb8;
-<<<<<<< HEAD
 }
-=======
+
+/* ── highlight boxes ─────────────────────────────────────────────────── */
+.box-red {
+  border: 2px solid #e41a1c;
+  background-color: #fdecea;
+  padding: 10px;
+  border-radius: 5px;
 }
->>>>>>> bd1cd0e1b3e52af2a809aadbd7ecf825f8dcee26
+
+.box-blue {
+  border: 2px solid #377eb8;
+  background-color: #eaf4fb;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.box-key {
+  border: 2px solid #388e3c;
+  background-color: #f1f8e9;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
+}

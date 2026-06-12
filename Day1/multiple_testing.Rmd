@@ -1,0 +1,296 @@
+---
+title: "Multiple Testing"
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
+    css: "../mycss.css"
+    transition: slide
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(knitr)
+library(tidyverse)
+```
+
+## Where we left off
+
+In a single test, we accept a ~~false positive rate~~ of $\alpha = 0.05$.
+
+. . .
+
+This means: if H0 is true, we wrongly reject it **5% of the time**.
+
+. . .
+
+<div class="box-red">
+⚠️ <strong>The metabolomics reality:</strong><br>
+We do not test <em>one</em> hypothesis. We simultaneously test <strong>hundreds or thousands</strong> of variables.
+</div>
+
+## A concrete example
+
+Imagine a metabolomics experiment:
+
+::: incremental
+- **2 groups** of samples (treated vs control)
+- **1000 metabolites** measured for each sample
+- A **t-test** for every metabolite → 1000 p-values
+- We flag anything with $p < 0.05$ as "significant"
+:::
+
+. . .
+
+How many false positives should we expect?
+
+## Expected false positives
+
+If ~~none~~ of the 1000 metabolites truly differ between groups:
+
+$$\text{Expected false positives} = 1000 \times 0.05 = \mathbf{50}$$
+
+. . .
+
+We would report **50 "significant" metabolites** — all of them artefacts.
+
+. . .
+
+<div class="box-key">
+Performing many tests inflates the probability of finding something by chance alone.
+</div>
+
+# Visualising the problem
+
+## p-values under H₀
+
+When there is **no real effect**, p-values follow a ~~uniform distribution~~ between 0 and 1.
+
+```{r fig.align='center', out.width="50%"}
+set.seed(42)
+n_vars <- 1000
+n_samples <- 20
+
+A <- matrix(rnorm(n_vars * n_samples), nrow = n_samples)
+B <- matrix(rnorm(n_vars * n_samples), nrow = n_samples)
+
+pvals <- sapply(1:n_vars, function(i) t.test(A[, i], B[, i])$p.value)
+
+tibble(p = pvals) %>%
+  ggplot(aes(x = p)) +
+  geom_histogram(binwidth = 0.05, fill = "steelblue", colour = "white") +
+  geom_vline(xintercept = 0.05, colour = "#e41a1c", linetype = "dashed", linewidth = 1) +
+  annotate("text", x = 0.08, y = 65, label = "α = 0.05", colour = "#e41a1c", hjust = 0) +
+  labs(x = "p-value", y = "Count",
+       title = paste0("1000 random t-tests — ", sum(pvals < 0.05), " with p < 0.05")) +
+  theme_light(base_size = 16)
+```
+
+## What this tells us
+
+::: incremental
+- The histogram is **flat** — every p-value is equally likely under H0
+- The red bar on the left ($p < 0.05$) contains ~50 tests
+- These are ~~all false positives~~ — there is no true signal in this data
+- A flat p-value histogram is actually a useful **quality check**: it confirms no real effects are present
+:::
+
+## When there ARE real effects
+
+If some variables truly differ between groups, the histogram is ~~no longer flat~~: a spike appears near zero on top of the uniform background.
+
+```{r fig.align='center', out.width="50%"}
+set.seed(99)
+n_null_h   <- 950   # variables with no effect
+n_signal_h <- 50    # variables with a true effect
+n_samp_h   <- 20
+
+pv_null   <- sapply(1:n_null_h, function(i)
+  t.test(rnorm(n_samp_h), rnorm(n_samp_h))$p.value)
+
+pv_signal <- sapply(1:n_signal_h, function(i)
+  t.test(rnorm(n_samp_h, mean = 0), rnorm(n_samp_h, mean = 1.8))$p.value)
+
+tibble(p     = c(pv_null, pv_signal),
+       origin = c(rep("null (no effect)", n_null_h),
+                  rep("true effect", n_signal_h))) %>%
+  ggplot(aes(x = p, fill = origin)) +
+  geom_histogram(binwidth = 0.05, colour = "white", position = "stack") +
+  geom_vline(xintercept = 0.05, colour = "#e41a1c", linetype = "dashed", linewidth = 1) +
+  scale_fill_manual(values = c("null (no effect)" = "grey70", "true effect" = "#377eb8"),
+                    name = "") +
+  labs(x = "p-value", y = "Count",
+       title = "1000 tests: 950 null + 50 true effects") +
+  theme_light(base_size = 16) +
+  theme(legend.position = "bottom")
+```
+
+## Reading the mixed histogram
+
+::: incremental
+- The **flat part** across the full range → null features (false positives hiding here)
+- The **spike near zero** → true positives piling up at small p-values
+- The height of the spike above the flat baseline is proportional to the ~~number of real effects~~
+- A spike + flat pattern is the signature of a real experiment with **some** true signal
+:::
+
+
+. . .
+
+
+<br>
+
+<div class="box-blue">
+<strong>Practical tip:</strong> always plot the p-value histogram before applying any correction — it tells you immediately whether your data contains any signal at all.
+</div>
+
+## Family-wise error rate (FWER)
+
+The probability of making **at least one** false positive across $m$ independent tests:
+
+$$\text{FWER} = 1 - (1 - \alpha)^{m}$$
+
+. . .
+
+| Tests ($m$) | FWER at $\alpha = 0.05$ |
+|:-----------:|:-----------------------:|
+| 1           | 0.05                    |
+| 10          | 0.40                    |
+| 50          | 0.92                    |
+| 100         | 0.994                   |
+| 1000        | ≈ 1                     |
+
+. . .
+
+<br>
+
+<div class="box-red">
+⚠️ With the number of tests typical of metabolomics, an uncorrected analysis is <em>guaranteed</em> to produce false positives.
+</div>
+
+# Correction methods
+
+## Two families of solutions
+
+::: incremental
+1. **Control FWER** — ensure the probability of *any* false positive stays below $\alpha$
+   - Bonferroni, Holm
+   - Very conservative; appropriate when ~~every false positive is dangerous~~
+
+2. **Control FDR** — ensure the *proportion* of false positives among findings stays below $\alpha$
+   - Benjamini-Hochberg
+   - Less conservative; appropriate for ~~discovery science~~
+:::
+
+## Bonferroni correction
+
+The simplest FWER control: divide the threshold by the number of tests.
+
+$$\alpha_{\text{Bonf}} = \frac{\alpha}{m}$$
+
+. . .
+
+For $m = 1000$ and $\alpha = 0.05$:
+
+$$\alpha_{\text{Bonf}} = \frac{0.05}{1000} = 0.00005$$
+
+. . .
+
+<div class="box-red">
+⚠️ <strong>Very conservative.</strong> A true positive must produce an extremely small p-value to survive. In metabolomics with correlated variables this is often too strict.
+</div>
+
+## False Discovery Rate (FDR)
+
+Introduced by **Benjamini & Hochberg (1995)** — one of the most cited papers in statistics.
+
+. . .
+
+Instead of controlling the probability of *any* false positive, control the **expected proportion** of false positives among all discoveries:
+
+$$\text{FDR} = E\left[\frac{\text{false positives}}{\text{total discoveries}}\right]$$
+
+. . .
+
+The resulting corrected p-values are called ~~q-values~~.
+
+A q-value of 0.05 means: among all features with $q \leq 0.05$, we expect at most **5% to be false positives**.
+
+
+
+# The volcano plot
+
+## Combining p-value and effect size
+
+A **volcano plot** displays, for each variable:
+
+- x-axis: ~~fold change~~ (or log₂ fold change) — the *size* of the effect
+- y-axis: $-\log_{10}(p)$ — the *confidence* in the effect
+
+```{r fig.align='center', out.width="50%"}
+set.seed(123)
+n_feat <- 500
+
+fc  <- rnorm(n_feat, 0, 0.8)
+pv  <- runif(n_feat)
+
+# inject some real signal
+sig_idx <- sample(1:n_feat, 40)
+fc[sig_idx]  <- rnorm(40, 0, 1) + sample(c(-2.5, 2.5), 40, replace = TRUE)
+pv[sig_idx]  <- runif(40, 0, 0.001)
+
+qv <- p.adjust(pv, method = "BH")
+
+tibble(fc = fc, pv = pv, qv = qv) %>%
+  mutate(status = case_when(
+    qv < 0.05 & fc >  1 ~ "up",
+    qv < 0.05 & fc < -1 ~ "down",
+    TRUE                 ~ "ns"
+  )) %>%
+  ggplot(aes(x = fc, y = -log10(pv), colour = status)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_hline(yintercept = -log10(max(pv[qv < 0.05])),
+             linetype = "dashed", colour = "grey40") +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed", colour = "grey40") +
+  scale_colour_manual(values = c(up = "#e41a1c", down = "#377eb8", ns = "grey60"),
+                      name = "") +
+  labs(x = "log₂ fold change", y = "-log₁₀(p)") +
+  theme_light(base_size = 16) +
+  theme(legend.position = "bottom")
+```
+
+## Reading a volcano plot
+
+::: incremental
+- Points in the **upper corners** — large effect, high confidence → strong candidates
+- Points at the **top centre** — significant but small effect → statistically real, biologically questionable
+- Points on the **sides, low** — large fold change but high p-value → likely noise or low sample size
+- The horizontal dashed line marks the **FDR threshold**
+- The vertical lines mark the **fold-change cutoff**
+:::
+
+# Take-home messages
+
+##
+
+<div class="box-red">
+⚠️ <strong>Never report uncorrected p-values</strong> when testing multiple hypotheses simultaneously.
+</div>
+
+<br>
+
+::: incremental
+- The **number of tests** is as important as the threshold
+- **Bonferroni** for strict FWER control (clinical, confirmatory settings)
+- **Benjamini-Hochberg** for discovery (metabolomics, genomics, exploratory)
+- Always inspect the **p-value histogram** — a spike near 0 and flat elsewhere is a good sign
+- Statistical significance alone is never enough: pair it with ~~effect size~~
+:::
+
+##
+
+<div class="box-key">
+In a typical metabolomics experiment you will test hundreds of features. Without correction, your results list is dominated by noise. With FDR control, you can make principled discoveries.
+</div>

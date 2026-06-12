@@ -1,6 +1,6 @@
 ---
 title: "Purring and nesting in R"
-author: "Pietro Franceschi"
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
 date: "`r Sys.Date()`"
 output: html_document
 ---

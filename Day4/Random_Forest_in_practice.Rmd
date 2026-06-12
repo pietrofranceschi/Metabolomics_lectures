@@ -1,6 +1,6 @@
 ---
 title: "Random Forest in practice"
-author: "Pietro Franceschi"
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
 date: "12/11/2020"
 output: html_document
 ---

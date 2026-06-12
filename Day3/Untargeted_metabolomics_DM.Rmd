@@ -1,9 +1,13 @@
 ---
 title: "Untargeted Metabolomics Data Matrix"
-author: "Pietro Franceschi"
-output: 
-  ioslides_presentation:
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
     css: "../mycss.css"
+    transition: slide
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -13,11 +17,11 @@ library(tidyverse)
 library(MASS)
 ```
 
-## Starting Ideas {#notes }
+## Starting Ideas {#notes}
 
->1. The data matrix will be **FAT**
->2. The variable we measure are **not** metabolites
->3. We want to process the raw data coming from the instrument and organize them in a data matrix
+> 1. The data matrix will be **FAT**
+> 2. The variable we measure are **not** metabolites
+> 3. We want to process the raw data coming from the instrument and organize them in a data matrix
 
 ## LC/GC MS
 
@@ -75,7 +79,7 @@ include_graphics("../images/ion_mobility.png")
 
 **One dimensional data**
 
-NMR measures a physical property (their frequency of resonance) of atomic nuclei in presence of a magnetic field. The **measured frequency of resonance depends on the chemical environment**, i.e. on the structure of the molecule which contains an active NMR nucleus 
+NMR measures a physical property (their frequency of resonance) of atomic nuclei in presence of a magnetic field. The **measured frequency of resonance depends on the chemical environment**, i.e. on the structure of the molecule which contains an active NMR nucleus
 
 1. No separation in time is (generally) needed
 2. Each molecule/metabolite produces more than one NMR peak
@@ -96,10 +100,4 @@ include_graphics("../images/nmr_spectroscopy.png")
 
 - Dimension 1: shift in frequency to a reference in **ppm**
 - The intensity of the different peaks coming from the same molecule are highly correlated
-- In metabolomics, the ppm scale is *binned* (*bucketing*) to account for slight misalignments 
-
-
-
-
-
-
+- In metabolomics, the ppm scale is *binned* (*bucketing*) to account for slight misalignments

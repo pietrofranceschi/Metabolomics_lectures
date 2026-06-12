@@ -1,6 +1,6 @@
 ---
 title: "Wrangling a Targeted Metabolomics DM"
-author: "Pietro Franceschi"
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
 output: html_document
 ---
 
@@ -357,7 +357,7 @@ The situation largely improves, even if some compounds are still showing strange
 
 
 ```{r}
-DM_nest$rawplots$`Taurodeoxycholic acid`
+DM_nest$rawplots$`Tauro-ß-Muricholic acid`
 ```
 
 Get out the samples wiuth intensity higher than 2000

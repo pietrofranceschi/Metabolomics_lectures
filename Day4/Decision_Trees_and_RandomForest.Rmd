@@ -1,9 +1,13 @@
 ---
 title: "Trees and Forests"
-author: "Pietro Franceschi"
-output: 
-  ioslides_presentation:
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
     css: "../mycss.css"
+    transition: slide
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -22,9 +26,9 @@ A tibble containing the passenger of the TItanic along with their fate during th
 
 
 ```{r, message=FALSE}
-train_titanic <- read_csv("../data/train_titanic.csv") %>% 
-  dplyr::select(Survived, Sex, Age) %>% 
-  na.omit() %>% 
+train_titanic <- read_csv("../data/train_titanic.csv") %>%
+  dplyr::select(Survived, Sex, Age) %>%
+  na.omit() %>%
   mutate(Survived = ifelse(Survived == 1, "survived","died"))
 
 summary(train_titanic)
@@ -55,23 +59,27 @@ Each node shows
 - the predicted probability of survival,
 - the percentage of observations in the node.
 
-## Pros anc Cons {.build} 
+## Pros and Cons
 
 **Pros**
 
-> - Trees are versatile (they can combine different types of variables)
-> - No problems with variable scaling
-> - Interpretable by definition
+::: incremental
+- Trees are versatile (they can combine different types of variables)
+- No problems with variable scaling
+- Interpretable by definition
+:::
 
 <hr>
 
 **Cons**
 
-> - High **variance** i.e. they do not always do well on the test set ...
+::: incremental
+- High **variance** i.e. they do not always do well on the test set ...
+:::
 
 ## Selecting the split point: impurity
 
-In a decision tree the order of the variables and the split points are selected trying to maximize the "purity". 
+In a decision tree the order of the variables and the split points are selected trying to maximize the "purity".
 
 A perfect split will separate the classes without misclassifications, leaving with absolutely "pure" groups.
 
@@ -82,18 +90,18 @@ Among the different criteria used to define the _impurity_ of a node two stands 
 
 were $p_{k}$ is the fraction of samples of class $k$ in the node
 
-## Best Split on the Age 
+## Best Split on the Age
 
 ```{r fig.height=4, fig.width=7, out.width="100%", fig.align="center"}
-train_titanic %>% 
-  filter(Sex == "male") %>% 
-  ggplot() + 
-  geom_histogram(aes(x = Age, fill = Survived), position="identity", alpha = 0.7, col = "white") + 
-  scale_fill_brewer(palette = "Set1") + 
-  geom_vline(xintercept = 6.5, col = "red", lty = 2) + 
-  geom_text(x = 10, y = 30, label = "Split", size = 4) + 
-  theme_light() + 
-  ggtitle("Males") + 
+train_titanic %>%
+  filter(Sex == "male") %>%
+  ggplot() +
+  geom_histogram(aes(x = Age, fill = Survived), position="identity", alpha = 0.7, col = "white") +
+  scale_fill_brewer(palette = "Set1") +
+  geom_vline(xintercept = 6.5, col = "red", lty = 2) +
+  geom_text(x = 10, y = 30, label = "Split", size = 4) +
+  theme_light() +
+  ggtitle("Males") +
   theme(aspect.ratio = 0.5)
 ```
 
@@ -125,17 +133,11 @@ This mixture of _bootstrap_ and _averaging_ is technically called ~~bagging~~
 ## Most Relevant Model Parameters
 
 - **ntree**: Number of trees to grow. Larger number of trees produce more stable models and covariate importance estimates, but require more memory and a longer run time. For small datasets, 50 trees may be sufficient. For larger datasets, 500 or more may be required.
-- **mtry**: Number of variables available for splitting at each tree node. For classification models, the default is the square root of the number of predictor variables (rounded down). For regression models, it is the number of predictor variables divided by 3 (rounded down). 
+- **mtry**: Number of variables available for splitting at each tree node. For classification models, the default is the square root of the number of predictor variables (rounded down). For regression models, it is the number of predictor variables divided by 3 (rounded down).
 
 
 ## Advantages
 
 > - **Error estimate**: due to bootstrapping some of the sample are left out (technically they are _out-of-bag_), so an error estimate on an independent set of samples comes for free
 > - **Interpretability**: even if in a less sample way the importance of each variables can be assessed as in decision trees
-> - **Low sensitivity to model parameters**: it appears that in practice RF is robust to the change of settings 
-
-
-
-
-
-
+> - **Low sensitivity to model parameters**: it appears that in practice RF is robust to the change of settings

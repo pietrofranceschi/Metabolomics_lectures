@@ -17,13 +17,17 @@ The material (which is growing!) covers the following topics:
 * [Our R cheatsheet](Day1/Our_R_cheatsheet.html) - [Rmd](Day1/Our_R_cheatsheet.Rmd)
     - Practical: `tidyverse` & `purrr` hands on
 * [What is Metabolomics](Day1/Metabolomics.html)
-* [Experimental design](Day1/experimental_design.html )
+* [Reproducibility and Good Practices in Science](Day1/reproducibility_and_good_practices.html) - [Rmd](Day1/reproducibility_and_good_practices.Rmd)
+    - Three case studies: Benveniste/homeopathy (Nature 1988), the Potti scandal at Duke, chocolate & Nobel prizes (NEJM 2012)
+* [Experimental design](Day1/experimental_design.html)
     - Practical: stratified random sampling [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
 * [Practical Considerations on the study design](Day1/practical_considerations.html)
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)
-    - Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd) 
+    - Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd)
 * [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.html)
+* [Multiple testing](Day1/multiple_testing.html) - [Rmd](Day1/multiple_testing.Rmd)
+    - FWER, Bonferroni, Benjamini-Hochberg FDR, p-value histograms, volcano plots
 
 ## Day Two
 
@@ -56,8 +60,7 @@ The material (which is growing!) covers the following topics:
 
 ## Day Four
 
-* Biomarker discovery: the univariate way
-* False discoveries, and multiple testing
+* Biomarker discovery: the univariate way (see also [Multiple testing](Day1/multiple_testing.html))
 * [Machine Learning for Dummies](Day4/ML_intro.html)
   * [KOMP data](Day2/KOMP_data_targeted.RData)
 * PLS and PLS-DA

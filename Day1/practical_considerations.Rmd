@@ -1,9 +1,13 @@
 ---
 title: "Practical Considerations"
-author: "Pietro Franceschi"
-output: 
-  ioslides_presentation:
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
     css: "../mycss.css"
+    transition: slide
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -14,57 +18,60 @@ library(tidyverse)
 
 
 
-## {.flexbox .vcenter}
+##
 
 ~~**Start from a clear question**~~
 
 
-## First things first {.build}
+## First things first
 
-> * What is the best strategy to quench metabolism?
-> * What is the best way to extract my samples?
-> * What is the best way to store my samples?
-> * **MS performance degrade with time**: how long can I run my sample list before cleaning
+::: incremental
+* What is the best strategy to quench metabolism?
+* What is the best way to extract my samples?
+* What is the best way to store my samples?
+* **MS performance degrade with time**: how long can I run my sample list before cleaning
+:::
 
-## Controlling analytical variability {.build}
+## Controlling analytical variability
 
-> * **Block** your experimental design on the analytical batch 
-> * Reduce as much as possible the length of the chromatographic run
-> * **Measure the analytical variability**
+::: incremental
+* **Block** your experimental design on the analytical batch
+* Reduce as much as possible the length of the chromatographic run
+* **Measure the analytical variability**
+:::
 
 ```{r fig.height=4, fig.width=8}
 sample_list <- tibble(batch = rep(c("Batch 1","Batch 2"), each = 20),
                       class = rep(c("treated","control"), each = 20),
-                      order = rep(1:20, times = 2)) %>% 
+                      order = rep(1:20, times = 2)) %>%
   mutate(random_class = sample(class))
 
 class.labs <- c("non random","random")
 names(class.labs) <- c("class","random_class")
 
 
-sample_list %>% 
-  ungroup() %>% 
-  pivot_longer(contains("class")) %>% 
-  ggplot() + 
-  geom_point(aes(y = batch, x = order, fill = value), pch = 21, size = 3) + 
-  facet_wrap(~name, labeller = labeller(name = class.labs)) + 
-  theme_bw() + xlab("Injection Order") + ylab("") + 
-  scale_fill_brewer(palette = "Set1", name = "Sample Class") + 
+sample_list %>%
+  ungroup() %>%
+  pivot_longer(contains("class")) %>%
+  ggplot() +
+  geom_point(aes(y = batch, x = order, fill = value), pch = 21, size = 3) +
+  facet_wrap(~name, labeller = labeller(name = class.labs)) +
+  theme_bw() + xlab("Injection Order") + ylab("") +
+  scale_fill_brewer(palette = "Set1", name = "Sample Class") +
   theme(aspect.ratio = 0.5, legend.position = "bottom")
 
 ```
 
 
 
-## Your silver bullet: Quality Contro Samples (QC) {.build}
+## Your silver bullet: Quality Control Samples (QC)
 
-> Reference samples which are regularly injected along the sequence.  
-
-> They measure analytical stability because the sample itself is the same.
-
-> QC samples should be representative of the chamical complexity of the samples
-
-> **Pooled samples** are often the preferred choice
+::: incremental
+- Reference samples which are regularly injected along the sequence.
+- They measure analytical stability because the sample itself is the same.
+- QC samples should be representative of the chemical complexity of the samples
+- **Pooled samples** are often the preferred choice
+:::
 
 
 ## A fairly good sample list
@@ -72,11 +79,11 @@ sample_list %>%
 ```{r fig.height=3, fig.width=4, fig.align="center"}
 
 tibble(order = 1:14,
-       sample = c("blank","QC","QC","QC",rep(c("S","S","S","S","QC"), times = 2))) %>% 
-  ggplot() + 
+       sample = c("blank","QC","QC","QC",rep(c("S","S","S","S","QC"), times = 2))) %>%
+  ggplot() +
   geom_point(aes(y = 1, x = order, fill = sample), pch = 21, size = 4) +
-  theme_bw() + xlab("Injection Order") + ylab("") + 
-  scale_fill_brewer(palette = "Set1", name = "Sample Class") + 
+  theme_bw() + xlab("Injection Order") + ylab("") +
+  scale_fill_brewer(palette = "Set1", name = "Sample Class") +
   theme(aspect.ratio = 0.5, legend.position = "bottom", axis.text.y = element_blank() )
 
 ```
@@ -91,7 +98,7 @@ tibble(order = 1:14,
 
 * Standards and blanks
 * Analytical batches and batch effect
-* Randomization, analytical batches and large studies in clinical settings 
+* Randomization, analytical batches and large studies in clinical settings
 
 
 ## DDA and Fragmentation
@@ -142,6 +149,3 @@ The more experiments I do, the worst is my estimate of the peak area ...
 * plan different runs for FS and DDA
 * fragment only ion of interest
 * strike a balance between chromatography, instrument speed and number of experiments
-
-
-

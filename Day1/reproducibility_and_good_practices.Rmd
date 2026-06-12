@@ -1,0 +1,370 @@
+---
+title: "Reproducibility and Good Practices in Science"
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
+    css: "../mycss.css"
+    transition: slide
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+```
+
+## Why does this matter?
+
+Science is the ~~best tool~~ we have to understand the natural world.
+
+. . .
+
+But science is done by **humans**, and humans make mistakes — or worse.
+
+. . .
+
+The question is not *whether* errors happen, but **whether we can detect and correct them**.
+
+## The Scientific Method
+
+```{r out.width="70%", fig.align="center"}
+include_graphics("../images/reproducibility.png")
+```
+
+<p style="font-size:0.5em; color:#888; text-align:center;">Baker, M. (2016). 1,500 scientists lift the lid on reproducibility. <em>Nature</em>, 533, 452–454. Survey of <strong>1,576 researchers</strong>.</p>
+
+The cornerstone of science is **reproducibility**: an independent group must be able to repeat your experiment and obtain the ~~same result~~.
+
+## What can go wrong?
+
+::: incremental
+- **Poor experimental design** → systematic bias
+- **Inadequate statistical analysis** → spurious findings
+- **Data analysis errors** → wrong conclusions from correct data
+- **Confirmation bias** → seeing what we want to see
+- **Fraud and misconduct** → active manipulation
+:::
+
+## A spectrum of failure
+
+<div class="box-red">
+⚠️ <strong>The "reproducibility crisis"</strong><br>
+A large fraction of published scientific results cannot be reproduced by independent groups. Estimates range from <strong>50% to 70%</strong> of findings in some fields.
+</div>
+
+<br>
+
+We will look at **three real cases** spanning different failure modes:
+
+1. ~~Honest delusion~~ — Benveniste & homeopathy (Nature, 1988)
+2. ~~Fatal errors~~ — The Potti scandal at Duke University
+3. ~~Correlation is not causation~~ — Chocolate and Nobel Prizes (NEJM, 2012)
+
+
+# Case 1: The Benveniste Affair
+
+## The original claim
+
+<div style="display: flex; align-items: flex-start; gap: 30px;">
+<div style="flex: 1;">
+
+In **June 1988**, *Nature* published a paper by Dayenas, Beauvais, and **J. Benveniste** from INSERM 200, Paris.
+
+The claim: human basophils degranulate in response to anti-IgE antibodies diluted to **10⁻¹²⁰** — far beyond Avogadro's limit.
+
+~~Not a single antibody molecule~~ could be present in the solution.
+
+</div>
+<div style="flex: 1;">
+```{r out.width="100%"}
+include_graphics("../images/benveniste_paper-1.png")
+```
+</div>
+</div>
+
+## What does it mean?
+
+If anti-IgE retains its biological effectiveness at $10^{-120}$ dilution...
+
+. . .
+
+...then **water has memory** of the molecules once dissolved in it.
+
+. . .
+
+This would be the **scientific basis for homeopathy**.
+
+. . .
+
+<div class="box-blue">
+<strong>Nature published it anyway</strong> — with an unprecedented <em>editorial reservation</em>, and on the condition that an independent team could investigate the laboratory.
+</div>
+
+## Nature sends an investigation team
+
+The team that visited INSERM 200 in July 1988:
+
+::: incremental
+- **John Maddox** — Editor of *Nature*
+- **James Randi** — Professional magician and skeptic (MacArthur Fellow)
+- **Walter W. Stewart** — Expert in scientific fraud and misconduct (NIH)
+:::
+
+. . .
+
+One week on-site. Access to **laboratory notebooks**.
+They imposed **strictly blinded** protocols.
+
+## The result: a delusion
+
+<div style="display: flex; align-items: flex-start; gap: 30px;">
+<div style="flex: 1;">
+```{r out.width="100%"}
+include_graphics("../images/homeopathy_delusion-1.png")
+```
+</div>
+<div style="flex: 1;">
+
+*Nature* Vol. 334, **28 July 1988**
+
+The investigators concluded:
+
+> *"We conclude that there is no substantial basis for the claim that anti-IgE at high dilution retains its biological effectiveness."*
+
+</div>
+</div>
+
+## What went wrong?
+
+::: incremental
+- **No serious blinding** — the person counting cells knew which tubes were "active"
+- **Observer bias** — samples that did not "work" were excluded or re-run
+- **Data errors of the magnitude that would be expected** from sampling noise
+- **Confirmation bias** — the word "working" was used only for positive results
+- **Financial conflict of interest** — two co-authors were paid by a homeopathic company
+:::
+
+## The lesson from Benveniste
+
+<div class="box-red">
+⚠️ <strong>Extraordinary claims require extraordinary evidence</strong><br>
+Blinding, independent replication, and rigorous documentation are not bureaucratic obstacles — they are the defences against our own wishful thinking.
+</div>
+
+<br>
+
+~~Benveniste was probably not lying~~ — he genuinely believed his results.
+
+That is precisely what makes this case so instructive.
+
+
+# Case 2: The Potti Scandal
+
+## The promise: personalised cancer therapy
+
+<div style="display: flex; align-items: flex-start; gap: 30px;">
+<div style="flex: 1;">
+
+Starting in **2006**, Anil Potti and colleagues at **Duke University** published a series of high-profile papers.
+
+The claim: microarray **gene expression signatures** from cancer cell lines can predict which drug a patient will respond to.
+
+Patients were being **enrolled in clinical trials** and allocated to treatment arms on this basis.
+
+</div>
+<div style="flex: 1;">
+```{r out.width="100%"}
+include_graphics("../images/potti_scandal-01.png")
+```
+</div>
+</div>
+
+## The forensic bioinformatics
+
+Keith Baggerly and Kevin Coombes at **MD Anderson** tried to reproduce the results as collaborators.
+
+. . .
+
+They could not. So they did something remarkable: they reverse-engineered the analyses from the published figures.
+
+. . .
+
+<div class="box-blue">
+<em>"Data processing is often not described well enough to allow for exact reproduction of the results, leading to exercises in <strong>forensic bioinformatics</strong>."</em><br>
+— Baggerly & Coombes, <em>Ann. Appl. Stat.</em> 2009
+</div>
+
+## What they found
+
+The errors were **remarkably simple**:
+
+::: incremental
+- **Off-by-one row/column shifts** when merging data tables
+- **Swapped sensitive/resistant labels** — the signature would treat patients with the *opposite* drug
+- **Wrong dataset** used for validation — an acute leukemia dataset used to validate a solid tumor predictor
+- **Reuse of training data** as "independent" test sets
+:::
+
+. . .
+
+~~The most common errors are simple errors.~~
+
+## The consequences
+
+::: incremental
+- Three **clinical trials** were placed on hold (2010)
+- Multiple papers **retracted** from high-profile journals
+- Potti **resigned** from Duke
+- Duke University paid **\$10 million** to settle lawsuits from patients
+- A **US Senate investigation** was launched into clinical trial oversight
+:::
+
+. . .
+
+<div class="box-red">
+⚠️ <strong>This was not fraud in the traditional sense</strong><br>
+The errors were "simple" — but they were never caught because the raw data and analysis code were never shared.
+</div>
+
+## The lesson from Potti
+
+**Reproducible research is a patient safety issue.**
+
+::: incremental
+- ~~Share raw data~~ — not just summary tables
+- ~~Share analysis code~~ — not just methods paragraphs
+- **Independent reanalysis** should be possible and routine
+- High-throughput data creates a gap between complexity and intuition that makes errors nearly invisible
+:::
+
+. . .
+
+> *"Poor documentation can shift from an inconvenience to an active danger when it obscures not just methods but errors."*
+> — Baggerly & Coombes
+
+
+# Case 3: Chocolate and Nobel Prizes
+
+## Published in the New England Journal of Medicine
+
+<div style="display: flex; align-items: flex-start; gap: 30px;">
+<div style="flex: 1;">
+
+In **October 2012**, Franz Messerli published in *NEJM* (one of the most prestigious medical journals):
+
+**"Chocolate Consumption, Cognitive Function, and Nobel Laureates"**
+
+The logic: flavonoids in chocolate improve cognitive function → countries that eat more chocolate should have more Nobel laureates.
+
+</div>
+<div style="flex: 1;">
+```{r out.width="80%", fig.align="center"}
+include_graphics("../images/chocolate.png")
+```
+</div>
+</div>
+
+## The statistics
+
+The correlation between per-capita chocolate consumption and Nobel laureates per 10 million population across 23 countries:
+
+$$r = 0.791, \quad P < 0.0001$$
+
+. . .
+
+~~Highly statistically significant.~~
+
+. . .
+
+To increase a country's Nobel laureate count by **1**, it would need to increase chocolate consumption by **0.4 kg per capita per year**.
+
+. . .
+
+The paper **concludes**: *"Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize."*
+
+## What is wrong here?
+
+::: incremental
+- **Correlation ≠ causation** — a fundamental principle
+- **Ecological fallacy** — country-level averages say nothing about individuals
+- **Reverse causation** — wealthy, highly-educated countries both consume more chocolate *and* produce more Nobel laureates
+- **Confounding** — GDP, research funding, education, climate... all correlated with both variables
+- **No mechanism established** — the flavonoid hypothesis is extrapolated far beyond the evidence
+:::
+
+## Why did it get published?
+
+. . .
+
+The paper was submitted as **"Occasional Notes"** — a lighter format in NEJM.
+
+. . .
+
+The author later acknowledged it was ~~partly tongue-in-cheek~~.
+
+. . .
+
+But the paper has been cited **hundreds of times**, often uncritically, as evidence for dietary effects on brain function.
+
+. . .
+
+<div class="box-blue">
+<strong>The lesson:</strong> the prestige of a journal does not guarantee the validity of a finding. <strong>Critical reading is always required.</strong>
+</div>
+
+## The lesson from chocolate & Nobel prizes
+
+**Statistically significant ≠ scientifically meaningful.**
+
+::: incremental
+- ~~Observational studies cannot establish causation~~
+- A p-value tells you the probability of the data given no effect — it does not tell you **why** the effect exists
+- With enough variables, spurious correlations are ~~inevitable~~
+- Always ask: *What is the plausible mechanism? What are the confounders?*
+:::
+
+
+# Three Cases, Common Threads
+
+## What connects them?
+
+| Case | Main failure |
+|------|-------------|
+| Benveniste | Confirmation bias, lack of blinding |
+| Potti | Undocumented analysis, no data sharing |
+| Chocolate/Nobel | Confounding, correlation ≠ causation |
+
+. . .
+
+~~All three were published in top journals.~~
+
+. . .
+
+All three were eventually corrected — but only after **harm was done**.
+
+## The path forward
+
+::: incremental
+- **Pre-register** your hypotheses before collecting data
+- **Share** raw data and analysis code (open science)
+- **Blind** your analyses where possible
+- **Report effect sizes**, not just p-values
+- Embrace **reproducible workflows** (R Markdown, Jupyter, ...)
+- **Replicate** before acting on findings, especially high-stakes ones
+:::
+
+##
+
+~~**Reproducibility is not a bureaucratic burden.**~~
+
+<br>
+
+It is the mechanism by which science corrects itself — and the guarantee that our findings are worth building on.
+
+<br>
+
+. . .
+
+**In metabolomics**, where data matrices are large, analysis pipelines are complex, and the pressure to find biomarkers is high, these principles are not optional.

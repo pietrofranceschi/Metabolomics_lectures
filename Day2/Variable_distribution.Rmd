@@ -1,9 +1,13 @@
 ---
 title: "Distribution of Measured Variables"
-author: "Pietro Franceschi"
-output: 
-  ioslides_presentation:
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
     css: "../mycss.css"
+    transition: slide
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -32,13 +36,13 @@ normal1 <- function(x){
 }
 
 
-xvalues %>% ggplot(aes(x = x)) + 
-  stat_function(fun = normal1, lwd = 1, col = "darkblue") + 
+xvalues %>% ggplot(aes(x = x)) +
+  stat_function(fun = normal1, lwd = 1, col = "darkblue") +
   stat_function(fun = normal1, geom = "area", fill = "steelblue", alpha = 0.5) +
-  theme_light() + 
-  geom_hline(yintercept = 0, lwd = 1) + 
-  geom_vline(xintercept = 0, lty = 2, col = "red") + 
-  geom_text(x = 0, y = 0.1, label = "mean", size =7) + 
+  theme_light() +
+  geom_hline(yintercept = 0, lwd = 1) +
+  geom_vline(xintercept = 0, lty = 2, col = "red") +
+  geom_text(x = 0, y = 0.1, label = "mean", size =7) +
   ylab("Probability")
 
 
@@ -67,27 +71,29 @@ hist(means, main = "Means of repeated sampling (20)", col = "Orange")
 
 **Noteworthy**
 
-> 1. The sampling distribution get's narrower as the sample increases 
+> 1. The sampling distribution get's narrower as the sample increases
 > 2. This is the ultime reasons why measuring more samples leads to smaller _p-values_
 
 
 ## Formally
 
-- Mean of the sampling distribution: $\mu_{pop}$  
-- Variance of the sampling distribution: $\frac{\sigma}{\sqrt(N)}$  
+- Mean of the sampling distribution: $\mu_{pop}$
+- Variance of the sampling distribution: $\frac{\sigma}{\sqrt(N)}$
 
 
 Where $N$ is the size of the sample
 
 
-## ... but {.build}
+## ... but
 
 We are often dealing with data non normally distributed
 
->1. Count based technologies never return negative numbers ... (MS!)
->2. In many biochemical reactions the product of concentrations is important  
->3. Presence of sub-populations
->4. Outliers
+::: incremental
+1. Count based technologies never return negative numbers ... (MS!)
+2. In many biochemical reactions the product of concentrations is important
+3. Presence of sub-populations
+4. Outliers
+:::
 
 Sub populations are typically present in complex experiments
 
@@ -123,7 +129,7 @@ legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd 
 ## Solutions
 
 > 1. **Non-parametric** approaches (Kruskall-Wallis, quantile-regression, permutations, bootstrap, ...)
-> 2. Variable **transformations** 
+> 2. Variable **transformations**
 
 
 Remember that non parametric tests suffer of lack of power and are often completely useless fin investigations with only few samples (5-10)
@@ -150,7 +156,7 @@ legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd 
 
 ## Quantile - quantile plots
 
-Quantile quantile plots are used to visually compare the **theoretical quantiles** of a distribution with the **sample quantiles** 
+Quantile quantile plots are used to visually compare the **theoretical quantiles** of a distribution with the **sample quantiles**
 
 ```{r fig.align='center'}
 a <- rnorm(30)
@@ -167,7 +173,7 @@ qqnorm(lndata, main = "Normal q-q plot of log-normal data", pch = 19, col = "#98
 qqline(lndata)
 
 ```
- 
+
 
 ## Take home message {#highlights}
 

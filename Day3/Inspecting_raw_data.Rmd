@@ -1,6 +1,6 @@
 ---
 title: "Inspecting raw LC-MS Data"
-author: "Pietro Franceschi"
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
 output: html_document
 ---
 
@@ -115,7 +115,7 @@ So both object are lists: for every scan we have a vector of `mz` and a vector o
 ### Plot by hand
 
 ```{r}
-plot(mz[[100]], I[[100]], type = "h")
+plot(mz[[1]], I[[1]], type = "h")
 ```
 
 ### Plot with `xcms`
@@ -123,14 +123,14 @@ plot(mz[[100]], I[[100]], type = "h")
 The first spectrum can be extracted by standard list subsetting
 
 ```{r}
-s1 <- spectra(fs_raw)[100]
+s1 <- spectra(fs_raw)[1]
 s1
 ```
 
 So a method for this type of object is already in place
 
 ```{r}
-plotSpectra(spectra(fs_raw)[220])
+plotSpectra(spectra(fs_raw)[1])
 ```
 
 
@@ -151,7 +151,7 @@ spectra_tibble <- tibble(rt = rt,
 ```{r}
 
 ggplotly(spectra_tibble  %>% unnest(c(mz, I)) %>% 
-  filter(mz > 284 & mz < 300) %>% 
+  filter(mz > 230 & mz < 310) %>% 
   filter(rt > 200 & rt< 300) %>% 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
@@ -227,6 +227,11 @@ Here we see a clear difference between the two traces, looking to the names we s
 
 
 ```{r}
+# extract the chromatogram
+chromatogram(two_raw, 
+              mz = 289.07 + 0.01*c(-1, 1), 
+              rt = 250 + 60*c(-1, 1)) %>% 
+  plot(.)
 
 ```
 

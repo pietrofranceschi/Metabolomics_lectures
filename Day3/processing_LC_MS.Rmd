@@ -1,9 +1,13 @@
 ---
 title: "Processing LC MS Data"
-author: "Pietro Franceschi"
-output: 
-  ioslides_presentation:
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
     css: "../mycss.css"
+    transition: slide
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -12,6 +16,7 @@ library(knitr)
 library(tidyverse)
 library(patchwork)
 library(cowplot)
+library(MSnbase)
 library(xcms)
 library(plotly)
 ```
@@ -71,19 +76,19 @@ Statistics, Bionformatics, Machine Learning, Chemometrics, ..., provide the tool
 ```{r fig.align='center', out.width="80%"}
 
 a <- tibble(class = rep(c("A","B"), each = 100),
-       intensity = c(rnorm(100,10), rnorm(100,11))) %>% 
-  ggplot() + 
-  geom_jitter(aes(x = class, y = intensity, col = class), width = 0.1) + 
-  theme_bw() + 
+       intensity = c(rnorm(100,10), rnorm(100,11))) %>%
+  ggplot() +
+  geom_jitter(aes(x = class, y = intensity, col = class), width = 0.1) +
+  theme_bw() +
   theme(aspect.ratio = 1)
 
 
 b <- tibble(met_a = runif(20,0,10)) %>%
-  mutate(noise = rnorm(20)) %>% 
-  mutate(met_b = met_a*2 + noise) %>% 
-  ggplot() + 
-  geom_point(aes(x = met_a, y = met_b), col = "steelblue", size = 2) + 
-  theme_bw() + 
+  mutate(noise = rnorm(20)) %>%
+  mutate(met_b = met_a*2 + noise) %>%
+  ggplot() +
+  geom_point(aes(x = met_a, y = met_b), col = "steelblue", size = 2) +
+  theme_bw() +
   theme(aspect.ratio = 1)
 
 
@@ -93,30 +98,38 @@ b|a
 
 
 
-## False Positives {.build}
+## False Positives
 
-> * Organization can show up only by chance
-> * These results are *true*, but the hold only for the data we are analyzing now
-> * Organization is not necessarily science
-> * Variability causes this
-> * We need to *validate* our outcomes
+::: incremental
+- Organization can show up only by chance
+- These results are *true*, but the hold only for the data we are analyzing now
+- Organization is not necessarily science
+- Variability causes this
+- We need to *validate* our outcomes
+:::
 
 
-## On Validation {.build}
+## On Validation
 
-> * **Statistical Validation**: get brand new samples and see if what we get is still there
-> * **Domain Validation**: is what I'm getting in keeping with the domain specific body of knowledge? Could I design an experiment to check my hypothesis?
+::: incremental
+- **Statistical Validation**: get brand new samples and see if what we get is still there
+- **Domain Validation**: is what I'm getting in keeping with the domain specific body of knowledge? Could I design an experiment to check my hypothesis?
+:::
 
-> #### Do we always need statistics?
+. . .
 
-## Data hygiene {.build}
+#### Do we always need statistics?
 
-> * Go for a scripting language and forget Excel
-> * ... at least use a gui pipeline or a web based solution
-> * Organize data and metadata
-> * Avoid as much as possible *manual curation*
-> * Share your data, your scripts, your results
-> * Go open source
+## Data hygiene
+
+::: incremental
+- Go for a scripting language and forget Excel
+- ... at least use a gui pipeline or a web based solution
+- Organize data and metadata
+- Avoid as much as possible *manual curation*
+- Share your data, your scripts, your results
+- Go open source
+:::
 
 ## Get out your data
 
@@ -141,13 +154,13 @@ include_graphics("../images/LCMS.jpg")
 include_graphics("../images/mass_drift.png")
 ```
 
-## Analytical Variability in LC-MS |Retention time
+## Analytical Variability in LC-MS | Retention time
 
 ```{r message=FALSE, warning=FALSE}
 
 fnames <- list.files("../data/SpikedApples/control/","CDF", full.names = TRUE)
 
-apples <- readMSData(fnames, mode = "onDisk") 
+apples <- readMSData(fnames, mode = "onDisk")
 
 ```
 
@@ -163,22 +176,23 @@ plot(bpi, col = "steelblue", main = "BPI")
 ```
 
 
-## Analytical Variability in LC-MS| Intensity
+## Analytical Variability in LC-MS | Intensity
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/Total_ion_current.png")
 ```
 
 
-## Preprocessing {.build}
+## Preprocessing
+
+::: incremental
+- I call **preprocessing** all the data carpentry steps I do to go from the raw experimental data to the data matrix
+- The aim of this process is to compensate for *analytical variability* being able to reliably build a data matrix
+- *QC samples* play a big role on that because they are sensitive only to analytical variability
+:::
 
 
-> * I call **preprocessing** all the data carpentry steps I do to go from the raw experimental data to the data matrix
-> * The aim of this process is to compensate for *analytical variability* being able to reliably build a data matrix
-> * *QC samples* play a big role on that because they are sensitive only to analytical variability
-
-
-## Uses of QCs 
+## Uses of QCs
 
 *QCs should be representative of the chemical complexity of your samples*
 
@@ -214,7 +228,7 @@ plot(proc_trace, col = "coral")
 
 ## Mass Spectra
 
-```{r fig.align='center', out.width="80%", fig.height=6} 
+```{r fig.align='center', out.width="80%", fig.height=6}
 
 #| fig-height: 6
 #| fig-align: center
@@ -222,9 +236,9 @@ plot(proc_trace, col = "coral")
 
 ms <- apples[[1000]]
 
-tibble(mz =  mz(ms), i = intensity(ms)) %>% 
-  ggplot() + 
-  geom_segment(aes(x = mz, xend = mz, y = 0, yend = i)) + 
+tibble(mz =  mz(ms), i = intensity(ms)) %>%
+  ggplot() +
+  geom_segment(aes(x = mz, xend = mz, y = 0, yend = i)) +
   theme_bw()
 
 
@@ -240,7 +254,7 @@ Always check your results on the raw data
 * biomarkers
 * results hidden in noise
 
-## {.flexbox .vcenter}
+##
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")
@@ -248,18 +262,22 @@ include_graphics("../images/RStudio.png")
 
 # Peak Picking
 
-## Peaks and metabolites: facts {.build}
+## Peaks and metabolites: facts
 
-> * A **metabolite produces peaks** in the extracted ion traces of its associated ions
-> * Different peaks in the same ion chromatograms are associated to different metabolites
-> * **Peaks are not metabolites**
-> * The same peak can slightly **move** across the injections
+::: incremental
+- A **metabolite produces peaks** in the extracted ion traces of its associated ions
+- Different peaks in the same ion chromatograms are associated to different metabolites
+- **Peaks are not metabolites**
+- The same peak can slightly **move** across the injections
+:::
 
 <hr>
 
->  **We need an automatic method to look for peaks**
+. . .
 
-## MatchedFilter 
+**We need an automatic method to look for peaks**
+
+## MatchedFilter
 
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
 include_graphics("../images/matchedFilter.png")
@@ -276,23 +294,25 @@ include_graphics("../images/cent_wave.png")
 
 <font size="2">BMC Bioinformatics 9, 504 (2008). https://doi.org/10.1186/1471-2105-9-504</font>
 
-## Peak Intensity: `into` and `maxo` {.flexbox .vcenter}
+## Peak Intensity: `into` and `maxo`
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/maxointo.png")
 ```
 
 
-## Things to always consider {.build}
+## Things to always consider
 
-> * Real peaks can be really badly shaped
-> * You are better than an algorithm ... maybe AI will do well
-> * Every algorithm has parameters to tune!
-> * Look to the data!
-> * Know how the instrument works
-> * Check what happens to metabolites you know should be there
+::: incremental
+- Real peaks can be really badly shaped
+- You are better than an algorithm ... maybe AI will do well
+- Every algorithm has parameters to tune!
+- Look to the data!
+- Know how the instrument works
+- Check what happens to metabolites you know should be there
+:::
 
-## {.flexbox .vcenter}
+##
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")
@@ -314,34 +334,36 @@ We have to merge the lists of [chromatographic peaks]{style="color: red"} into a
 * *chromatographich peaks* what was detected in the individual samples (mz, rt, intensity)
 * *features* consensus variables which are *grouping* several peaks coming from the different injections (mz, rt, intensity)
 
-## Grouping - Correspondence {.flexbox .vcenter}
+## Grouping - Correspondence
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/grouping.svg")
 ```
 
-## Grouping - Correspondence {.flexbox .vcenter}
+## Grouping - Correspondence
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/workflow.svg")
 ```
 
 
-## Dynamic Time Warping {.build}
+## Dynamic Time Warping
 
-> Available in `xcms` trough `obiwarp`
+Available in `xcms` through `obiwarp`
 
-> ![](../images/warping.png){width="100%" fig-align="center"}
+. . .
+
+![](../images/warping.png){width="100%"}
 
 
-## RT Checks {.flexbox .vcenter}
+## RT Checks
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/rt_shift.png")
 ```
 
 
-## Things to always consider 
+## Things to always consider
 
 -   Aligning samples and not QCs can be tricky
 -   Some metabolites could not be present in pooled QC (dilutions)
@@ -366,7 +388,7 @@ Even if you do everything well your final data matrix will be full of missing va
 -   missing not at random
 
 
-## {.flexbox .vcenter}
+##
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")
@@ -375,13 +397,15 @@ include_graphics("../images/RStudio.png")
 
 # Fragmentation Data
 
-## Annotation and MS {.build}
+## Annotation and MS
 
-> * At the end of the journey we would like to work on *metabolites* or *pathways* and not on features
-> * We know that **annotation** is the most challenging step of all the business
-> * The more we know about the structure of our ions the better it is
-> * Database of standards, web resources, chemoinformatics, ...
-> * **Fragmentation patterns are extremely useful**
+::: incremental
+- At the end of the journey we would like to work on *metabolites* or *pathways* and not on features
+- We know that **annotation** is the most challenging step of all the business
+- The more we know about the structure of our ions the better it is
+- Database of standards, web resources, chemoinformatics, ...
+- **Fragmentation patterns are extremely useful**
+:::
 
 ## MS/MS and DDA
 
@@ -399,15 +423,8 @@ include_graphics("../images/tandemMS.jpg")
 * As we already discussed, do not be too optimistic with complex MS experiments
 * Sometimes the ion you are interested was not fragmented (plan a specific run!)
 
-## {.flexbox .vcenter}
+##
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")
 ```
-
-
-
-
-
-
-

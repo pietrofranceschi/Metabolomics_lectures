@@ -1,7 +1,13 @@
 ---
 title: "Harmonizing ML in R"
-author: "Pietro Franceschi"
-output: ioslides_presentation
+author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+output:
+  revealjs::revealjs_presentation:
+    theme: white
+    highlight: pygments
+    css: "../mycss.css"
+    transition: slide
+    self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -12,29 +18,6 @@ library(tidyverse)
 ```
 
 
-```{css}
-
-slides > slide {
-  background: linear-gradient(#ffffff, #ffffff 85%, #ffffff);
-  background-color: white;
-}
-
-
-#notes {
-  color: blue;
-}
-
-del {
-  color: red;
-  text-decoration: none;
-}
-
-strong {
-  color: #404040;
-}
-
-```
-
 ## The issue
 
 
@@ -42,9 +25,3 @@ strong {
 
 
 ## Solution 2
-
-
-
-
-
-
