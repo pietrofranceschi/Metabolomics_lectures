@@ -163,6 +163,22 @@ tibble(p     = c(pv_null, pv_signal),
    - Less conservative; appropriate for ~~discovery science~~
 :::
 
+## Family-wise error rate (FWER)
+
+The probability of making **at least one** false positive across $m$ independent tests:
+
+$$\text{FWER} = 1 - (1 - \alpha)^{m}$$
+
+. . .
+
+| Tests ($m$) | FWER at $\alpha = 0.05$ |
+|:-----------:|:-----------------------:|
+| 1           | 0.05                    |
+| 10          | 0.40                    |
+| 50          | 0.92                    |
+| 100         | 0.994                   |
+| 1000        | ≈ 1                     |
+
 ## Bonferroni correction
 
 The simplest FWER control: divide the threshold by the number of tests.
