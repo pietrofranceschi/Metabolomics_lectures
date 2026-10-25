@@ -275,21 +275,22 @@ Are my results fitting inside the established (domain specific) body of knowledg
 
 *e.g. Are my markers reasonable under the light of the human metabolism?*
 
-## Key Elements to design a succesfull metabolomics investigation {.smaller}
+## Key Elements to design a successful metabolomics investigation
 
-### 1 - Planning
+::: fragment
+1.  **Planning**
+    -   Scientific question
+    -   Experimental design
+    -   Analytical platform and analytical run
+    -   Data analysis strategy
+:::
 
--   Scientific question
--   Experimental design
--   Analytical platform and analytical run
--   Data analysis strategy
+::: fragment
+2.  **Awareness**
+    -   *The strength of the chain is in the weakest link*
+:::
 
-
-### 2 - Awareness
-
--   *The Strength Of The Chain Is In The Weakest Link*
-
-
-### 3 - Interdisciplinarity
-
--   The analyst and/or the data analyst are your best friends ...
+::: fragment
+3.  **Interdisciplinarity**
+    -   The analyst and/or the data analyst are your best friends ...
+:::
