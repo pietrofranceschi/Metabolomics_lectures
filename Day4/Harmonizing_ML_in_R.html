@@ -593,6 +593,11 @@ width: 100%;
 .cols .col {
 flex: 1;
 }
+
+.reveal .controls {
+color: #3C5454;
+bottom: 40px; 
+}
 </style>
     <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -648,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function(e) {
       // https://revealjs.com/config/
       Reveal.initialize({
         // Display controls in the bottom right corner
-        controls: false,
+        controls: true,
         // Help the user learn the controls by providing hints, for example by
         // bouncing the down arrow when they first encounter a vertical slide
         controlsTutorial: true,

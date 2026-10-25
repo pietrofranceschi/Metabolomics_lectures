@@ -225,3 +225,9 @@ del {
 .cols .col {
   flex: 1;
 }
+
+/* ── Navigation arrows (when controls: true) ──────────────────────────── */
+.reveal .controls {
+  color: #3C5454;
+  bottom: 40px;   /* stay clear of the slide number */
+}
