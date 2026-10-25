@@ -212,7 +212,9 @@ The approach is so powerful that all aspect related to sample handling/storage/e
 4.  ...
 :::
 
-Remember that ~~instruments are sensitive~~, so errors will unavoidably show-up in the final data (*garbage in, garbage out*)
+::: {.box-key .fragment}
+Remember that ~~instruments are sensitive~~, so errors will unavoidably show up in the final data (*garbage in, garbage out*)
+:::
 
 ## Sampling and sample handling
 
