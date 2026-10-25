@@ -29,6 +29,21 @@
   padding-bottom: 0.2em;
   border-bottom: 2.5px solid #8CB932;
   text-align: left;
+  /* keep long titles (and the rule) clear of the logo */
+  margin-right: 100px;
+}
+
+/* untitled slides (empty `##`): no lone rule */
+.reveal .slides section h2:empty {
+  display: none;
+}
+
+/* section-divider slides (level-1 headers) */
+.reveal .slides section h1 {
+  color: #3C5454;
+  font-size: 1.6em;
+  font-weight: 700;
+  padding: 0 90px;
 }
 
 .reveal .slides section h3 {
@@ -82,7 +97,9 @@
 }
 
 /* ── Logo watermark (all content slides) ──────────────────────────────── */
-.reveal .slides section:not(#title-slide)::after {
+/* .stack = wrapper of vertical slides (created by level-1 headers): skip it,
+   otherwise the logo is drawn twice */
+.reveal .slides section:not(#title-slide):not(.stack)::after {
   content: '';
   position: absolute;
   top: 12px;

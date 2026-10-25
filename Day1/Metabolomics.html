@@ -425,6 +425,19 @@ margin-bottom: 0.4em;
 padding-bottom: 0.2em;
 border-bottom: 2.5px solid #8CB932;
 text-align: left;
+
+margin-right: 100px;
+}
+
+.reveal .slides section h2:empty {
+display: none;
+}
+
+.reveal .slides section h1 {
+color: #3C5454;
+font-size: 1.6em;
+font-weight: 700;
+padding: 0 90px;
 }
 .reveal .slides section h3 {
 color: #3C5454;
@@ -470,7 +483,8 @@ margin-top: 0.3em;
 display: none;
 }
 
-.reveal .slides section:not(#title-slide)::after {
+
+.reveal .slides section:not(#title-slide):not(.stack)::after {
 content: '';
 position: absolute;
 top: 12px;
