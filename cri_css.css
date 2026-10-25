@@ -225,6 +225,15 @@ del {
   margin: 0.5em 0;
 }
 
+/* no extra paragraph margins inside the boxes */
+:is(.box-green, .box-lightgreen, .box-key, .box-red, .box-blue) > :first-child {
+  margin-top: 0;
+}
+
+:is(.box-green, .box-lightgreen, .box-key, .box-red, .box-blue) > :last-child {
+  margin-bottom: 0;
+}
+
 /* ── Two-column helper ─────────────────────────────────────────────────── */
 .cols {
   display: flex;

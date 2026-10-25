@@ -593,6 +593,13 @@ border-radius: 5px;
 margin: 0.5em 0;
 }
 
+:is(.box-green, .box-lightgreen, .box-key, .box-red, .box-blue) > :first-child {
+margin-top: 0;
+}
+:is(.box-green, .box-lightgreen, .box-key, .box-red, .box-blue) > :last-child {
+margin-bottom: 0;
+}
+
 .cols {
 display: flex;
 gap: 2em;
@@ -741,7 +748,6 @@ more!</strong></a></p>
 <p>⚠️ <strong>Key question</strong> <br> What is the best way to sample
 my population in a <del>representative</del> way?</p>
 </div>
-<p><br></p>
 <ul>
 <li>Do it <del>randomly</del> to avoid any intentional or unintentional
 bias (<strong>Randomized Sampling</strong>)</li>
@@ -750,8 +756,10 @@ bias (<strong>Randomized Sampling</strong>)</li>
 <li>The number of samples is determined by practical/economical
 considerations</li>
 </ul>
-<p>In presence of known subpopulations stratified random sampling
+<div class="box-key">
+<p>In presence of known subpopulations, stratified random sampling
 results in a more accurate characterization of the population</p>
+</div>
 </section>
 <section id="stratified-random-sampling" class="slide level2">
 <h2>Stratified Random Sampling</h2>

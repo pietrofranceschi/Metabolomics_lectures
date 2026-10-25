@@ -593,6 +593,13 @@ border-radius: 5px;
 margin: 0.5em 0;
 }
 
+:is(.box-green, .box-lightgreen, .box-key, .box-red, .box-blue) > :first-child {
+margin-top: 0;
+}
+:is(.box-green, .box-lightgreen, .box-key, .box-red, .box-blue) > :last-child {
+margin-bottom: 0;
+}
+
 .cols {
 display: flex;
 gap: 2em;

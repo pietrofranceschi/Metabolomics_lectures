@@ -125,13 +125,13 @@ include_graphics("../images/chocolate.png")
 ⚠️ <strong>Key question</strong> <br> What is the best way to sample my population in a ~~representative~~ way?
 </div>
 
-<br>
-
 * Do it ~~randomly~~ to avoid any intentional or unintentional bias (**Randomized Sampling**)
 * Take into account known subpopulations and confounding factors (**Stratified Random Sampling**)
 * The number of samples is determined by practical/economical considerations
 
-In presence of known subpopulations stratified random sampling results in a more accurate characterization of the population
+::: box-key
+In presence of known subpopulations, stratified random sampling results in a more accurate characterization of the population
+:::
 
 
 ## Stratified Random Sampling
