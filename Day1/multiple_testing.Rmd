@@ -215,55 +215,105 @@ A q-value of 0.05 means: among all features with $q \leq 0.05$, we expect at mos
 
 
 
-# The volcano plot
+# Significance and effect size
 
-## Combining p-value and effect size
-
-A **volcano plot** displays, for each variable:
-
-- x-axis: ~~fold change~~ (or log₂ fold change) — the *size* of the effect
-- y-axis: $-\log_{10}(p)$ — the *confidence* in the effect
-
-```{r fig.align='center', out.width="50%"}
+```{r volcano-data}
+## simulated metabolomics experiment: 500 metabolites (log2 scale), 10 vs 10 samples,
+## each metabolite with its own variability, 40 of them truly different
 set.seed(123)
 n_feat <- 500
+n_grp  <- 10
+sds    <- rlnorm(n_feat, log(0.5), 0.6)
+shift  <- rep(0, n_feat)
+sig_idx <- sample(n_feat, 40)
+shift[sig_idx] <- sample(c(-1, 1), 40, replace = TRUE) * runif(40, 0.5, 2) * sds[sig_idx]
 
-fc  <- rnorm(n_feat, 0, 0.8)
-pv  <- runif(n_feat)
+volcano <- map_dfr(1:n_feat, \(i) {
+  a <- rnorm(n_grp, 10 + shift[i], sds[i])
+  b <- rnorm(n_grp, 10, sds[i])
+  sp <- sqrt((var(a) + var(b)) / 2)
+  tibble(id = i,
+         lfc = mean(a) - mean(b),                 ## log2 fold change
+         d   = (mean(a) - mean(b)) / sp,          ## Cohen's d
+         p   = t.test(a, b, var.equal = TRUE)$p.value)
+}) |>
+  mutate(q = p.adjust(p, method = "BH"),
+         d_se = sqrt(2 / n_grp + d^2 / (4 * n_grp)),
+         significant = q < 0.05)
 
-# inject some real signal
-sig_idx <- sample(1:n_feat, 40)
-fc[sig_idx]  <- rnorm(40, 0, 1) + sample(c(-2.5, 2.5), 40, replace = TRUE)
-pv[sig_idx]  <- runif(40, 0, 0.001)
+p_thr <- max(volcano$p[volcano$significant])
+```
 
-qv <- p.adjust(pv, method = "BH")
+## The classic volcano plot
 
-tibble(fc = fc, pv = pv, qv = qv) %>%
-  mutate(status = case_when(
-    qv < 0.05 & fc >  1 ~ "up",
-    qv < 0.05 & fc < -1 ~ "down",
-    TRUE                 ~ "ns"
-  )) %>%
-  ggplot(aes(x = fc, y = -log10(pv), colour = status)) +
+Very popular in metabolomics papers:
+
+- x-axis: ~~log₂ fold change~~ — the *size* of the effect (?)
+- y-axis: $-\log_{10}(p)$ — the *confidence* in the effect
+
+```{r fig.align='center', out.width="42%", fig.width=7, fig.height=4.5}
+volcano |>
+  ggplot(aes(x = lfc, y = -log10(p), colour = significant)) +
   geom_point(alpha = 0.7, size = 2) +
-  geom_hline(yintercept = -log10(max(pv[qv < 0.05])),
-             linetype = "dashed", colour = "grey40") +
-  geom_vline(xintercept = c(-1, 1), linetype = "dashed", colour = "grey40") +
-  scale_colour_manual(values = c(up = "#e41a1c", down = "#377eb8", ns = "grey60"),
-                      name = "") +
+  geom_hline(yintercept = -log10(p_thr), linetype = "dashed", colour = "grey40") +
+  scale_colour_manual(values = c(`TRUE` = "#8B3A3A", `FALSE` = "grey60"),
+                      labels = c(`TRUE` = "FDR < 0.05", `FALSE` = "ns"), name = "") +
   labs(x = "log₂ fold change", y = "-log₁₀(p)") +
   theme_light(base_size = 16) +
   theme(legend.position = "bottom")
 ```
 
-## Reading a volcano plot
+. . .
 
-::: incremental
-- Points in the **upper corners** — large effect, high confidence → strong candidates
-- Points at the **top centre** — significant but small effect → statistically real, biologically questionable
-- Points on the **sides, low** — large fold change but high p-value → likely noise or low sample size
-- The horizontal dashed line marks the **FDR threshold**
-- The vertical lines mark the **fold-change cutoff**
+<div class="box-red">
+⚠️ The fold change ignores the variability: the same fold change can be a huge effect for a stable metabolite and pure noise for a variable one.
+</div>
+
+## Volcano plot with Cohen's d
+
+Same data, but on the x-axis a real effect size: ~~Cohen's d~~
+
+```{r fig.align='center', out.width="55%", fig.width=7, fig.height=4.5}
+volcano |>
+  ggplot(aes(x = d, y = -log10(p), colour = significant)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_hline(yintercept = -log10(p_thr), linetype = "dashed", colour = "grey40") +
+  scale_colour_manual(values = c(`TRUE` = "#8B3A3A", `FALSE` = "grey60"),
+                      labels = c(`TRUE` = "FDR < 0.05", `FALSE` = "ns"), name = "") +
+  labs(x = "Cohen's d", y = "-log₁₀(p)") +
+  theme_light(base_size = 16) +
+  theme(legend.position = "bottom")
+```
+
+. . .
+
+::: box-key
+The "volcano" collapses on a curve: for a given sample size, $t = d \sqrt{n/2}$, so p-value and effect size carry the ~~same information~~
+:::
+
+## Report effect sizes with their uncertainty
+
+Cohen's d with its 95% confidence interval for the metabolites significant at FDR < 0.05
+
+```{r fig.align='center', out.width="50%", fig.width=7, fig.height=4.5}
+volcano |>
+  filter(significant) |>
+  mutate(id = fct_reorder(paste0("M", id), d)) |>
+  ggplot(aes(x = d, y = id)) +
+  geom_vline(xintercept = 0, colour = "grey40") +
+  geom_vline(xintercept = c(-0.8, 0.8), linetype = "dashed", colour = "grey60") +
+  geom_errorbarh(aes(xmin = d - 1.96 * d_se, xmax = d + 1.96 * d_se),
+                 height = 0, colour = "#3C5454") +
+  geom_point(colour = "#8B3A3A", size = 2) +
+  labs(x = "Cohen's d (95% CI)", y = NULL) +
+  theme_light(base_size = 16) +
+  theme(axis.text.y = element_text(size = 8))
+```
+
+. . .
+
+::: box-key
+With few samples, even "significant" effects are estimated with ~~large uncertainty~~
 :::
 
 ## Take-home messages
@@ -277,7 +327,7 @@ tibble(fc = fc, pv = pv, qv = qv) %>%
 - **Bonferroni** for strict FWER control (clinical, confirmatory settings)
 - **Benjamini-Hochberg** for discovery (metabolomics, genomics, exploratory)
 - Always inspect the **p-value histogram** — a spike near 0 and flat elsewhere is a good sign
-- Statistical significance alone is never enough: pair it with ~~effect size~~
+- Statistical significance alone is never enough: pair it with a standardized ~~effect size~~ (Cohen's d), not with the fold change
 :::
 
 ::: {.box-key .fragment}
