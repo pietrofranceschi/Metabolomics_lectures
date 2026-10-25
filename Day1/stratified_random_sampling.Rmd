@@ -1,21 +1,25 @@
 ---
 title: "Stratified Random Sampling"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
-output: html_document
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyverse)
+set.seed(123)
 ```
-
 
 ## Intro
 
-During the presentation I affirmed that in presence of known subpopulations **stratified random sampling** is able to give a more accurate estimate of the properties of my reference population. Let's check my statement ...
+During the presentation I claimed that, in presence of known subpopulations, **stratified random sampling** gives a more accurate estimate of the properties of the reference population. Let's check this statement with a simulation ...
 
 ## The question
-Suppose that I'm interested in estimating the average height in a population of 10000 people and that I know that out of them 8000 are males and 2000 are females. To create my population I use the following properties: 
+
+Suppose that I'm interested in estimating the average height in a population of 10000 people, and that I know that 8000 of them are males and 2000 are females. To create my population I use the following properties:
 
 * Males: mean = 180 cm, sd = 10 cm
 * Females: mean = 150 cm, sd = 10 cm
@@ -25,31 +29,29 @@ Suppose that I'm interested in estimating the average height in a population of 
 First of all I create my population
 
 ```{r}
-## separate tibbles
-males <- tibble(gender = "M", height = rnorm(8000,180,10))
-females <- tibble(gender = "F", height = rnorm(2000,150,10))
+## the two subpopulations
+males <- tibble(sex = "M", height = rnorm(8000, 180, 10))
+females <- tibble(sex = "F", height = rnorm(2000, 150, 10))
 
-## merge everything in a df
-mypop <- males %>% 
-  bind_rows(females)
+## merge everything in a single tibble
+mypop <- bind_rows(males, females)
 ```
 
-
-Just for fun let's give a look 
+Just for fun let's give a look
 
 ```{r}
-mypop %>% 
-  ggplot() + 
-  geom_histogram(aes(x = height, fill = gender), col = "white",  alpha = 0.4, position = "identity")  +
+mypop |>
+  ggplot() +
+  geom_histogram(aes(x = height, fill = sex), col = "white", alpha = 0.6, position = "identity", bins = 50) +
   theme_light()
 ```
-Ok, we see what we expect, the two groups are different, and there is an unbalancing.
 
+Ok, we see what we expect: the two groups are different, and they are unbalanced.
 
 ## The problem
 
-Ok suppose now that I'm interested in estimating well the population mean. 
-In my case this parameter is known ...
+Suppose now that I'm interested in estimating the population mean.
+In my simulation this parameter is known ...
 
 ```{r}
 pop_mu <- mean(mypop$height)
@@ -59,293 +61,195 @@ pop_mu
 In the plot it stays there ...
 
 ```{r}
-mypop %>% 
-  ggplot() + 
-  geom_histogram(aes(x = height, fill = gender), col = "white",  alpha = 0.6, position = "identity") + 
-  geom_vline(xintercept = pop_mu, col="red", lty = 2) + 
+mypop |>
+  ggplot() +
+  geom_histogram(aes(x = height, fill = sex), col = "white", alpha = 0.6, position = "identity", bins = 50) +
+  geom_vline(xintercept = pop_mu, col = "red", lty = 2) +
   theme_light()
 ```
 
-Suppose also that I do not have money to cover the full population, so the best I can do is to measure 30 people. So I'll use their mean height to estimate the mean of the population.  
+Suppose also that I do not have the money to measure the full population: the best I can do is to measure 30 people, and use their mean height to estimate the mean of the population.
 
-What I can do in my simulation (and that I cannot do in my real life) is to ask myself how **variable** is my estimation of the population mean when I repeat the sampling several times
-
+What I can do in my simulation (and that I cannot do in real life) is to ask myself how **variable** my estimate of the population mean is, when I repeat the sampling several times.
 
 ## Simple Random Sampling
-Suppose that I have no clue about the presence of the two sub-populations, so the best I can do to avoid biases is **simple random sampling**. Remember, *random* is my best way to avoid introducing biases.
 
-So let's now simulate repeatedly the extraction of 30 people from my population and to see the variability of the process I do it 500 times
+Suppose that I have no clue about the presence of the two subpopulations, so the best I can do to avoid biases is **simple random sampling**. Remember, *random* is my best way to avoid introducing biases.
+
+So let's simulate the extraction of 30 people from my population, and to see the variability of the process I do it 500 times
 
 ```{r}
 ## start creating the tibble container
-x <- tibble(sampid = paste0("s",1:500))
+x <- tibble(sampid = 1:500)
+
+## here we do the simple random sampling ...
+x <- x |>
+  mutate(random_samples = map(sampid, \(i) sample(mypop$height, size = 30)))
+
+## ... and we calculate the averages
+x <- x |>
+  mutate(random_averages = map_dbl(random_samples, mean))
+
 head(x)
 ```
 
-```{r}
-## here we do the complete random sampling ...
-x <- x %>% 
-  mutate(random_samples = map(sampid, ~sample(x = mypop$height,size = 30)))
-head(x)
-```
-
+And we plot the estimates together with the true population mean
 
 ```{r}
-## now we calculate the averages
-x <- x %>% 
-  mutate(random_averages = map_dbl(random_samples, ~mean(.x)))
-head(x)
-```
-
-And we plot the distribution of the estimates as a reference with the true population mean
-
-```{r}
-x %>% 
-  ggplot() + 
-  geom_point(aes(x = sampid, y = random_averages)) + 
-  geom_hline(yintercept = pop_mu, col = "red", lty = 2) + 
-  theme_light() + 
-  theme(axis.text.x = element_blank())
-```
-The same plot as a histogram ...
-
-```{r}
-x %>% 
-  ggplot() + 
-  geom_histogram(aes(x = random_averages), alpha = 0.5, col = "white") + 
-  geom_vline(xintercept = pop_mu, col = "red", lty = 2) + 
+x |>
+  ggplot() +
+  geom_point(aes(x = sampid, y = random_averages), col = "steelblue", alpha = 0.6) +
+  geom_hline(yintercept = pop_mu, col = "red", lty = 2) +
+  labs(x = "sampling", y = "estimated mean") +
   theme_light()
 ```
 
-As we can see, the estimate has variability (:-P), and it is centered around the correct value for the population mean. It is also normally distributed
+The same plot as a histogram ...
+
+```{r}
+x |>
+  ggplot() +
+  geom_histogram(aes(x = random_averages), fill = "steelblue", alpha = 0.6, col = "white", bins = 30) +
+  geom_vline(xintercept = pop_mu, col = "red", lty = 2) +
+  theme_light()
+```
+
+As we can see, the estimate has variability (:-P), it is centered around the correct value of the population mean, and it is normally distributed.
 
 ## Stratified sampling
 
-Suppose now that I'm aware of the fact that my population is composed by different subgroups. To take into account that I switch to **stratified random sampling**
+Suppose now that I'm aware that my population is composed of different subgroups. To take this into account I switch to **stratified random sampling**.
 
-
-If I'm sticking with 30 people I have to allocate them to the two groups in a proportion that mirrors the proportions of the individuals in the population
+If I stick to 30 people, I have to allocate them to the two groups in a proportion that mirrors the proportion of the individuals in the population
 
 ```{r}
 nsamp <- 30
 
-## here I calculate the fraction
-subfractions <- ceiling((table(mypop$gender)/nrow(mypop))*nsamp)
-
-## just to show how much easy to read is the coding with pipes
-library(magrittr)
-
-another_subfraction <- mypop$gender %>% 
-  table(.) %>% 
-  divide_by(nrow(mypop)) %>% 
-  multiply_by(nsamp) %>% 
-  ceiling(.)
+## the number of individuals to sample in each subpopulation
+subfractions <- round(table(mypop$sex) / nrow(mypop) * nsamp)
 
 subfractions
 ```
 
-Just to check let's look to the proportions
-
-```{r}
-subfractions[1]/subfractions[2]
-2000/8000
-```
-
 Let's now code this new way of sampling
 
-
 ```{r}
-## here we do the complete random sampling of the two populations
+## the heights of the two subpopulations
+heights_m <- males$height
+heights_f <- females$height
+
+## here we do the random sampling inside each subpopulation
 ## and we return a vector with the samples extracted in a stratified way
-x <- x %>% 
-  mutate(stratified_random_samples = map(sampid, function(n) {
-    out_males <- mypop %>% filter(gender == "M") %>% pull(height) %>% sample(.,subfractions["M"])
-    out_females <- mypop %>% filter(gender == "F") %>% pull(height) %>% sample(.,subfractions["F"])
-    return(c(out_males,out_females))
-  }))
+x <- x |>
+  mutate(stratified_random_samples = map(sampid, \(i) c(sample(heights_m, subfractions["M"]),
+                                                        sample(heights_f, subfractions["F"]))))
+
+## the average of the samples is again the estimate of the population mean
+x <- x |>
+  mutate(stratified_averages = map_dbl(stratified_random_samples, mean))
+
 head(x)
 ```
 
-Now, the average of the samples will be another time the estimate of the population mean
+And now we plot! To compare the two strategies it is convenient to put the estimates in a "long" format
 
 ```{r}
-## now we calculate the averages
-x <- x %>% 
-  mutate(stratified_averages = map_dbl(stratified_random_samples, ~mean(.x)))
-head(x)
-```
+x_long <- x |>
+  select(sampid, random = random_averages, stratified = stratified_averages) |>
+  pivot_longer(-sampid, names_to = "sampling", values_to = "estimate")
 
-And now we plot!
-
-```{r}
-x %>% 
-  ggplot() + 
-  geom_point(aes(x = sampid, y = random_averages), col = "steelblue", alpha = 0.5) + 
-  geom_point(aes(x = sampid, y = stratified_averages), col = "orange", alpha = 0.5) + 
-  geom_hline(yintercept = pop_mu, col = "red", lty = 2) + 
-  theme_light() + 
-  theme(axis.text.x = element_blank())
-```
-As before in terms of a histogram
-
-```{r}
-x %>% 
-  ggplot() + 
-  geom_histogram(aes(x = random_averages), fill = "blue", alpha = 0.5, col = "white") + 
-  geom_histogram(aes(x = stratified_averages), fill = "red", alpha = 0.5, col = "white") + 
-  geom_vline(xintercept = pop_mu, col = "red", lty = 2) + 
+x_long |>
+  ggplot() +
+  geom_point(aes(x = sampid, y = estimate, col = sampling), alpha = 0.6) +
+  geom_hline(yintercept = pop_mu, col = "red", lty = 2) +
+  scale_color_manual(values = c(random = "steelblue", stratified = "orange")) +
+  labs(x = "sampling", y = "estimated mean") +
   theme_light()
 ```
 
+As before, in terms of a histogram
 
-As you can see the average is still good, but the _variability (variance) of my estimate is much smaller_
-This is true for all the statistics you would like to estimate from your sample. If you think to it, the reason for this fact is that using stratification we ensure that our sample is representative of both subpopulations.
+```{r}
+x_long |>
+  ggplot() +
+  geom_histogram(aes(x = estimate, fill = sampling), alpha = 0.6, col = "white",
+                 position = "identity", bins = 30) +
+  geom_vline(xintercept = pop_mu, col = "red", lty = 2) +
+  scale_fill_manual(values = c(random = "steelblue", stratified = "orange")) +
+  theme_light()
+```
 
-For our metabolomics business knowing this is important when you are dealing with observational studies. Because with experiment you are in general allocating experimental units as you want.
+As you can see the average is still good, but the _variability (variance) of my estimate is much smaller_.
+This is true for all the statistics you would like to estimate from your sample. If you think about it, the reason is that with stratification we ensure that our sample is representative of both subpopulations.
 
+For our metabolomics business this is important when you are dealing with **observational studies**: in experiments, in general, you allocate the experimental units as you want.
 
-**Something for You**
+**Something for you**
 
-* Check what happens to the two types of sampling if you change the unbalancing in the population ? 
-* Check what happens to the two types of sampling if you change the size of the sample (here 30)?
+* Check what happens to the two types of sampling if you change the unbalance in the population
+* Check what happens to the two types of sampling if you change the size of the sample (here 30)
 
-
-Both tasks can be dealt either by changing my code above and looking to the results or everything can be organized in a more "scientific" way by calculating the variance of the estimates and wrapping the code in some sort of loop which will allow you to conveniently show your results in a plot.  
-
+Both tasks can be dealt with by changing my code above and looking at the results, or in a more "scientific" way by calculating the variability of the estimates for several settings, and showing the results in a plot.
 
 ## Effects of the sample size
 
-Let's try to organize everything in a table. We make a plan for that
+Let's organize everything in a table. The plan is
 
-* one column for the sample size
-* one column with the random sampling
-* two columns for the fractions males/females
-* two columns for the numbers of males and females
-* one column with the result of stratified sampling
+* one row for each sampling, with a column for the sample size
+* two columns with the number of males and females to sample in the stratified case
+* one column with the random sampling and one with the stratified sampling
 * then the means
-* then the summary for the SD and a plot
+* then the summary of the SDs and a plot
 
 ```{r}
-## we split data in males and females
+## the set of sizes we will consider
+sizes <- c(30, 50, 100, 500)
 
-mypop_m <- rnorm(8000,180,10)  ## Extracting 8000 numbers from a gaussian population with mean 180 and sd 10
-mypop_f <- rnorm(1000,150,10)
+m_fraction <- length(heights_m) / nrow(mypop)
+
+sample_size_effect <- tibble(s_size = rep(sizes, each = 500)) |>
+  mutate(n_m = round(m_fraction * s_size),
+         n_f = s_size - n_m) |>
+  mutate(random_samplings = map(s_size, \(n) sample(mypop$height, size = n)),
+         stratified_samplings = map2(n_m, n_f, \(a, b) c(sample(heights_m, a), sample(heights_f, b)))) |>
+  mutate(mean_random = map_dbl(random_samplings, mean),
+         mean_strat = map_dbl(stratified_samplings, mean))
 ```
 
-Let's join these two subpopulationsinto one population
-
-```{r}
-mypop <- c(mypop_m,mypop_f)  ## Concatenating the two vectors
-
-
-hist(mypop)
+```{r fig.width=8, fig.height=6}
+sample_size_effect |>
+  select(s_size, random = mean_random, stratified = mean_strat) |>
+  pivot_longer(-s_size, names_to = "sampling", values_to = "estimate") |>
+  ggplot() +
+  geom_histogram(aes(x = estimate, fill = sampling), col = "white", alpha = 0.6,
+                 position = "identity", bins = 30) +
+  geom_vline(xintercept = pop_mu, lty = 2, col = "red") +
+  scale_fill_manual(values = c(random = "steelblue", stratified = "orange")) +
+  facet_wrap(~ s_size, scales = "free", labeller = label_both) +
+  theme_light()
 ```
-
-This will be my reference population. From this pop I can calculate the mean of the number. Mind that this mean **is** the true population mean
-
-
-```{r}
-mean(mypop)
-```
-
-I can also plot it
-
-```{r}
-## this plot is made by using "base" R plotting utilities
-hist(mypop)
-abline(v = mean(mypop), 
-       col = "red", 
-       lty = 4, ## the type of the line
-       lwd = 2)       
-```
-
-
-Now I have my population, I want now to simulate the sampling from that population. So basically I want to estimate the mean of my population from a group of samples extracted from `mypop`
-
-If you think to it, every sample will give you a slightly different estimate of the population mean
-
-
-```{r}
-## Example of sampling
-
-pop_mean <-  
-  mean(mypop)
-
-pop_mean
-```
-
-Trust me, the variability of the estimate of the mean, decreases as the size of the sample increases. The distribution of the means (called sampling distribution of the mean) is normally distributed.
-
-
-What to do now is to compare the spread of the estimates of the population mean when sampling is performed in a "random" fashion or in  a stratified fashion
-
-In particular I want to test both the effect of the stratification and the size of my sample 
-
-
-I now create a vector containing the sample sizes I'll check
-
-```{r}
-## Set of sizes we will consider
-sizes <- c(30,50,100,500)
-```
-
-
-
-
-```{r}
-sample_size_effect <- tibble(s_size = rep(c(sizes), each = 500)) %>% 
-  mutate(m_fraction = length(mypop_m)/(length(mypop))) %>% 
-  mutate(f_fraction = 1 - m_fraction) %>% 
-  mutate(across(contains("fraction"), function(s) ceiling(s*s_size),.names = "sample_{.col}")) %>% 
-  #mutate(across(contains("fraction"),~ ceiling(.x*s_size),.names = "sample_{.col}")) %>% 
-  mutate(random_samplings = map(s_size, ~ sample(mypop, size = .x))) %>% 
-  mutate(stratified_samplings = map2(sample_m_fraction,sample_f_fraction, function(a,b) c(sample(mypop_m,a), sample(mypop_f,b)))) %>%
-  # mutate(stratified_samplings = map2(sample_m_fraction,sample_f_fraction,~ c(sample(mypop_m,.x), sample(mypop_f,.y)))) %>%
-  mutate(mean_random = map_dbl(random_samplings,~mean(.x))) %>% 
-  mutate(mean_strat = map_dbl(stratified_samplings,~mean(.x)))
-  
-```
-
-
-
-```{r}
-sample_size_effect %>% 
-  ggplot() + 
-  geom_histogram(aes(x = mean_random), 
-                 col = "white",    ## color of the border
-                 fill = "steelblue",  ## color of the bars
-                 alpha = 0.5) +  ## transparency
-  geom_histogram(aes(x = mean_strat), col = "white", fill = "orange", alpha = 0.5) + 
-  geom_vline(xintercept = pop_mean, lty = 2, col = "red") + 
-  facet_wrap(~factor(s_size), scales = "free")
-```
-
 
 So in all cases stratifying is better ...
 
 ```{r}
-sample_size_effect %>% 
-  group_by(s_size) %>% 
+sample_size_effect |>
+  group_by(s_size) |>
   summarize(sd_random = sd(mean_random),
-            sd_strata = sd(mean_strat)) %>% 
-  mutate(sdratio = sd_random/sd_strata)
+            sd_strata = sd(mean_strat)) |>
+  mutate(sd_ratio = sd_random / sd_strata)
 ```
 
+The SD of both estimates decreases with the sample size, but their ratio stays (roughly) constant: it is always advantageous to use stratified sampling.
 
-So the ratio is constant. This means that it is always advantageous to use stratified sampling. 
-* Our estimate of the "true" mean is less variable. 
-* It is less likely to have an estimate completely off
-* Can you check the role of the unbalancing in the populations?
+* Our estimate of the "true" mean is less variable
+* It is less likely to get an estimate completely off
 
+Why is the ratio constant? With proportional allocation, stratified sampling removes the part of the variance due to the difference between the groups, leaving only the variance _within_ the groups. Here the within-group SD is 10 cm, while the SD of the whole population is
 
+```{r}
+sd(mypop$height)
+```
 
+and the ratio between the two (`r round(sd(mypop$height) / 10, 2)`) is what we see in the table above, whatever the sample size.
 
-
-
-
-
-
-
-
-
-
+**Can you now check the role of the unbalance in the populations?**
