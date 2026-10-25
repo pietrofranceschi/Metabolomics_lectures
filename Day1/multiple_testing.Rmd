@@ -149,30 +149,6 @@ tibble(p     = c(pv_null, pv_signal),
 <strong>Practical tip:</strong> always plot the p-value histogram before applying any correction — it tells you immediately whether your data contains any signal at all.
 </div>
 
-## Family-wise error rate (FWER)
-
-The probability of making **at least one** false positive across $m$ independent tests:
-
-$$\text{FWER} = 1 - (1 - \alpha)^{m}$$
-
-. . .
-
-| Tests ($m$) | FWER at $\alpha = 0.05$ |
-|:-----------:|:-----------------------:|
-| 1           | 0.05                    |
-| 10          | 0.40                    |
-| 50          | 0.92                    |
-| 100         | 0.994                   |
-| 1000        | ≈ 1                     |
-
-. . .
-
-<br>
-
-<div class="box-red">
-⚠️ With the number of tests typical of metabolomics, an uncorrected analysis is <em>guaranteed</em> to produce false positives.
-</div>
-
 # Correction methods
 
 ## Two families of solutions

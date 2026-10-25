@@ -738,53 +738,6 @@ before applying any correction — it tells you immediately whether your
 data contains any signal at all.</p>
 </div>
 </div>
-</section>
-<section id="family-wise-error-rate-fwer" class="slide level2">
-<h2>Family-wise error rate (FWER)</h2>
-<p>The probability of making <strong>at least one</strong> false
-positive across <span class="math inline">\(m\)</span> independent
-tests:</p>
-<p><span class="math display">\[\text{FWER} = 1 - (1 -
-\alpha)^{m}\]</span></p>
-<div class="fragment">
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: center;">Tests (<span class="math inline">\(m\)</span>)</th>
-<th style="text-align: center;">FWER at <span class="math inline">\(\alpha = 0.05\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0.05</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">10</td>
-<td style="text-align: center;">0.40</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">50</td>
-<td style="text-align: center;">0.92</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">100</td>
-<td style="text-align: center;">0.994</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">1000</td>
-<td style="text-align: center;">≈ 1</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="fragment">
-<p><br></p>
-<div class="box-red">
-<p>⚠️ With the number of tests typical of metabolomics, an uncorrected
-analysis is <em>guaranteed</em> to produce false positives.</p>
-</div>
-</div>
 </section></section>
 <section>
 <section id="correction-methods" class="title-slide slide level1">
