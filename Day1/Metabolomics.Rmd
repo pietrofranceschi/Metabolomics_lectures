@@ -83,37 +83,37 @@ We need an analytic technique:
 ## Nuclear Magnetic Resonance
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/NMR.png")
+include_graphics("../images/scheme_nmr_instrument.svg")
 ```
 
 ## Molecules and Peaks
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/NMR1.png")
+include_graphics("../images/scheme_nmr_spectrum.svg")
 ```
 
 ## Mass Spectrometry
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/MS.png")
+include_graphics("../images/scheme_ms_instrument.svg")
 ```
 
 ## Molecules and Ions
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/MS1.png")
+include_graphics("../images/scheme_ms_spectrum.svg")
 ```
 
 ## Chromatographic Separation
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/LC-MS.png")
+include_graphics("../images/scheme_lcms.svg")
 ```
 
 ## Molecules and features
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/MS_NMR_multi.png")
+include_graphics("../images/scheme_ms_nmr_features.svg")
 ```
 
 ## Molecules and features
@@ -246,7 +246,7 @@ Remember that ~~instruments are sensitive~~, so errors will unavoidably show-up 
 ## Annotation ...
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/annotation.png")
+include_graphics("../images/scheme_annotation.svg")
 ```
 
 ## Annotation in Untargeted Metabolomics
