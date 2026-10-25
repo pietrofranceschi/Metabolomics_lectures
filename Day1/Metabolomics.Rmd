@@ -224,7 +224,9 @@ Remember that ~~instruments are sensitive~~, so errors will unavoidably show up 
 -   Poor preparation, handling and storage will hamper the overall investigation
 :::
 
-*e.g. how to sample in a representative way in GC? How to quench the metabolism of microorganisms? how to store biofluids?*
+::: fragment
+*e.g. how to sample in a representative way in GC? How to quench the metabolism of microorganisms? How to store biofluids?*
+:::
 
 ## Annotation ...
 
