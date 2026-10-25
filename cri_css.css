@@ -46,6 +46,17 @@
   padding: 0 90px;
 }
 
+.reveal .slides section.level1 {
+  border-top: 6px solid #8CB932;
+}
+
+.reveal .slides section.level1 > h1 {
+  display: inline-block;
+  margin-top: 220px;
+  padding: 0 0.4em 0.25em;
+  border-bottom: 4px solid #8CB932;
+}
+
 .reveal .slides section h3 {
   color: #3C5454;
   font-size: 0.9em;
