@@ -236,13 +236,15 @@ include_graphics("../images/scheme_annotation.svg")
 
 ## Annotation in Untargeted Metabolomics
 
-As you have already understood, in untargeted metabolomics:
-
+::: incremental
 -   We do not measure the concentration of metabolites
--   If I have the metabolite is easier to understand what are the signals we actually measure (ions, NMR peaks, features)
+-   Knowing the metabolite, it is much easier to predict the signals we actually measure (ions, NMR peaks, features)
 -   ... the reverse (called ~~annotation~~) is not at all trivial
+:::
 
-~~*Chemical annotation is the current bottleneck in untargeted metabolomics*~~
+::: {.box-key .fragment}
+Chemical ~~annotation~~ is the current bottleneck in untargeted metabolomics
+:::
 
 ## Annotation strategies
 
