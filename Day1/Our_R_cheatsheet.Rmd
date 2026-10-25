@@ -1,264 +1,288 @@
 ---
 title: "Our R cheatsheet"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
-output: html_document
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+set.seed(123)
 ```
 
+This page collects the few R ideas we will use over and over during the course:
+R Markdown, the pipe, tibbles, the core `dplyr` verbs and `purrr` for iterations.
+It is not a full R tutorial, just the minimum to read (and write) the code of the course.
 
 ## Rmd
-Everything you see in the course website has been created with R relying on `.Rmd` files.
-What you see here is an Rmd file which combines 
 
-1. text with a simplified format
+Everything you see in the course website has been created with R, relying on `.Rmd` (R Markdown) files.
+An Rmd file combines
+
+1. text written in a simplified format (Markdown)
 2. R chunks which can be executed independently
 
-Rmd files can be "compiled" in various forms (html, doc, pdf, md) and are extremely handy.
+Rmd files can be "compiled" (knitted) into various formats (html, docx, pdf, slides) and are extremely handy
+to keep code, results and comments together. This is a big step towards reproducible analysis.
 
-## Pipes 
-In almost all my code I rely on _pipes_ (`%>%`).
-The pipe operator has been introduced in R (as part of the `magrittr` package) to make the code easier to read in presence of nested functions.
+To compile a file from RStudio press the **Knit** button, or from the console run
 
-```{r}
-library(magrittr)
-
-## consider for example
-a <- 10
-b <- sqrt(log(a+2)) ## this is a trivial nested function ...
-
-## with pipes I could write the same as 
-b1 <- a %>% 
-  add(2) %>%   ## here I'm adding 2 to a
-  log(.) %>%   ### here I'm taking the log of a+2
-  sqrt(.)
-
-## the "dot" represents what is coming from the pipe
-
+```{r eval=FALSE}
+rmarkdown::render("Our_R_cheatsheet.Rmd")
 ```
 
-You can imagine the pipe operator just like a pipe, which connects two functions passing the output of the first to the input of the second.
+## Pipes
 
-This way of programming is particularly efficient when you want to do "data carpentry" on tabular data
+In almost all my code I rely on _pipes_ (`|>`).
+The pipe makes code easier to read when several functions are nested one inside the other.
 
-## Tibbles 
+```{r}
+## consider for example
+a <- 10
+b <- sqrt(log(a + 2)) ## a trivial nested function: it has to be read from the inside out ...
 
-Tibbles are the new version of R "data.frames". You can think to them as the analogous of Excel tables. Tibbles are the workhorse of the data analyst since almost all the data we will be digesting are organized as tables.
+## with the pipe I can write the same thing as a sequence of steps
+b1 <- (a + 2) |>   ## take a + 2
+  log() |>         ## take the log
+  sqrt()           ## take the square root
 
-An interesting feature of tibbles is that they can contain columns of tables. The advantage of that will be clear during the demos. Just as an appetizer
+identical(b, b1)
+```
+
+You can imagine the pipe operator just like a pipe, which connects two functions passing the output of the first one
+as the **first argument** of the second one: `x |> f(y)` is the same as `f(x, y)`.
+
+If the object coming from the pipe has to go to a different argument, use the placeholder `_`, which must be used
+with a named argument:
+
+```{r}
+mtcars |>
+  lm(mpg ~ wt, data = _) |>   ## the data go to the "data" argument
+  coef()
+```
+
+This way of programming is particularly efficient when you want to do "data carpentry" on tabular data.
+
+::: {style="border-left: 4px solid #8CB932; padding-left: 1em;"}
+**`|>` and `%>%`**. The native pipe `|>` is part of base R since version 4.1 and does not need any package.
+In older code (and in many tutorials online) you will find the `%>%` pipe from the `magrittr` package, which
+uses `.` as placeholder instead of `_`. For the code we write in the course they are equivalent.
+:::
+
+## Tibbles
+
+Tibbles are the modern version of R `data.frame`s. You can think of them as the analogous of Excel tables.
+Tibbles are the workhorse of the data analyst, since almost all the data we will be digesting are organized as tables.
 
 ```{r}
 library(tidyverse)
 
 ## here I create a dummy table
-my_first_tibble <- tibble(names = c("One","Two"),
-                          counts = c(1,2))
+my_first_tibble <- tibble(names = c("One", "Two"),
+                          counts = c(1, 2))
 
 my_first_tibble
-
 ```
 
-and now I add a column of tables ...
+An interesting feature of tibbles is that they can contain _columns of lists_, so each cell can hold a complex
+object (a vector, a matrix, a model, another table ...). The advantage of that will be clear during the demos.
+Just as an appetizer, let's add a column of matrices ...
 
 ```{r}
-## this is a dummy matrix to be used just as an example
+## a dummy matrix, just as an example
 a_matrix <- matrix(1:4, nrow = 2)
 
-## I'm adding here a 2 element column which combines twice the matrix
-my_first_tibble$tables <- list(a_matrix,a_matrix)
+## base R way: a 2 element list, one matrix for each row
+my_first_tibble$tables <- list(a_matrix, a_matrix * 2)
 
-## I'm doing that with the data carpentry machinery
-my_first_tibble <- my_first_tibble %>% 
-  add_column(other_tables = list(a_matrix,a_matrix))
-
+## the same with the data carpentry machinery
+my_first_tibble <- my_first_tibble |>
+  mutate(other_tables = list(a_matrix, a_matrix * 3))
 
 my_first_tibble
-
 ```
 
-Now you see that my table contains a column made of matrices
+Now you see that my table contains columns made of matrices (`<int [2 × 2]>`).
+
+## Data carpentry: the core verbs
+
+The `dplyr` and `tidyr` packages (both part of `tidyverse`) provide a small set of "verbs" which, chained by pipes,
+cover most of the everyday work on a data matrix. Here they are on the `iris` dataset, which is included in R.
+
+```{r}
+iris_tbl <- as_tibble(iris)
+
+iris_tbl |>
+  filter(Species != "setosa") |>            ## keep some rows
+  select(Species, starts_with("Petal")) |>  ## keep some columns
+  mutate(Petal.Ratio = Petal.Length / Petal.Width) |>  ## create a new column
+  group_by(Species) |>                      ## split by group ...
+  summarise(mean_ratio = mean(Petal.Ratio), ## ... and summarise each group
+            n = n())
+```
+
+Metabolomics data matrices are usually _wide_ (one column per metabolite). Many operations (plotting with `ggplot`,
+statistics on all the variables at once) are easier on the _long_ format (one row per sample and variable).
+`pivot_longer()` and `pivot_wider()` move between the two:
+
+```{r}
+iris_long <- iris_tbl |>
+  mutate(sample_id = row_number()) |>
+  pivot_longer(cols = -c(sample_id, Species),
+               names_to = "variable",
+               values_to = "value")
+
+iris_long
+
+## and back
+iris_long |>
+  pivot_wider(names_from = variable, values_from = value)
+```
 
 ## `purrr` and cycles
 
-In many cases you would like to apply some sort of function iteratively along a table. The standard way of doing this ion many programming languages is to use `for` loops. Unfortunately, for loops can be really slow in R. To work around this problem. base `r` provides a full set of *apply* functions (e.g. `apply`,`lapply`,`sapply`,`vapply` ...). Modern programming paradigms are making life easier using the `purrr` package
+In many cases you would like to apply some function iteratively along the elements of a table.
+The standard way of doing this in many programming languages is a `for` loop, which works perfectly well in R too.
+Base R also provides a full set of *apply* functions (`apply`, `lapply`, `sapply`, `vapply` ...).
+The `purrr` package (part of `tidyverse`) offers a consistent family of `map` functions which
+fit nicely inside `mutate()` and work on the list columns of a tibble.
 
-The `purrr` package (which is part of `tidyverse` ) allows you to recursively apply operations to data stored in tabular form.
-
-BTW: Do you know how to write R functions???
-
-
-Suppose, for example, that we want to calculate the determinant of the previous matrices
+BTW: do you know how to write R functions???
 
 ```{r}
-## in R there is a specific function called "determinat" to do that
-?determinant
+## a function taking a number and returning its square
+square <- function(x) {
+  x^2
+}
+
+square(3)
 ```
 
-If my data are organized in tabular form ...the determinant of the two matrices can be 
+Suppose, for example, that we want to calculate the determinant of the previous matrices
+(in R there is a specific function for that: `det()`).
+
+If my data are organized in tabular form, the determinant of the matrices can be
 calculated in a very efficient and organized way as follows
 
 ```{r}
-my_first_tibble <- 
-  my_first_tibble %>% 
-  mutate(determinant = map(tables, function(x) determinant(x))) %>% 
-  mutate(determinant1 = map(tables, ~ determinant(.x)))
+my_first_tibble <- my_first_tibble |>
+  mutate(determinant = map_dbl(tables, function(x) det(x)))
 
 my_first_tibble
 ```
+
 In words ...
 
 1. take `my_first_tibble`
-2. pipe it to a function called `mutate`, which creates a new column called _determinant_.
-3. the content of determinant is created by `map`ing the R function `determinant` to the objects stored in the _tables_ column
+2. pipe it to `mutate`, which creates a new column called _determinant_
+3. the content of _determinant_ is created by `map`ping the function `det` to each object stored in the _tables_ column
 
-
+The function given to `map` can be written in three equivalent ways, you will find all of them around:
 
 ```{r}
-## this is the determinant of the first matrix
-my_first_tibble$determinant[[1]]
+my_first_tibble |>
+  mutate(det_1 = map_dbl(tables, function(x) det(x)),  ## a standard anonymous function
+         det_2 = map_dbl(tables, \(x) det(x)),          ## the short form of base R (R >= 4.1)
+         det_3 = map_dbl(tables, ~ det(.x))) |>          ## the purrr "formula" shortcut
+  select(names, starts_with("det"))
 ```
 
+### `map` or `map_dbl`?
 
-## Homework
-1. Create a tibble that contains 100 random sampling from a non normal distribution (I suggest to you uniform or a lognormal distribution).
-2. Show that the means of the 100 samples shows a normal distribution regardless the shape of the distribution we are drawing from
+`map()` always returns a **list**, so it can store anything (matrices, models, tables).
+When each result is a single number, `map_dbl()` returns a plain numeric vector, which is easier to use
+(`map_chr()`, `map_int()` and `map_lgl()` do the same for characters, integers and logicals).
 
+```{r}
+map(1:3, square)      ## a list
+map_dbl(1:3, square)  ## a numeric vector
+```
+
+## Homework: the central limit theorem
+
+1. Create a tibble that contains 1000 independent samplings (of 50 values each) from a non normal distribution
+   (I suggest the uniform or the lognormal distribution).
+2. Show that the means of the samplings follow a normal distribution, regardless of the shape of the distribution we are drawing from.
 
 To draw from different distributions:
 
-* `runif` for uniform distribution
-* `rlnorm` for the lognormal distribution
+* `runif()` for the uniform distribution
+* `rlnorm()` for the lognormal distribution
 
-This is a brute force demonstration of the **central limit theorem**
+This is a brute force demonstration of the **central limit theorem**.
 
+### A possible solution
 
-
-What we need: 
-
-a tibble to store the data, to be used to run the sampling ...
-
+What we need: a tibble to store the data, with one row for each sampling ...
 
 ```{r}
-dt <- tibble(sid = paste0("s_",1:1000))
+my_samplings <- tibble(id = 1:1000)
 ```
 
-
-then we perform the actual sampling
-
+then we perform the actual sampling, storing each sample of 50 values in a list column ...
 
 ```{r}
-dt <- dt %>% 
-  mutate(data = map(sid, function(s) runif(500)))
+my_samplings <- my_samplings |>
+  mutate(sampling = map(id, \(x) runif(50)))
+
+my_samplings
 ```
 
-
-
-then we need a column with the means of the samplings
-
+then we need a column with the mean of each sampling
 
 ```{r}
-dt <- dt %>% 
-  mutate(avg = map_dbl(data, function(t) mean(t)))
+my_samplings <- my_samplings |>
+  mutate(avg = map_dbl(sampling, mean))
 ```
 
-
-Let's make it more nice ...
-
+and finally we look at the distribution of the means
 
 ```{r}
-tibble(sid = paste0("s_",1:1000)) %>%                                  ## create the id
-  mutate(data = map(sid, function(s) runif(1000))) %>%                  ## make the sampling  
-  mutate(avg = map_dbl(data, function(t) mean(t))) %>%                 ## calculate the means
-  ggplot() + 
-  geom_histogram(aes(x = avg), fill = "steelblue", col = "white") + 
-  theme_bw() + 
+my_samplings |>
+  ggplot() +
+  geom_histogram(aes(x = avg), fill = "steelblue", col = "white", bins = 30) +
+  theme_bw() +
   theme(aspect.ratio = 0.5)
 ```
 
+Even if the samplings are coming from a uniform distribution, their means are normally distributed.
 
+### Let's make it more nice ...
 
+The full process can be written as a single pipe. Here we also compare the two distributions, and we look
+at the shape of the data we are sampling from (left) and at the distribution of the means (right).
 
+```{r fig.width=8, fig.height=5}
+samplings <- tibble(distribution = c("uniform", "lognormal")) |>
+  mutate(draw = list(\(n) runif(n), \(n) rlnorm(n))) |>              ## the sampling functions
+  mutate(sampling = map(draw, \(f) map(1:1000, \(i) f(50)))) |>      ## 1000 samplings of 50 values
+  unnest(sampling) |>                                               ## one row for each sampling
+  mutate(avg = map_dbl(sampling, mean))                             ## the means
 
+## the raw values of the first 20 samplings of each distribution ...
+raw_data <- samplings |>
+  slice_head(n = 20, by = distribution) |>
+  unnest(sampling) |>
+  transmute(distribution, what = "raw data", value = sampling)
 
+## ... and the means
+means <- samplings |>
+  transmute(distribution, what = "means of the samplings", value = avg)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-## We need a function to sample from the uniform distribution
-
-data_uniform <- runif(50)
-
-```
-
-
-```{r}
-## here I'm creating the tibble which will contain the data
-my_samplings <- tibble(id = 1:100)
-
-## I want to add a column with the samplings
-
-my_samplings <- my_samplings %>% 
-  mutate(sampling = map(id, function(x) runif(50)))
-
-
-
-```
-
-
-Now we want to calculate the means of the independent samplings
-
-```{r}
-my_samplings <- my_samplings %>% 
-  mutate(means = map(sampling, function(x) mean(x)))
-```
-
-
-Let's now look to the distribution of the means ...
-
-
-```{r}
-hist(unlist(my_samplings$means))
-```
-
-Here we are seeing that even if the samplings are coming from a uniform distribution, their means are normally distributed
-
-
-As you may have noticed it was necessary to unlist the output of map ... thius is necessary because map will produce a list  ...
-
-To make this step more straightforward, in `purrr` there is a `map_dbl` function which will output a number for each row
-
-
-```{r}
-my_samplings <- my_samplings %>% 
-  mutate(means_1 = map_dbl(sampling, function(x) mean(x)))
-```
-
-
-With this you could also use directly ggplot
-
-
-```{r}
-my_samplings %>% 
-  ggplot() + 
-  geom_histogram(aes(x = means_1), fill= "darkred", col  ="white") + 
+bind_rows(raw_data, means) |>
+  mutate(what = fct_inorder(what)) |>
+  ggplot() +
+  geom_histogram(aes(x = value), fill = "steelblue", col = "white", bins = 30) +
+  facet_wrap(distribution ~ what, scales = "free") +
   theme_bw()
 ```
 
+Look carefully at the lognormal case: the means are close to normal, but still a bit skewed to the right.
+The central limit theorem holds "for large samples", and the more asymmetric the original distribution, the larger
+the sample needed to get a really normal distribution of the means. Many metabolite concentrations are lognormal-like,
+so keep this in mind when you have few samples!
 
-
-
-
-
+**Try it yourself**: change the size of each sampling from 50 to 5 and to 500, and look at what happens to the
+distribution of the means.
