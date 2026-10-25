@@ -35,35 +35,15 @@ Metabolomics aims at measuring the metabolites in a ~~quantitative~~ way and to 
 4.  To study the ~~chemical interaction~~ in complex systems (*e.g. ecological interaction are often mediated by chemicals*)
 :::
 
-# Challenges of Metabolomics
+## Challenges of Metabolomics
 
-##
-
-### 1 - ~~Size~~ of the metabolic chemical space
-
-The molecules included in the metabolome can be extremely diverse in particular if plants/microorganisms are concerned.
-
-. . .
-
-### 2 - Diversity in the ~~chemical properties~~ of the metabolites
-
-The chemical diversity results in different properties which would require different methods of analysis.
-
-##
-
-### 3 - Huge differences in ~~concentrations~~
-
-Some of the metabolite are present in high concentration, while other highly relevant compounds are present only in small traces. Our analytical method should be able to ~~see them at the same time~~.
-
-### 4. - ~~Coverage~~
-
-The chemical diversity makes extremely difficult to have only **one** analytical method able to analyze everything.
-
-##
-
-### 5. - ~~Pre analytics~~
-
-The approach is so sensitive that every un reproducible pre-analytical issue will affect the data.
+::: incremental
+1.  ~~Size~~ of the chemical space: the metabolome is extremely diverse, in particular for plants and microorganisms.
+2.  Diversity in the ~~chemical properties~~: different molecules would require different methods of analysis.
+3.  Huge differences in ~~concentration~~: abundant metabolites and relevant traces should be ~~seen at the same time~~.
+4.  ~~Coverage~~: no single analytical method is able to analyze everything.
+5.  ~~Pre-analytics~~: the approach is so sensitive that every non-reproducible pre-analytical step will affect the data.
+:::
 
 
 # Analytical Techniques in Metabolomics
