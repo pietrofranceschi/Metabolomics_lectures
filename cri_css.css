@@ -1,0 +1,210 @@
+/* ── CRI / FEM reveal.js theme ───────────────────────────────────────────── */
+/* Palette
+   MachGreen      #3C5454   titles, strong, structure
+   MachLightGreen #8CB932   bullets, accents, separator rule
+   MachGray       #F5F5F5   block backgrounds
+   AccentRed      #8B3A3A   warning / highlight boxes
+   AccentBlue     #2E6B8A   info / note boxes
+*/
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+.reveal {
+  font-size: 28px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #222;
+}
+
+.reveal .slides section {
+  padding: 20px 48px;
+  box-sizing: border-box;
+}
+
+/* ── Slide titles ──────────────────────────────────────────────────────── */
+.reveal .slides section h2 {
+  color: #3C5454;
+  font-size: 1.15em;
+  font-weight: 700;
+  margin-top: 0.3em;
+  margin-bottom: 0.4em;
+  padding-bottom: 0.2em;
+  border-bottom: 2.5px solid #8CB932;
+  text-align: left;
+}
+
+.reveal .slides section h3 {
+  color: #3C5454;
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-top: 0.4em;
+  margin-bottom: 0.3em;
+}
+
+/* ── Title slide ───────────────────────────────────────────────────────── */
+#title-slide {
+  border-top: 6px solid #8CB932;
+}
+
+#title-slide .title {
+  color: #3C5454;
+  font-size: 1.6em;
+  font-weight: 700;
+  margin-top: 0.6em;
+  margin-bottom: 0.3em;
+}
+
+#title-slide .subtitle {
+  color: #5a7a7a;
+  font-size: 0.75em;
+  font-weight: normal;
+  margin-bottom: 0.5em;
+}
+
+#title-slide .author {
+  color: #3C5454;
+  font-size: 0.5em;
+  font-weight: normal;
+  margin-top: 1em;
+  /* author is rendered as an h2: undo the slide-title rule and alignment */
+  border-bottom: none;
+  text-align: center;
+}
+
+#title-slide .date {
+  color: #888;
+  font-size: 0.42em;
+  font-weight: normal;
+  margin-top: 0.3em;
+}
+
+/* suppress watermark on title slide */
+#title-slide::after {
+  display: none;
+}
+
+/* ── Logo watermark (all content slides) ──────────────────────────────── */
+.reveal .slides section:not(#title-slide)::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  width: 72px;
+  height: 72px;
+  background-image: url('fem_logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Lists ─────────────────────────────────────────────────────────────── */
+.reveal ul,
+.reveal ol {
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reveal ul li::marker {
+  color: #8CB932;
+}
+
+.reveal ul {
+  list-style-type: disc;
+}
+
+/* ── Inline emphasis ───────────────────────────────────────────────────── */
+strong {
+  color: #3C5454;
+}
+
+em {
+  color: #5a7a7a;
+}
+
+del {
+  color: #8B3A3A;
+  text-decoration: none;
+}
+
+/* ── Named spans ───────────────────────────────────────────────────────── */
+#notes {
+  color: #8CB932;
+}
+
+#highlights {
+  color: #8B3A3A;
+}
+
+/* ── Code blocks ───────────────────────────────────────────────────────── */
+.reveal pre {
+  font-size: 0.52em;
+  line-height: 1.35;
+  box-shadow: none;
+  border-left: 3px solid #8CB932;
+  background: #F5F5F5;
+}
+
+.reveal code {
+  background: #F5F5F5;
+  color: #3C5454;
+  padding: 0.05em 0.25em;
+  border-radius: 3px;
+}
+
+/* ── Highlight / callout boxes ─────────────────────────────────────────── */
+.box-green {
+  border: 2px solid #3C5454;
+  background-color: #F5F5F5;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin: 0.5em 0;
+}
+
+.box-lightgreen {
+  border: 2px solid #8CB932;
+  background-color: #f4f9e8;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin: 0.5em 0;
+}
+
+.box-key {
+  border: 2px solid #8CB932;
+  background-color: #f4f9e8;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: 600;
+  color: #3C5454;
+  margin: 0.5em 0;
+}
+
+.box-red {
+  border: 2px solid #8B3A3A;
+  background-color: #fdf0f0;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin: 0.5em 0;
+}
+
+.box-blue {
+  border: 2px solid #2E6B8A;
+  background-color: #eef4f8;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin: 0.5em 0;
+}
+
+/* ── Two-column helper ─────────────────────────────────────────────────── */
+.cols {
+  display: flex;
+  gap: 2em;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.cols .col {
+  flex: 1;
+}

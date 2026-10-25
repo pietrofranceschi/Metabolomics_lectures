@@ -1,13 +1,16 @@
 ---
 title: "Multiple Testing"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
   revealjs::revealjs_presentation:
-    theme: white
-    highlight: pygments
-    css: "../mycss.css"
-    transition: slide
+    css: "../cri_css.css"
     self_contained: true
+    center: false
+    transition: fade
+    reveal_options:
+      slideNumber: "c/t"
+      controls: false
+      progress: false
 ---
 
 ```{r setup, include=FALSE}
