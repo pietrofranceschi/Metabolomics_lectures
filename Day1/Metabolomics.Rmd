@@ -265,17 +265,9 @@ Chemical ~~annotation~~ is the current bottleneck in untargeted metabolomics
 3.  Not always easy to place the results inside the established body of knowledge
 :::
 
-
-<br>
-
-<hr>
-
-<br>
-
-~~**Two stage design:**~~
-
-1.  Hypothesis generation
-2.  Validation
+::: {.box-key .fragment}
+~~Two-stage design~~: 1. hypothesis generation → 2. validation
+:::
 
 ## Domain Specific Validation
 
