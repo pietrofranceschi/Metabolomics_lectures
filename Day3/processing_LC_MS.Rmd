@@ -257,7 +257,7 @@ Always check your results on the raw data
 * biomarkers
 * results hidden in noise
 
-##
+## Hands-on: let's switch to RStudio
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")
@@ -315,7 +315,7 @@ include_graphics("../images/maxointo.png")
 - Check what happens to metabolites you know should be there
 :::
 
-##
+## Hands-on: let's switch to RStudio
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")
@@ -391,7 +391,7 @@ Even if you do everything well your final data matrix will be full of missing va
 -   missing not at random
 
 
-##
+## Hands-on: let's switch to RStudio
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")
@@ -426,7 +426,7 @@ include_graphics("../images/tandemMS.jpg")
 * As we already discussed, do not be too optimistic with complex MS experiments
 * Sometimes the ion you are interested was not fragmented (plan a specific run!)
 
-##
+## Hands-on: let's switch to RStudio
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
 include_graphics("../images/RStudio.png")

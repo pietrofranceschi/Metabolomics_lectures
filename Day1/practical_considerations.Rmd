@@ -21,9 +21,11 @@ library(tidyverse)
 
 
 
-##
+## The starting point
 
-~~**Start from a clear question**~~
+::: box-key
+Start from a clear question
+:::
 
 
 ## First things first

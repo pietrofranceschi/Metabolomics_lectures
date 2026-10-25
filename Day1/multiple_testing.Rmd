@@ -266,15 +266,11 @@ tibble(fc = fc, pv = pv, qv = qv) %>%
 - The vertical lines mark the **fold-change cutoff**
 :::
 
-# Take-home messages
-
-##
+## Take-home messages
 
 <div class="box-red">
 ⚠️ <strong>Never report uncorrected p-values</strong> when testing multiple hypotheses simultaneously.
 </div>
-
-<br>
 
 ::: incremental
 - The **number of tests** is as important as the threshold
@@ -284,8 +280,6 @@ tibble(fc = fc, pv = pv, qv = qv) %>%
 - Statistical significance alone is never enough: pair it with ~~effect size~~
 :::
 
-##
-
-<div class="box-key">
+::: {.box-key .fragment}
 In a typical metabolomics experiment you will test hundreds of features. Without correction, your results list is dominated by noise. With FDR control, you can make principled discoveries.
-</div>
+:::

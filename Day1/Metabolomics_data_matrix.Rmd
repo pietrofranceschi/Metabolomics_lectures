@@ -53,12 +53,12 @@ include_graphics("../images/Matrix.svg")
 ```
 
 
-##
+## The goal of data analysis
 
 ~~**The objective of data analysis is to find "organization" inside the matrix**~~
 
 
-~~**Our organization should be also statistically robust**~~: if someone redo my experiment the results should be the same 😉
+~~**Our organization should be also statistically robust**~~: if someone redid my experiment, the results should be the same 😉
 
 
 ## Organization: Correlations
