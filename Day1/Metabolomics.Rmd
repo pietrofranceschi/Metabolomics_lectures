@@ -35,6 +35,55 @@ Metabolomics aims at measuring the metabolites in a ~~quantitative~~ way and to 
 4.  To study the ~~chemical interaction~~ in complex systems (*e.g. ecological interaction are often mediated by chemicals*)
 :::
 
+# Doing Metabolomics
+
+
+## Targeted
+
+We use the analytical method of choice to analyze a selected set of metabolites. The list can go from around 10 to something around 500.
+
+~~The measured variables are metabolites~~
+
+<div class="box-red">
+⚠️ <strong>Warning:</strong> The numbers we collect is the concentration of the individual metabolites.
+</div>
+
+
+## Untargeted
+
+We "throw" a raw sample in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown.
+
+~~The measured variables are **not** metabolites~~
+
+<div class="box-red">
+⚠️ <strong>Warning:</strong> The numbers we get are the peak areas of the individual features.
+</div>
+
+## Why targeted, why untargeted {.smaller}
+
+### Targeted
+
+1.  😀 ~~quantitative~~ results are obtained "by definition"
+2.  😀 results can be interpreted under the light of the ~~known metabolic pathways~~
+3.  😀 the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited *batch effect*)
+4.  😞 we basically look only to the expected
+
+
+### Untargeted
+
+1.  😀 ~~holistic~~
+2.  😀 open to ~~unexpected~~
+3.  😞 tricky
+4.  😞 hardly quantitative
+5.  😞 not standardized
+
+## The ideal Metabolomics road-map
+
+```{r out.width="70%", fig.align="center"}
+include_graphics("../images/metabolomics_workflow.png")
+```
+
+
 ## Challenges of Metabolomics
 
 ::: incremental
@@ -149,54 +198,6 @@ The approach is so powerful that all aspect related to sample handling/storage/e
 2.  😀 Universal
 3.  😀 With high dynamic range
 4.  😞 Less reproducible (😉)
-
-# Doing Metabolomics
-
-
-## Targeted
-
-We use the analytical method of choice to analyze a selected set of metabolites. The list can go from around 10 to something around 500.
-
-~~The measured variables are metabolites~~
-
-<div class="box-red">
-⚠️ <strong>Warning:</strong> The numbers we collect is the concentration of the individual metabolites.
-</div>
-
-
-## Untargeted
-
-We "throw" a raw sample in our instrument, trying to analyze as much signals as possible. How many things we are able to see is unknown.
-
-~~The measured variables are **not** metabolites~~
-
-<div class="box-red">
-⚠️ <strong>Warning:</strong> The numbers we get are the peak areas of the individual features.
-</div>
-
-## Why targeted, why untargeted {.smaller}
-
-### Targeted
-
-1.  😀 ~~quantitative~~ results are obtained "by definition"
-2.  😀 results can be interpreted under the light of the ~~known metabolic pathways~~
-3.  😀 the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited *batch effect*)
-4.  😞 we basically look only to the expected
-
-
-### Untargeted
-
-1.  😀 ~~holistic~~
-2.  😀 open to ~~unexpected~~
-3.  😞 tricky
-4.  😞 hardly quantitative
-5.  😞 not standardized
-
-## The ideal Metabolomics road-map
-
-```{r out.width="70%", fig.align="center"}
-include_graphics("../images/metabolomics_workflow.png")
-```
 
 # Pitfalls and caveats
 
