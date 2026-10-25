@@ -358,15 +358,13 @@ All three were eventually corrected — but only after **harm was done**.
 - **Replicate** before acting on findings, especially high-stakes ones
 :::
 
-##
+## Take-home message
 
-~~**Reproducibility is not a bureaucratic burden.**~~
-
-<br>
+::: box-key
+Reproducibility is not a bureaucratic burden.
+:::
 
 It is the mechanism by which science corrects itself — and the guarantee that our findings are worth building on.
-
-<br>
 
 . . .
 
