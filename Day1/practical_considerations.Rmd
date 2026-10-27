@@ -23,7 +23,7 @@ library(tidyverse)
 
 ## The starting point
 
-::: box-key
+::: {.box-red style="margin-top: 5.5em; text-align: center; font-size: 1.4em; font-weight: 600;"}
 Start from a clear question
 :::
 
