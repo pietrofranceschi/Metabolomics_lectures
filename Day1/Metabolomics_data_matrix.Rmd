@@ -17,32 +17,38 @@ output:
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(knitr)
 library(tidyverse)
+
+# blue-ish palette for the matrix heatmaps
+mat_cols <- colorRampPalette(c("white", "steelblue", "#3C5454"))(50)
 ```
 
 
 
 ## Many variables in many samples
 
-As in all _omic_ experiments, a metabolomic assay allows to measure a large number of _variables_(properties) in a (hopefully) reasonably large number of samples.
+As in all _omic_ experiments, a metabolomic assay measures a large number of **variables** (properties) in a (hopefully) reasonably large number of **samples**.
 
-<br>
-<hr>
-<br>
+<div class="box-red">
+⚠️ <strong>Question:</strong> <br> ... what are the variables ...
+</div>
 
-~~... what are the variables ...~~
-
-> 1. In a targeted metabolomics investigation?
-> 2. In an untargeted MS based metabolomics analysis?
-> 3. In an untargeted NMR based metabolomics assay?
+::: incremental
+1. In a targeted metabolomics investigation?
+2. In an untargeted MS based metabolomics analysis?
+3. In an untargeted NMR based metabolomics assay?
+:::
 
 
 ## Number of variables | place your guess
 
-::: incremental
+::: fragment
 * Targeted metabolomics investigation
-* ~~from 10 to 300~~
-* Unargeted metabolomics investigation
-* ~~from 1000 to 30000~~
+    * ~~from 10 to 300~~
+:::
+
+::: fragment
+* Untargeted metabolomics investigation
+    * ~~from 1000 to 30000~~
 :::
 
 
@@ -55,305 +61,270 @@ include_graphics("../images/Matrix.svg")
 
 ## The goal of data analysis
 
-~~**The objective of data analysis is to find "organization" inside the matrix**~~
+<div class="box-red">
+⚠️ <strong>Goal:</strong> <br> The objective of data analysis is to find **"organization"** inside the matrix
+</div>
 
-
-~~**Our organization should be also statistically robust**~~: if someone redid my experiment, the results should be the same 😉
+::: {.box-key .fragment}
+Our organization should also be statistically robust: if someone redid my experiment, the results should be the same 😉
+:::
 
 
 ## Organization: Correlations
 
-```{r}
-
-# --- Parameters ---
-rho_target <- 0.8  # Desired correlation coefficient
-n <- 150           # Number of data points
-
-# Set seed for reproducibility
+```{r fig.align='center', fig.width=6, fig.height=5, out.width="55%"}
 set.seed(42)
+n <- 150
+rho_target <- 0.8
 
-# 1. Generate Correlated Data
-# X is a standard normal variable
+# Y = rho * X + sqrt(1 - rho^2) * noise  ->  cor(X, Y) ~ rho
 X <- rnorm(n)
-# Epsilon is independent standard normal noise
-Epsilon <- rnorm(n)
+Y <- rho_target * X + sqrt(1 - rho_target^2) * rnorm(n)
 
-# Y is created such that the correlation between X and Y is approximately rho
-# Formula: Y = rho * X + sqrt(1 - rho^2) * Epsilon
-Y <- rho_target * X + sqrt(1 - rho_target^2) * Epsilon
-
-# Create a data frame
-data_plot <- data.frame(X = X, Y = Y)
-
-# Calculate the actual correlation for the plot label
-actual_rho <- cor(data_plot$X, data_plot$Y)
-
-# 2. Create the Plot using ggplot2
-ggplot(data_plot, aes(x = X, y = Y)) +
-  # Add scatter points
-  geom_point(color = "#0072B2", alpha = 0.7, size = 3) + # Blue points
-  # Add a linear regression line (geom_smooth(method = "lm"))
-  geom_smooth(method = "lm", se = TRUE, color = "#D55E00", linetype = "solid", linewidth = 1) + # Orange regression line
-  # Customize plot theme and labels
-  theme_minimal(base_size = 14) +
-  labs(
-    x = "Variable X",
-    y = "Variable Y"
-  ) +
-  # Customize title alignment and font
-  theme(plot.title = element_text(face = "bold", hjust = 0.5),
-        plot.subtitle = element_text(hjust = 0.5, size = 12))
-
+tibble(X = X, Y = Y) |>
+  ggplot(aes(x = X, y = Y)) +
+  geom_point(colour = "steelblue", alpha = 0.7, size = 3) +
+  geom_smooth(method = "lm", se = TRUE, colour = "#8B3A3A", linewidth = 1) +
+  labs(x = "Variable X", y = "Variable Y") +
+  theme_light(base_size = 16)
 ```
 
 
 ## Organization: Biomarkers
 
-```{r}
-set.seed(123) # For reproducibility
-n <- 50 # Number of observations per group
+```{r fig.align='center', fig.width=6, fig.height=5, out.width="55%"}
+set.seed(123)
+n <- 50
 
-# Group 1 (Lower Mean)
-group1_data <- rnorm(n, mean = 10, sd = 2)
-
-# Group 2 (Higher Mean - designed to be significantly different)
-group2_data <- rnorm(n, mean = 13, sd = 2)
-
-# Create the final data frame
-data_sig <- data.frame(
-  Group = factor(c(rep("Control", n), rep("Treatment", n))),
-  Variable_A = c(group1_data, group2_data)
+data_sig <- tibble(
+  Group = rep(c("Control", "Treatment"), each = n),
+  Variable_A = c(rnorm(n, mean = 10, sd = 2), rnorm(n, mean = 13, sd = 2))
 )
 
-
-
-# --- 3. Create the Jitter Plot with Boxplots and Significance ---
 ggplot(data_sig, aes(x = Group, y = Variable_A, fill = Group)) +
-
-  # A. Boxplot (to show quartiles, median, and outliers)
   geom_boxplot(width = 0.3, alpha = 0.5, outlier.shape = NA) +
-
-  # B. Jitter Plot (to show individual data points)
   geom_jitter(width = 0.2, alpha = 0.7, size = 2) +
-
-  # D. Customization
-  scale_fill_manual(values = c("Control" = "#E69F00", "Treatment" = "#56B4E9")) + # Colorblind-friendly colors
-  labs(
-    x = "Group",
-    y = "Variable A (Continuous)"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5))
+  scale_fill_manual(values = c(Control = "steelblue", Treatment = "orange")) +
+  labs(x = "Group", y = "Variable A") +
+  theme_light(base_size = 16) +
+  theme(legend.position = "none")
 ```
 
 
 # Data Matrices: facts
 
-## Variables are not independent {.smaller}
+## Variables are not independent
 
+<div style="display: flex; align-items: center; gap: 30px;">
+<div style="flex: 1;">
+
+::: incremental
 * Biological relations
 * Chemical/Analytical reasons
+:::
 
-```{r fig.align='center', out.width="80%"}
-x <- 1:20
-y <- x*2 + rnorm(20,0,3)
-par(pty="s")
-plot(x,y, main = "Correlation", xlab = "Var1", ylab = "Var2", cex = 1, col = "coral", pch = 19)
+</div>
+<div style="flex: 1;">
+```{r fig.align='center', fig.width=5, fig.height=5, out.width="90%"}
+set.seed(1)
+tibble(Var1 = 1:20, Var2 = Var1 * 2 + rnorm(20, 0, 3)) |>
+  ggplot(aes(x = Var1, y = Var2)) +
+  geom_point(colour = "#8B3A3A", size = 3) +
+  ggtitle("Correlation") +
+  theme_light(base_size = 16) +
+  theme(aspect.ratio = 1)
 ```
-
----
-
-```{r, echo=FALSE, fig.align='center', out.width="30%"}
-include_graphics("../images/important.png")
-```
-
-<br>
-
-<div class="box-key">
-  <p>Analytical correlation is always stronger than the biological one!</p>
+</div>
 </div>
 
-<br>
 
-*The correlation structure of your matrix is often not really informative about biology*
+## Analytical vs biological correlation
+
+<div class="box-red">
+⚠️ <strong>Important:</strong> <br> Analytical correlation is always stronger than the biological one!
+</div>
+
+::: {.box-key .fragment}
+The correlation structure of your matrix is often not really informative about biology
+:::
 
 
 ## Rows (samples) are often dependent
 
-The design of the study can result in a ~~multilevel hierarchical structure~~  of the samples which violate independence. In other words some samples are "by construction" associated and share something in common
+The design of the study can result in a ~~multilevel hierarchical structure~~ of the samples which violates independence. In other words some samples are "by construction" associated and share something in common
 
-~~**Examples**~~
+**Examples**
 
+::: incremental
 1. Repeated measures of the same individual
 2. Subpopulations
-3. Different site, different day, ...
+3. Different sites, different days, ...
+:::
+
 
 ## Data Matrix size
 
-In the typical "happy" statistical context, the number of variable we measure is smaller than the number of samples.
+In the typical "happy" statistical context, the number of variables we measure is smaller than the number of samples.
 
-In _omics_ the number of variables normally outperforms the number of samples
-<br>
-<br>
-~~*FAT DATA MATRIX*~~
-<br>
-```{r fig.align='center', fig.height=4, fig.width=12, out.width="100%"}
-mymat <- matrix(rnorm(20*300), nrow = 20)
-image(t(mymat), asp = 20/300, xlab = "", ylab = "", axes = FALSE)
-# Add closer x label
-mtext("Variables", side = 1, line = -3)  # smaller line = closer
+In _omics_ the number of variables normally exceeds the number of samples
 
-# Add closer y label
-mtext("Samples", side = 2, line = 0)
+```{r fig.align='center', fig.height=1.6, fig.width=12, out.width="100%"}
+set.seed(2)
+mymat <- matrix(rnorm(20 * 300), nrow = 20)
+par(mar = c(2, 2, 0, 0))
+image(t(mymat), col = mat_cols, asp = 20/300, xlab = "", ylab = "", axes = FALSE)
+mtext("Variables", side = 1, line = 0.5)
+mtext("Samples", side = 2, line = 0.5)
 ```
+
+::: {.box-key .fragment}
+FAT DATA MATRIX
+:::
+
 
 # Analyzing data matrices
 
 ## Univariate approach
 
-The **Univariate** approach considers each variable separately and it applies "standard" statistical tools to spot the more **interesting** variables
+The **Univariate** approach considers each variable separately and applies "standard" statistical tools to spot the more **interesting** variables
 
+::: incremental
 1. Statistical testing
 2. Linear modeling (`lm`, `glm`, ...)
 3. ANOVAs
 4. Hierarchical Modeling
+:::
 
 ```{r fig.align='center', fig.height=2.5, fig.width=6, out.width="60%"}
-mymat <- matrix(rnorm(20*100), nrow = 20)
-par(mar=rep(0, 4), xpd = NA)
-image(t(mymat), asp = 20/100, xaxt='n', ann=FALSE, yaxt='n', bty="n")
-rect(xleft = 0.5, xright = 0.51, ybottom = -0.1, ytop = 1.1, border = "steelblue", lwd = 2)
-rect(xleft = 0.3, xright = 0.31, ybottom = -0.1, ytop = 1.1, border = "steelblue", lwd = 2)
-rect(xleft = 0.7, xright = 0.71, ybottom = -0.1, ytop = 1.1, border = "steelblue", lwd = 2)
+set.seed(3)
+mymat <- matrix(rnorm(20 * 100), nrow = 20)
+par(mar = rep(0, 4), xpd = NA)
+image(t(mymat), col = mat_cols, asp = 20/100, xaxt = "n", ann = FALSE, yaxt = "n", bty = "n")
+for (x in c(0.3, 0.5, 0.7)) {
+  rect(xleft = x, xright = x + 0.01, ybottom = -0.1, ytop = 1.1, border = "#8B3A3A", lwd = 3)
+}
 ```
 
-## Univariate
 
+## Univariate: pros and cons
 
-~~**PRO**~~ 😀
-
+::::: cols
+::: {.col .box-lightgreen}
+**PRO** 😀
 
 1. Statistical modeling is there!
 2. Interpretable by construction
+:::
 
-<hr>
-
-~~**CONS**~~ 😞
-
+::: {.col .box-red .fragment}
+**CONS** 😞
 
 1. Multiple testing
 2. The structure of the data creates redundancy
 3. Assumptions for parametric (and non parametric) approaches are often not fulfilled
+:::
+:::::
 
 
 ## Where is the problem: Multiple testing
 
-* We measure many variables (features,metabolites) in the same set of samples
+::: incremental
+* We measure many variables (features, metabolites) in the same set of samples
 * We run a battery of statistical tests looking for the significance of what we see in the individual variables
 * **We ask ourselves if at least one test is significant in the overall set of tests**
+:::
 
-<br>
-<hr>
-
-~~We run individual tests, but we have question about the full set of variables ...~~
+::: {.box-key .fragment}
+We run individual tests, but we have a question about the full set of variables ...
+:::
 
 
 ## Multivariate approach
 
-Each samples is represented as a point in the multidimensional variable space. The dataset is a **cloud** of points in that space.
+Each sample is represented as a point in the multidimensional variable space. The dataset is a **cloud** of points in that space.
 
 The size of the space equals the number of variables we are measuring. **Multivariate methods** (PCA, PLS, ASCA, ...) are able to exploit the correlation between the variables to highlight/extract the organization of the data
 
-```{r, echo=FALSE, fig.align='center', out.width="40%"}
+```{r, echo=FALSE, fig.align='center', out.width="35%"}
 include_graphics("../images/Coord_planes_color.svg")
 ```
 
+
 ## Why multivariate ...
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.width=5, fig.height=6, out.width="50%"}
-library(tidyverse)
-
-# Function to generate points on an ellipse
+```{r fig.align='center', fig.width=5, fig.height=5, out.width="40%"}
+# points on an ellipse with given center, semi-axes and rotation
 generate_ellipse <- function(center = c(0, 0), axes = c(1, 0.5), angle = 0, n_points = 100) {
   theta <- seq(0, 2 * pi, length.out = n_points)
-  # Parametric ellipse before rotation
-  x <- axes[1] * cos(theta)
-  y <- axes[2] * sin(theta)
-  # Rotation matrix
+  xy <- rbind(axes[1] * cos(theta), axes[2] * sin(theta))
   rot <- matrix(c(cos(angle), -sin(angle), sin(angle), cos(angle)), nrow = 2)
-  rotated <- t(rot %*% rbind(x, y))
-  # Translate to center
-  data.frame(
-    x = rotated[, 1] + center[1],
-    y = rotated[, 2] + center[2]
-  )
+  rotated <- t(rot %*% xy)
+  tibble(x = rotated[, 1] + center[1], y = rotated[, 2] + center[2])
 }
 
-# Create two ellipses
-ellipse1 <- generate_ellipse(center = c(-1.5, 0), axes = c(2, 1), angle = pi / 6)
-ellipse1$group <- "Ellipse 1"
+ellipses <- bind_rows(
+  generate_ellipse(center = c(-1.5, 0), axes = c(2, 1), angle = pi / 6) |> mutate(group = "A"),
+  generate_ellipse(center = c(1.5, 1), axes = c(2, 1), angle = pi / 6) |> mutate(group = "B")
+)
 
-ellipse2 <- generate_ellipse(center = c(1.5, 1), axes = c(2, 1), angle = pi / 6)
-ellipse2$group <- "Ellipse 2"
-
-# Combine into one data frame
-ellipses <- rbind(ellipse1, ellipse2)
-
-# Plot
-ggplot(ellipses, aes(x = x, y = y, fill = group, col = group)) +
-  geom_path(size = 1.2) +
-  geom_polygon(alpha = 0.7) +
-  geom_text(aes(x = -1.5, y = 0, label = "A"), col = "black") +
-  geom_text(aes(x = 1.5, y = 1, label = "B"), col = "black") +
-  xlab("Var 1") +
-  ylab("Var 2") +
+ggplot(ellipses, aes(x = x, y = y, fill = group, colour = group)) +
+  geom_polygon(alpha = 0.5, linewidth = 1.2) +
+  annotate("text", x = c(-1.5, 1.5), y = c(0, 1), label = c("A", "B"), size = 7) +
+  scale_fill_manual(values = c(A = "steelblue", B = "orange")) +
+  scale_colour_manual(values = c(A = "steelblue", B = "orange")) +
+  labs(x = "Var 1", y = "Var 2") +
   coord_equal() +
-  theme_bw() +
-  theme(legend.position = "none", aspect.ratio = 1)
+  theme_light(base_size = 16) +
+  theme(legend.position = "none")
 ```
 
-Group separation is clearer in the 2d space ...
+::: {.box-key .fragment}
+Group separation is clearer in the 2D space ...
+:::
 
-## Multivariate
 
+## Multivariate: pros and cons
 
-~~**PRO**~~ 😀
+::::: cols
+::: {.col .box-lightgreen}
+**PRO** 😀
 
 1. Potentially more powerful
 2. Explicit use of variable correlation
 3. No issues with multiple testing
+:::
 
-<hr>
-
-~~**CONS**~~ 😞
-
+::: {.col .box-red .fragment}
+**CONS** 😞
 
 1. Chance correlations in fat matrices
-2. Empty Space
+2. Empty space
 3. Difficult to embed hierarchical structure
+:::
+:::::
 
 
-
-## The problem: The course of dimensionality
+## The problem: the curse of dimensionality
 
 ```{r fig.align='center', fig.height=2.5, fig.width=8, out.width="100%"}
 set.seed(123)
+pt_col <- adjustcolor("orange", alpha.f = 0.6)
 
-par(mfrow = c(1,3))
-par(pty="s")
-plot(y = rep(0,10), x = runif(10,0,10), xaxt='n', yaxt='n', bty="n", xlim = c(-1,11),
-     main = "10 points 1D", xlab = "", ylab = "", col = "#FFA50060", cex = 2, pch  =19)
-arrows(x0 = 0 , y0 = 0, x1 = 11)
-
-par(pty="s")
-plot(y = runif(10,0,10), x = runif(10,0,10), xlab = "D1", ylab = "D2", main = "10 points 2D", col = "#FFA50060", cex = 2, pch =19)
-
-
-plot(y = runif(100,0,10), x = runif(100,0,10), xlab = "D1", ylab = "D2", main = "100 points 2D", col = "#FFA50060", cex = 2, pch  =19)
-
+par(mfrow = c(1, 3), pty = "s")
+plot(y = rep(0, 10), x = runif(10, 0, 10), xaxt = "n", yaxt = "n", bty = "n", xlim = c(-1, 11),
+     main = "10 points 1D", xlab = "", ylab = "", col = pt_col, cex = 2, pch = 19)
+arrows(x0 = 0, y0 = 0, x1 = 11)
+plot(y = runif(10, 0, 10), x = runif(10, 0, 10), xlab = "D1", ylab = "D2",
+     main = "10 points 2D", col = pt_col, cex = 2, pch = 19)
+plot(y = runif(100, 0, 10), x = runif(100, 0, 10), xlab = "D1", ylab = "D2",
+     main = "100 points 2D", col = pt_col, cex = 2, pch = 19)
 ```
 
-1. To fill the space the number of points is not linear with the number of dimensions
-2. Already with 10 samples the 2d plot looks empty
-3. Can you imagine 20 samples in 10000 dimensions? ;-)
+::: incremental
+1. To fill the space, the number of points does not grow linearly with the number of dimensions
+2. Already with 10 samples the 2D plot looks empty
+:::
+
+::: {.box-key .fragment}
+Can you imagine 20 samples in 10000 dimensions? 😉
+:::

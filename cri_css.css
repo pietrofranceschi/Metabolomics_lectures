@@ -234,6 +234,11 @@ del {
   margin-bottom: 0;
 }
 
+/* lists inside boxes: no full width, or the left margin pushes them past the border */
+:is(.box-green, .box-lightgreen, .box-key, .box-red, .box-blue) :is(ul, ol) {
+  width: auto;
+}
+
 /* ── Two-column helper ─────────────────────────────────────────────────── */
 .cols {
   display: flex;
