@@ -13,7 +13,7 @@ set.seed(123)
 ```
 
 This page collects the few R ideas we will use over and over during the course:
-R Markdown, the pipe, tibbles, the core `dplyr` verbs and `purrr` for iterations.
+R Markdown, the pipe, tibbles, the core `dplyr` verbs, `purrr` for iterations and nested tables.
 It is not a full R tutorial, just the minimum to read (and write) the code of the course.
 
 ## Rmd
@@ -198,6 +198,122 @@ When each result is a single number, `map_dbl()` returns a plain numeric vector,
 ```{r}
 map(1:3, square)      ## a list
 map_dbl(1:3, square)  ## a numeric vector
+```
+
+## Nesting: a table of tables
+
+List columns and `map` become really powerful together with `nest()`. The idea is to analyse each variable
+of a data matrix separately (exactly what we do in a univariate analysis of a metabolomics experiment),
+keeping everything (data, plots, models, p-values) organized in a single table.
+
+Let's analyse the four measures of the `iris` flowers as a function of the species. We start from the long
+table created above and we _nest_ it: one row for each variable, with all its values stored in a column of tables
+
+```{r}
+iris_nest <- iris_long |>
+  nest(data = -variable)
+
+iris_nest
+```
+
+Each element of the `data` column is a small tibble with the values (and the species) of one variable
+
+```{r}
+iris_nest$data[[1]]
+```
+
+### A plot for each variable
+
+To add a column of plots we write a function which takes one of the small tables and returns a plot ...
+
+```{r}
+my_plot <- function(t) {
+  t |>
+    ggplot(aes(x = Species, y = value)) +
+    geom_violin(aes(fill = Species), alpha = 0.5) +
+    geom_jitter(aes(colour = Species), width = 0.1, size = 2, alpha = 0.7) +
+    scale_fill_manual(values = c("steelblue", "orange", "#8B3A3A")) +
+    scale_colour_manual(values = c("steelblue", "orange", "#8B3A3A")) +
+    theme_bw() +
+    theme(legend.position = "none")
+}
+```
+
+... and we `map` it over the `data` column
+
+```{r}
+iris_nest <- iris_nest |>
+  mutate(plots = map(data, my_plot))
+
+iris_nest
+
+## the plot of the third variable
+iris_nest$variable[[3]]
+iris_nest$plots[[3]]
+```
+
+### A test for each variable
+
+Are the values measured in the three species different? We add a column with the outcome of a Kruskal-Wallis test
+of `value` against `Species` and then we extract the p-values
+
+```{r}
+iris_nest <- iris_nest |>
+  mutate(kw = map(data, \(t) kruskal.test(value ~ Species, data = t)),
+         p = map_dbl(kw, \(k) k$p.value))
+
+iris_nest
+```
+
+All this can be condensed in a single pipe ...
+
+```{r}
+iris_long |>
+  nest(data = -variable) |>
+  mutate(plots = map(data, my_plot),
+         kw = map(data, \(t) kruskal.test(value ~ Species, data = t)),
+         p = map_dbl(kw, \(k) k$p.value))
+```
+
+### Tidy model outputs with `broom`
+
+Models (`lm`, `glm`, `nlme`, ...) return outputs which are not super handy in a table context
+
+```{r}
+dummy_model <- lm(Petal.Width ~ Sepal.Width * Species, data = iris_tbl)
+
+summary(dummy_model)
+```
+
+Very informative, but in a pipeline it is better to have the coefficients and their p-values in a tibble.
+The `tidy()` function of the `broom` package does exactly that
+
+```{r}
+library(broom)
+
+tidy(dummy_model)
+```
+
+### Now for you
+
+We used the Kruskal-Wallis test to check the dependence of each variable on the species.
+
+Could you check if Sepal Length, Petal Length and Petal Width are associated with Sepal Width?
+Fit a linear model with Sepal Width as predictor and each of the other measures as response (if you are brave,
+also add the Species as a categorical predictor and check its interaction with Sepal Width).
+
+### A possible solution
+
+```{r}
+iris_tbl |>
+  pivot_longer(-c(Sepal.Width, Species), names_to = "variable", values_to = "value") |>
+  nest(data = -variable) |>
+  mutate(models = map(data, \(t) lm(value ~ Sepal.Width * Species, data = t)),
+         terms = map(models, tidy)) |>
+  unnest(terms) |>
+  filter(p.value < 0.05) |>
+  select(variable, term, estimate, std.error, p.value) |>
+  arrange(desc(estimate))
 ```
 
 ## Homework: the central limit theorem
