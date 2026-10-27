@@ -41,12 +41,9 @@ As in all _omic_ experiments, a metabolomic assay measures a large number of **v
 
 ## Number of variables | place your guess
 
-::: fragment
+::: incremental
 * Targeted metabolomics investigation
     * ~~from 10 to 300~~
-:::
-
-::: fragment
 * Untargeted metabolomics investigation
     * ~~from 1000 to 30000~~
 :::
