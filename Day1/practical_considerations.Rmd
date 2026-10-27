@@ -112,7 +112,7 @@ tibble(order = 1:14,
 ## DDA and Fragmentation
 
 ```{r out.width="100%", fig.align="center"}
-include_graphics("../images/tandemMS.jpg")
+include_graphics("../images/scheme_fs_msms.svg")
 ```
 
 Experiments combining full scan and fragmentation are quite popular, because fragmentation patterns are needed for metabolite annotation and for setting up quantitative methods
