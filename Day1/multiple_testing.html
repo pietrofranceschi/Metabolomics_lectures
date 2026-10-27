@@ -842,31 +842,33 @@ positives}}{\text{total discoveries}}\right]\]</span></p>
 <p>A q-value of 0.05 means: among all features with <span class="math inline">\(q \leq 0.05\)</span>, we expect at most <strong>5%
 to be false positives</strong>.</p>
 </div>
+</section></section>
+<section>
+<section id="summary" class="title-slide slide level1">
+<h1>Summary</h1>
+
 </section>
 <section id="take-home-messages" class="slide level2">
 <h2>Take-home messages</h2>
 <div class="box-red">
 <p>⚠️ <strong>Never report uncorrected p-values</strong> when testing
-multiple hypotheses simultaneously.</p>
+many hypotheses</p>
 </div>
 <ul>
-<li class="fragment">The <strong>number of tests</strong> is as
-important as the threshold</li>
-<li class="fragment"><strong>Bonferroni</strong> for strict FWER control
-(clinical, confirmatory settings)</li>
-<li class="fragment"><strong>Benjamini-Hochberg</strong> for discovery
-(metabolomics, genomics, exploratory)</li>
-<li class="fragment">Always inspect the <strong>p-value
-histogram</strong> — a spike near 0 and flat elsewhere is a good
-sign</li>
-<li class="fragment">Statistical significance alone is never enough:
-pair it with a standardized <del>effect size</del> (Cohen’s d), not with
-the fold change</li>
+<li class="fragment">The <strong>number of tests</strong> matters as
+much as the threshold</li>
+<li class="fragment"><strong>Bonferroni</strong>: strict FWER control
+(clinical, confirmatory)</li>
+<li class="fragment"><strong>Benjamini-Hochberg</strong>: discovery
+(metabolomics, exploratory)</li>
+<li class="fragment">Inspect the <strong>p-value histogram</strong>:
+spike near 0, flat elsewhere</li>
+<li class="fragment">Significance is not enough: pair it with an
+<del>effect size</del> (Cohen’s d)</li>
 </ul>
 <div class="box-key fragment">
-<p>In a typical metabolomics experiment you will test hundreds of
-features. Without correction, your results list is dominated by noise.
-With FDR control, you can make principled discoveries.</p>
+<p>Hundreds of features without correction: a results list dominated by
+noise. With FDR control, discoveries are principled.</p>
 </div>
 </section></section>
     </div>

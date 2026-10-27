@@ -215,20 +215,22 @@ A q-value of 0.05 means: among all features with $q \leq 0.05$, we expect at mos
 
 
 
+# Summary
+
 ## Take-home messages
 
 <div class="box-red">
-⚠️ <strong>Never report uncorrected p-values</strong> when testing multiple hypotheses simultaneously.
+⚠️ <strong>Never report uncorrected p-values</strong> when testing many hypotheses
 </div>
 
 ::: incremental
-- The **number of tests** is as important as the threshold
-- **Bonferroni** for strict FWER control (clinical, confirmatory settings)
-- **Benjamini-Hochberg** for discovery (metabolomics, genomics, exploratory)
-- Always inspect the **p-value histogram** — a spike near 0 and flat elsewhere is a good sign
-- Statistical significance alone is never enough: pair it with a standardized ~~effect size~~ (Cohen's d), not with the fold change
+- The **number of tests** matters as much as the threshold
+- **Bonferroni**: strict FWER control (clinical, confirmatory)
+- **Benjamini-Hochberg**: discovery (metabolomics, exploratory)
+- Inspect the **p-value histogram**: spike near 0, flat elsewhere
+- Significance is not enough: pair it with an ~~effect size~~ (Cohen's d)
 :::
 
 ::: {.box-key .fragment}
-In a typical metabolomics experiment you will test hundreds of features. Without correction, your results list is dominated by noise. With FDR control, you can make principled discoveries.
+Hundreds of features without correction: a results list dominated by noise. With FDR control, discoveries are principled.
 :::
