@@ -123,11 +123,11 @@ but they are significant at the 0.15 level!
 
 
 
-## More samples! {.smaller}
+## More samples!
 
 I'm stubborn, so I'm convinced that the drug is really working. We redo the same study with a test group of **500** people and we observe another time an average level of 193 ...
 
-```{r out.width="70%", fig.align='center'}
+```{r fig.width=8, fig.height=3.5, out.width="75%", fig.align='center'}
 means50 <- rep(0,50)
 
 for(i in (1:50)){
@@ -139,7 +139,7 @@ mycols <- rep("#C8081570",50)
 mycols[means50 < 193] <- "#377eb870"
 
 plot(x = 1:50, means50, ylim = c(180, 220), pch = 19, col = mycols,
-     ylab = "mean of 50 individuals", xlab = "Replicated sampling from theoretical population")
+     ylab = "mean of 500 individuals", xlab = "Replicated sampling from theoretical population")
 abline(h = 193, col = "steelblue", lty = 2)
 abline(h = 200, col = "darkred")
 
@@ -252,7 +252,7 @@ xvalues %>% ggplot(aes(x = x)) +
 
 ```
 
-## Notes
+## Effect size: notes
 
 1. The difference in means is not sufficient
 2. The measure should take into account of the variability
