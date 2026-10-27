@@ -363,3 +363,106 @@ x %>%
 * With three samples variability is large
 * Also the possibility of calling non significant the difference is large
 * Even the effect size does not tell to me if something is relevant!
+
+
+```{r volcano-data}
+## simulated metabolomics experiment: 500 metabolites (log2 scale), 10 vs 10 samples,
+## each metabolite with its own variability, 40 of them truly different
+set.seed(123)
+n_feat <- 500
+n_grp  <- 10
+sds    <- rlnorm(n_feat, log(0.5), 0.6)
+shift  <- rep(0, n_feat)
+sig_idx <- sample(n_feat, 40)
+shift[sig_idx] <- sample(c(-1, 1), 40, replace = TRUE) * runif(40, 0.5, 2) * sds[sig_idx]
+
+volcano <- map_dfr(1:n_feat, \(i) {
+  a <- rnorm(n_grp, 10 + shift[i], sds[i])
+  b <- rnorm(n_grp, 10, sds[i])
+  sp <- sqrt((var(a) + var(b)) / 2)
+  tibble(id = i,
+         lfc = mean(a) - mean(b),                 ## log2 fold change
+         d   = (mean(a) - mean(b)) / sp,          ## Cohen's d
+         p   = t.test(a, b, var.equal = TRUE)$p.value)
+}) |>
+  mutate(d_se = sqrt(2 / n_grp + d^2 / (4 * n_grp)),
+         significant = p < 0.05)
+
+p_thr <- 0.05
+```
+
+## Effect size and significance: the volcano plot
+
+Very popular in metabolomics papers:
+
+- x-axis: ~~log₂ fold change~~ — the *size* of the effect (?)
+- y-axis: $-\log_{10}(p)$ — the *confidence* in the effect
+
+```{r fig.align='center', out.width="42%", fig.width=7, fig.height=4.5}
+volcano |>
+  ggplot(aes(x = lfc, y = -log10(p), colour = significant)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_hline(yintercept = -log10(p_thr), linetype = "dashed", colour = "grey40") +
+  scale_colour_manual(values = c(`TRUE` = "#8B3A3A", `FALSE` = "grey60"),
+                      labels = c(`TRUE` = "p < 0.05", `FALSE` = "ns"), name = "") +
+  labs(x = "log₂ fold change", y = "-log₁₀(p)") +
+  theme_light(base_size = 16) +
+  theme(legend.position = "bottom")
+```
+
+. . .
+
+<div class="box-red">
+⚠️ The fold change ignores the variability: the same fold change can be a huge effect for a stable metabolite and pure noise for a variable one.
+</div>
+
+## Volcano plot with Cohen's d
+
+Same data, but on the x-axis a real effect size: ~~Cohen's d~~
+
+```{r fig.align='center', out.width="55%", fig.width=7, fig.height=4.5}
+volcano |>
+  ggplot(aes(x = d, y = -log10(p), colour = significant)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_hline(yintercept = -log10(p_thr), linetype = "dashed", colour = "grey40") +
+  scale_colour_manual(values = c(`TRUE` = "#8B3A3A", `FALSE` = "grey60"),
+                      labels = c(`TRUE` = "p < 0.05", `FALSE` = "ns"), name = "") +
+  labs(x = "Cohen's d", y = "-log₁₀(p)") +
+  theme_light(base_size = 16) +
+  theme(legend.position = "bottom")
+```
+
+. . .
+
+::: box-key
+The "volcano" collapses on a curve: for a given sample size, $t = d \sqrt{n/2}$, so p-value and effect size carry the ~~same information~~
+:::
+
+## Report effect sizes with their uncertainty
+
+Cohen's d with its 95% confidence interval for the 20 metabolites with the smallest p-value
+
+```{r fig.align='center', out.width="40%", fig.width=7, fig.height=4.5}
+volcano |>
+  slice_min(p, n = 20) |>
+  mutate(id = fct_reorder(paste0("M", id), d)) |>
+  ggplot(aes(x = d, y = id)) +
+  geom_vline(xintercept = 0, colour = "grey40") +
+  geom_vline(xintercept = c(-0.8, 0.8), linetype = "dashed", colour = "grey60") +
+  geom_errorbarh(aes(xmin = d - 1.96 * d_se, xmax = d + 1.96 * d_se),
+                 height = 0, colour = "#3C5454") +
+  geom_point(colour = "#8B3A3A", size = 2) +
+  labs(x = "Cohen's d (95% CI)", y = NULL) +
+  theme_light(base_size = 16) +
+  theme(axis.text.y = element_text(size = 8))
+```
+
+. . .
+
+::: box-key
+With few samples, even "significant" effects are estimated with ~~large uncertainty~~
+:::
+
+<div class="box-blue">
+With 500 metabolites, many of the p &lt; 0.05 are false positives: we need to correct the p-values → <strong>multiple testing</strong>
+</div>
