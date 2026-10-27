@@ -34,7 +34,7 @@ Start from a clear question
 * What is the best strategy to quench metabolism?
 * What is the best way to extract my samples?
 * What is the best way to store my samples?
-* **MS performance degrade with time**: how long can I run my sample list before cleaning
+* **MS performance degrades with time**: how long can I run my sample list before cleaning
 :::
 
 ## Controlling analytical variability
@@ -96,7 +96,7 @@ tibble(order = 1:14,
 
 ::: incremental
 * The usefulness of blanks is disputed
-* The first repeated QCs are use to allow the column to equilibrate
+* The first repeated QCs are used to allow the column to equilibrate
 * One could add QC dilutions
 * Also the design of the sequence can be validated
 :::
@@ -115,10 +115,10 @@ tibble(order = 1:14,
 include_graphics("../images/tandemMS.jpg")
 ```
 
-Experiment combining full scan and fragmentation experiment are quite popular, because fragmentation patterns are needed for metabolite annotation and for setting-up quantitative methods
+Experiments combining full scan and fragmentation are quite popular, because fragmentation patterns are needed for metabolite annotation and for setting up quantitative methods
 
 
-## Use wisely your time
+## Use your time wisely
 
 ```{r fig.height=3, fig.width=12, out.width="100%", fig.align="center"}
 x <- seq(1, 15, length=40)
@@ -152,8 +152,8 @@ polygon(x[seq(1,100,4)],y[seq(1,100,4)], col = "#4682B450", border = NA)
 
 ```
 
-The more experiments I do, the worst is my estimate of the peak area ...
+The more experiments I do, the worse my estimate of the peak area ...
 
 * plan different runs for FS and DDA
-* fragment only ion of interest
+* fragment only ions of interest
 * strike a balance between chromatography, instrument speed and number of experiments
