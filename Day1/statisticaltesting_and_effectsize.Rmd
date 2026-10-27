@@ -255,12 +255,17 @@ xvalues %>% ggplot(aes(x = x)) +
 ## Effect size: notes
 
 1. The difference in means is not sufficient
-2. The measure should take into account of the variability
-3. The variability of the population not the one of he sampling distribution ;-)
+2. The measure should take into account the variability
+3. The variability of the population, not the one of the sampling distribution ;-)
 
-<hr>
+::: {.box-red .fragment}
+⚠️ <strong>Fold change:</strong> <br> plain or robust, it only says **where** the effect is, not how large it is compared to the variability
+:::
 
-The _fold change_ is **not**  a good measure of the effect size ...
+::: {.box-key .fragment}
+Scale the log fold change by the variability → **Cohen's d on log-transformed data**
+<br>(non-parametric alternative: probability of superiority)
+:::
 
 
 ## Cohen's d
