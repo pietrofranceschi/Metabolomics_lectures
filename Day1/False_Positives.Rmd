@@ -1,188 +1,197 @@
 ---
-title: "False Positives"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
-output: html_document
+title: "Fat Data Matrices and False Positives"
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-```
-
-
-```{r}
 library(tidyverse)
+set.seed(123)
 ```
 
+## Intro
 
-This demo deals with "random organization". As we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization". 
+This demo deals with "random organization". As we discussed in the lecture, an experiment is always performed on a subset of the population, so a measured "organization"
 
 * can mirror a population level property
-* can be the result of a "unlucky" sampling
+* can be the result of an "unlucky" sampling
 
-To understand the second point, just consider an hypothetical sampling of the human population made by an extraterrestrial entity. If he/she (it?) random sample a couple of humans, it will likely conclude that we are all Chinese! 
+To understand the second point, just consider a hypothetical sampling of the human population made by an extraterrestrial entity. If it randomly samples a couple of humans, it could well conclude that we all come from the same country!
 
-Let's make a more scientific example. Let's create a fake metabolomics experiment (but it can be everything you like ...) where I'm measuring 1000 **independent** variables on a group of samples. And let's suppose that I want to study the correlation between the different variables to infer new regulatory networks ...
+## A dummy experiment
 
-To simulate my dummy experiment I will fill my data matrices with random numbers, to show the role of the sample/variable ratio in this business I'll also simulate my dummy data with different number of samples
+Let's make a more scientific example. Let's create a fake metabolomics experiment (but it can be anything you like ...) where I'm measuring 1000 **independent** variables on a group of samples. And let's suppose that I want to study the correlation between the different variables to infer new regulatory networks ...
+
+To simulate my dummy experiment I fill my data matrices with random numbers. To show the role of the sample/variable ratio, I simulate five scenarios with a growing number of samples
 
 ```{r}
-## Random expression data matrix
-dummy_data <- tibble(nsamples = seq(10,500,10)) %>% 
-  mutate(DM = map(nsamples,function(x) matrix(rnorm(1000*x), ncol = 1000)))
+## random "expression" data matrices: samples in rows, 1000 variables in columns
+dummy_data <- tibble(nsamples = c(10, 30, 100, 300, 500)) |>
+  mutate(DM = map(nsamples, \(x) matrix(rnorm(1000 * x), ncol = 1000)))
 
-head(dummy_data)
+dummy_data
 ```
 
-That's the battery of data matrices of growing size. Do I have some "true" results inside my data? 
+That's the battery of data matrices of growing size. Do I have some "true" results inside my data?
 
 **NO!**
 
-OK, let's calculate the correlation among the different variables in all the 6 scenarios
+## Correlation matrices
+
+OK, let's calculate the correlation among the different variables in all the 5 scenarios
 
 ```{r}
-## I'm using purrr
-
-dummy_data <- dummy_data %>% 
-  mutate(varCorr = map(DM,function(f) cor(f)))
+dummy_data <- dummy_data |>
+  mutate(varCorr = map(DM, cor))
 ```
 
-Just to see what's going on let's give a look to one of the correlation matrices, actually only to the first 100 variables
+Just to see what's going on, let's have a look at one of the correlation matrices (30 samples), actually only at the first 100 variables
+
+```{r fig.width=5, fig.height=5}
+dim(dummy_data$varCorr[[2]])
+
+par(pty = "s", mar = c(1, 1, 1, 1))
+image(dummy_data$varCorr[[2]][1:100, 1:100], xaxt = "n", yaxt = "n",
+      zlim = c(-1, 1), col = hcl.colors(21, "Blue-Red 3"))
+```
+
+In the matrix the color of each pixel is proportional to the correlation between two variables (blue negative, red positive). The diagonal is made up of 1s, because the correlation between each variable and itself is 1. The matrix is symmetric, since Pearson correlation is symmetric.
+
+To look at the distribution of the correlation coefficients we only need the upper triangle of each matrix
 
 ```{r}
-dim(dummy_data$varCorr[[3]])
-
-jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
-
-par(pty="s")
-image(t(dummy_data$varCorr[[3]][1:100,1:100]), xaxt = "n", yaxt = "n", col = jet.colors(20))
+dummy_data <- dummy_data |>
+  mutate(uptri = map(varCorr, \(m) m[upper.tri(m)]))
 ```
 
-Right, in the matrix the color of each pixel is proportional to the correlation between two variables (here only 100 are shown).
-The diagonal is made up of 1s, because the correlation between each variable and itself is 1. The matrix is symmetric, since the measure of Pearson correlation is symmetric.
+## The worst case: 10 samples, 1000 variables
 
-The plot is rotated ... this is an idiosyncrasy of the `image` basic plot ... however
-
-
-Now we get only the upper triangle of the matrix in order to look to the distribution of the correlation coefficients
+Let's start from the most "unfavourable" situation: 10 samples and 1000 variables
 
 ```{r}
-dummy_data <- dummy_data %>% 
-  mutate(uptri = map(varCorr,~.x[upper.tri(.x)]))
+tibble(r = dummy_data$uptri[[1]]) |>
+  ggplot(aes(x = r)) +
+  geom_histogram(binwidth = 0.02, fill = "steelblue", colour = "white") +
+  geom_vline(xintercept = c(-0.8, 0.8), colour = "#8B3A3A", linetype = "dashed") +
+  labs(x = "Pearson correlation", y = "Number of variable pairs", title = "Random correlations") +
+  theme_light()
 ```
 
+Unexpectedly ( ;-) ) ... we also have variables showing high correlation! The dashed lines show the ±0.8 limits ...
 
-Let's now start from the most "unfavourable" situation: 10 samples and 1000 variables
+In absolute terms
 
-```{r}
-hist(dummy_data$uptri[[1]], 
-     col = "steelblue", 
-     breaks = 100,
-     main = "Random Correlations")
-abline(v = c(-0.8,0.8), col = "red", lty = 2)
-```
-
-Unexpectedly ( ;-) ) ... we also have variables showing high correlation! The vertical lines show the 0.8 limit ... 
-
-In absolute terms 
 ```{r}
 range(dummy_data$uptri[[1]])
 ```
+
 !!!!
 
-The code below gives you the indexes of the variables showing high correlation (excluding the 1s)
-
+The code below gives the indices of the pairs of variables with a correlation above 0.95 (upper triangle only, so each pair appears once and the diagonal is excluded)
 
 ```{r}
-highcorrid <- which(dummy_data$varCorr[[1]] > 0.95 & dummy_data$varCorr[[1]] != 1, arr.ind = TRUE)
+cor10 <- dummy_data$varCorr[[1]]
+highcorrid <- which(cor10 > 0.95 & upper.tri(cor10), arr.ind = TRUE)
 highcorrid
 ```
 
+Let's plot the first of these pairs
 
-```{r}
-par(pty="s")
-plot(dummy_data$DM[[1]][,highcorrid[1,1]],dummy_data$DM[[1]][,highcorrid[1,2]], 
-     xlab = paste0("Var ",highcorrid[1,1]), 
-     ylab = paste0("Var ",highcorrid[1,2]),
-     col = "darkred", pch = 19, cex = 2)
+```{r fig.width=5, fig.height=5}
+v1 <- highcorrid[1, 1]
+v2 <- highcorrid[1, 2]
+
+tibble(x = dummy_data$DM[[1]][, v1], y = dummy_data$DM[[1]][, v2]) |>
+  ggplot(aes(x = x, y = y)) +
+  geom_point(colour = "#8B3A3A", size = 4) +
+  labs(x = paste("Var", v1), y = paste("Var", v2)) +
+  theme_light() +
+  theme(aspect.ratio = 1)
 ```
 
 Here the presence of high correlation is clear!!!
 
 >**But this correlation does not have a "biological" origin ... so it does not represent a truly scientific result ...**
 
-Before giving you the chance to play with some random science, let's look oh what happens to the histogram of the correlation coefficients as the number of samples increases ...
+## Increasing the number of samples
+
+Before giving you the chance to play with some random science, let's look at what happens to the histogram of the correlation coefficients as the number of samples increases ...
 
 ```{r}
-dummy_data %>% 
-  filter(nsamples %in% c(10,100,300,500)) %>% 
-  dplyr::select(nsamples, uptri) %>%       ## this is needed because a function called `select` is abiguous
-  unnest(uptri) %>% 
-  ggplot() + 
-  geom_histogram(aes(x = uptri, fill = factor(nsamples)), alpha = 0.5, col = "white", binwidth = 0.05) + 
-  geom_vline(xintercept = c(-0.8,0.8), col  ="red", lty = 2) + 
-  facet_wrap(vars(nsamples), scales = "free_y") + 
+dummy_data |>
+  dplyr::select(nsamples, uptri) |>       ## dplyr:: because other packages also have a `select`
+  unnest(uptri) |>
+  ggplot(aes(x = uptri)) +
+  geom_histogram(binwidth = 0.05, fill = "steelblue", colour = "white") +
+  geom_vline(xintercept = c(-0.8, 0.8), colour = "#8B3A3A", linetype = "dashed") +
+  facet_wrap(vars(nsamples), scales = "free_y", labeller = label_both) +
+  labs(x = "Pearson correlation", y = "Number of variable pairs") +
   theme_light()
 ```
 
-What we see here is interesting, the probability of getting high correlation coefficients by chance decreases with the number of samples. As expected, measuring more gives to me a more realistic view of reality ...
+The probability of getting high correlation coefficients by chance decreases with the number of samples. As expected, measuring more samples gives a more realistic view of reality ...
 
-**Something for you!**
+## Something for you!
 
 1. Play around and try to understand what I did
-2. Simulate an experiment where I have two classes of samples (10 treated, 10 controls) and I'm characterizing them with an array of new machines able to measure 5, 10, 100, 1000, 10000 variables. Fill each data matrix with random numbers. In each case calculate the p-value of an univariate t-test for each variable (you will have 5, 10, 1000, 10000 p-values). Do you find p-values lower than 0.05? Can you plot the histograms of the p-values?
+2. Simulate an experiment where I have two classes of samples (10 treated, 10 controls) and I'm characterizing them with an array of new machines able to measure 5, 10, 100, 1000, 10000 variables. Fill each data matrix with random numbers. In each case calculate the p-value of a univariate t-test for each variable (you will have 5, 10, 100, 1000, 10000 p-values). Do you find p-values lower than 0.05? Can you plot the histograms of the p-values?
 
+Many of the functions you need are already in the demo above.
 
-Many of the function you need to do that are present in my demo. In addition:
+## A possible solution
+
+One row per "machine", with the number of variables it measures
 
 ```{r}
-ex2 <- tibble(nvar = c(5,10,100,1000,10000))
+ex2 <- tibble(nvar = c(5, 10, 100, 1000, 10000))
+```
+
+The two classes: 10 treated (`A`) and 10 controls (`B`), filled with random numbers
+
+```{r}
+ex2 <- ex2 |>
+  mutate(A = map(nvar, \(x) matrix(rnorm(x * 10), nrow = 10)),
+         B = map(nvar, \(x) matrix(rnorm(x * 10), nrow = 10)))
+
 ex2
 ```
 
-```{r}
-ex2 <- ex2 %>% 
-  mutate(A = map(nvar,function(x) matrix(rnorm(x*10), nrow = 10)))
-
-ex2
-```
+A function returning the p-value of a t-test for each column (variable)
 
 ```{r}
-ex2 <- ex2 %>% 
-  mutate(B = map(nvar,function(x) matrix(rnorm(x*10), nrow = 10)))
-
-ex2
-```
-
-
-```{r}
-myt <- function(m,n) {
-  ps <- rep(0,ncol(m))
-  for (i in 1:length(ps)){
-    myt <- t.test(m[,i],n[,i])
-    ps[i] <- myt$p.value
-  }
-  return(ps)
+col_ttest <- function(m, n) {
+  vapply(seq_len(ncol(m)), \(i) t.test(m[, i], n[, i])$p.value, numeric(1))
 }
 ```
 
+`map2()` is the extension of `map()` to the case where the new column combines the content of two other columns ...
 
 ```{r}
+ex2 <- ex2 |>
+  mutate(ps = map2(A, B, col_ttest),
+         n_signif = map_int(ps, \(p) sum(p < 0.05)))
 
-## map2 is the extension of map the case in which the new column is created combining 
-## the content of other two columns ...
-ex2 <- ex2 %>% 
-  mutate(ps = map2(A,B,function(x,y) myt(x,y)))
-
-ex2
+ex2 |> dplyr::select(nvar, n_signif)
 ```
 
+About 5% of the variables are "significant", even if no variable is truly different between the two classes. With 10000 variables that means hundreds of false positives!
 
 Last bit is the plot ...
 
 ```{r}
-hist(ex2$ps[[5]])
-abline(v = 0.05, col = "red", lty = 2)
+ex2 |>
+  dplyr::select(nvar, ps) |>
+  unnest(ps) |>
+  ggplot(aes(x = ps)) +
+  geom_histogram(binwidth = 0.05, boundary = 0, fill = "steelblue", colour = "white") +
+  geom_vline(xintercept = 0.05, colour = "#8B3A3A", linetype = "dashed") +
+  facet_wrap(vars(nvar), scales = "free_y", labeller = label_both) +
+  labs(x = "p-value", y = "Number of variables") +
+  theme_light()
 ```
 
-
-
+Under the null hypothesis the p-values are uniformly distributed: the more variables we test, the more "significant" results we get by chance.
