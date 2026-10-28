@@ -2,19 +2,18 @@
 title: "Metabolomics Data Matrix"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf", message = FALSE, warning = FALSE)
 library(knitr)
 library(tidyverse)
 
@@ -23,14 +22,15 @@ mat_cols <- colorRampPalette(c("white", "steelblue", "#3C5454"))(50)
 ```
 
 
-
 ## Many variables in many samples
 
 As in all _omic_ experiments, a metabolomic assay measures a large number of **variables** (properties) in a (hopefully) reasonably large number of **samples**.
 
-<div class="box-red">
-⚠️ <strong>Question:</strong> <br> ... what are the variables ...
-</div>
+::: box-red
+**Question:**
+
+... what are the variables ...
+:::
 
 ::: incremental
 1. In a targeted metabolomics investigation?
@@ -51,25 +51,27 @@ As in all _omic_ experiments, a metabolomic assay measures a large number of **v
 
 ## Data Matrix
 
-```{r, echo=FALSE, fig.align='center', out.width="60%"}
-include_graphics("../images/Matrix.svg")
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/Matrix.pdf")
 ```
 
 
 ## The goal of data analysis
 
-<div class="box-red">
-⚠️ <strong>Goal:</strong> <br> The objective of data analysis is to find **"organization"** inside the matrix
-</div>
+::: box-red
+**Goal:**
+
+The objective of data analysis is to find **"organization"** inside the matrix
+:::
 
 ::: {.box-key .fragment}
-Our organization should also be statistically robust: if someone redid my experiment, the results should be the same 😉
+Our organization should also be statistically robust: if someone redid my experiment, the results should be the same
 :::
 
 
 ## Organization: Correlations
 
-```{r fig.align='center', fig.width=6, fig.height=5, out.width="55%"}
+```{r fig.align='center', fig.width=6, fig.height=5, out.width="\\linewidth", out.height="0.75\\textheight"}
 set.seed(42)
 n <- 150
 rho_target <- 0.8
@@ -89,7 +91,7 @@ tibble(X = X, Y = Y) |>
 
 ## Organization: Biomarkers
 
-```{r fig.align='center', fig.width=6, fig.height=5, out.width="55%"}
+```{r fig.align='center', fig.width=6, fig.height=5, out.width="\\linewidth", out.height="0.75\\textheight"}
 set.seed(123)
 n <- 50
 
@@ -112,17 +114,17 @@ ggplot(data_sig, aes(x = Group, y = Variable_A, fill = Group)) +
 
 ## Variables are not independent
 
-<div style="display: flex; align-items: center; gap: 30px;">
-<div style="flex: 1;">
+:::: {.columns align=center}
+::: {.column width="50%"}
 
 ::: incremental
 * Biological relations
 * Chemical/Analytical reasons
 :::
 
-</div>
-<div style="flex: 1;">
-```{r fig.align='center', fig.width=5, fig.height=5, out.width="90%"}
+:::
+::: {.column width="50%"}
+```{r fig.align='center', fig.width=5, fig.height=5, out.width="\\linewidth", out.height="0.7\\textheight"}
 set.seed(1)
 tibble(Var1 = 1:20, Var2 = Var1 * 2 + rnorm(20, 0, 3)) |>
   ggplot(aes(x = Var1, y = Var2)) +
@@ -131,15 +133,17 @@ tibble(Var1 = 1:20, Var2 = Var1 * 2 + rnorm(20, 0, 3)) |>
   theme_light(base_size = 16) +
   theme(aspect.ratio = 1)
 ```
-</div>
-</div>
+:::
+::::
 
 
 ## Analytical vs biological correlation
 
-<div class="box-red">
-⚠️ <strong>Important:</strong> <br> Analytical correlation is always stronger than the biological one!
-</div>
+::: box-red
+**Important:**
+
+Analytical correlation is always stronger than the biological one!
+:::
 
 ::: {.box-key .fragment}
 The correlation structure of your matrix is often not really informative about biology
@@ -165,7 +169,7 @@ In the typical "happy" statistical context, the number of variables we measure i
 
 In _omics_ the number of variables normally exceeds the number of samples
 
-```{r fig.align='center', fig.height=1.6, fig.width=12, out.width="100%"}
+```{r fig.align='center', fig.height=1.6, fig.width=12, out.width="\\linewidth", out.height="0.3\\textheight"}
 set.seed(2)
 mymat <- matrix(rnorm(20 * 300), nrow = 20)
 par(mar = c(2, 2, 0, 0))
@@ -192,7 +196,7 @@ The **Univariate** approach considers each variable separately and applies "stan
 4. Hierarchical Modeling
 :::
 
-```{r fig.align='center', fig.height=2.5, fig.width=6, out.width="60%"}
+```{r fig.align='center', fig.height=2.5, fig.width=6, out.width="\\linewidth", out.height="0.35\\textheight"}
 set.seed(3)
 mymat <- matrix(rnorm(20 * 100), nrow = 20)
 par(mar = rep(0, 4), xpd = NA)
@@ -205,22 +209,25 @@ for (x in c(0.3, 0.5, 0.7)) {
 
 ## Univariate: pros and cons
 
-::::: cols
-::: {.col .box-lightgreen}
-**PRO** 😀
+:::: {.columns align=top}
+::: {.column width="48%"}
+::: {.box-lightgreen}
+**PRO**
 
 1. Statistical modeling is there!
 2. Interpretable by construction
 :::
-
-::: {.col .box-red .fragment}
-**CONS** 😞
+:::
+::: {.column width="48%"}
+::: {.box-red .fragment}
+**CONS**
 
 1. Multiple testing
 2. The structure of the data creates redundancy
 3. Assumptions for parametric (and non parametric) approaches are often not fulfilled
 :::
-:::::
+:::
+::::
 
 
 ## Where is the problem: Multiple testing
@@ -242,14 +249,14 @@ Each sample is represented as a point in the multidimensional variable space. Th
 
 The size of the space equals the number of variables we are measuring. **Multivariate methods** (PCA, PLS, ASCA, ...) are able to exploit the correlation between the variables to highlight/extract the organization of the data
 
-```{r, echo=FALSE, fig.align='center', out.width="35%"}
-include_graphics("../images/Coord_planes_color.svg")
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.42\\textheight"}
+include_graphics("../images/Coord_planes_color.pdf")
 ```
 
 
 ## Why multivariate ...
 
-```{r fig.align='center', fig.width=5, fig.height=5, out.width="40%"}
+```{r fig.align='center', fig.width=5, fig.height=5, out.width="\\linewidth", out.height="0.6\\textheight"}
 # points on an ellipse with given center, semi-axes and rotation
 generate_ellipse <- function(center = c(0, 0), axes = c(1, 0.5), angle = 0, n_points = 100) {
   theta <- seq(0, 2 * pi, length.out = n_points)
@@ -282,28 +289,31 @@ Group separation is clearer in the 2D space ...
 
 ## Multivariate: pros and cons
 
-::::: cols
-::: {.col .box-lightgreen}
-**PRO** 😀
+:::: {.columns align=top}
+::: {.column width="48%"}
+::: {.box-lightgreen}
+**PRO**
 
 1. Potentially more powerful
 2. Explicit use of variable correlation
 3. No issues with multiple testing
 :::
-
-::: {.col .box-red .fragment}
-**CONS** 😞
+:::
+::: {.column width="48%"}
+::: {.box-red .fragment}
+**CONS**
 
 1. Chance correlations in fat matrices
 2. Empty space
 3. Difficult to embed hierarchical structure
 :::
-:::::
+:::
+::::
 
 
 ## The problem: the curse of dimensionality
 
-```{r fig.align='center', fig.height=2.5, fig.width=8, out.width="100%"}
+```{r fig.align='center', fig.height=2.5, fig.width=8, out.width="\\linewidth", out.height="0.45\\textheight"}
 set.seed(123)
 pt_col <- adjustcolor("orange", alpha.f = 0.6)
 
@@ -323,5 +333,5 @@ plot(y = runif(100, 0, 10), x = runif(100, 0, 10), xlab = "D1", ylab = "D2",
 :::
 
 ::: {.box-key .fragment}
-Can you imagine 20 samples in 10000 dimensions? 😉
+Can you imagine 20 samples in 10000 dimensions?
 :::
