@@ -61,7 +61,7 @@ The material (which is growing!) covers the following topics:
 ## Day Four
 
 * Biomarker discovery: the univariate way (see also [Multiple testing](Day1/08_multiple_testing.pdf))
-* [Machine Learning for Dummies](Day4/01_ml_intro.html)
+* [Machine Learning for Dummies](Day4/01_ml_intro.pdf)
   * [KOMP data](data/KOMP_data_targeted.RData)
 * PLS and PLS-DA
 * [Decision Trees and Random Forest](Day4/02_decision_trees_random_forest.html)

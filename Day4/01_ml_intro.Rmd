@@ -2,31 +2,28 @@
 title: "Machine Learning: a gentle introduction"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 library(MASS)
 ```
 
 
-
 ## Machine Learning
 
 _Machine learning (ML) is the study of ~~computer algorithms~~ that improve automatically through ~~experience~~. It is seen as a subset of artificial intelligence. Machine learning algorithms build a ~~model~~ based on sample data, known as "training data", in order to make ~~predictions or decisions~~ without being explicitly programmed to do so_
 
-<hr>
 
 * **ML** focus on prediction
 * **Statistical models** focus on interpretation and inference
@@ -42,8 +39,10 @@ Two strategies:
 
 ## Two contexts
 
-> * **Regression** if the predicted property is continuous
-> * **Classification** if the predicted property is categorical
+::: incremental
+* **Regression** if the predicted property is continuous
+* **Classification** if the predicted property is categorical
+:::
 
 ## ML conceptual workflow
 
@@ -55,23 +54,23 @@ Two strategies:
 5. do the predictions
 :::
 
-<hr>
 
 _Our Working example: fit a line through a group of points_
 
 
-## Loss Function {.smaller}
+## Loss Function
 
-```{r out.width="80%", fig.align= "center"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.6\\textheight"}
 include_graphics("../images/linefit.png")
 ```
+
 1. The (square) sum of the green lines is our loss function
-2. Our best line is the one that **minimizes**˘ the sum of the green lines
+2. Our best line is the one that **minimizes** the sum of the green lines
 
 
-## Overfitting {.smaller}
+## Overfitting
 
-```{r out.width="80%", fig.align= "center"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.55\\textheight"}
 include_graphics("../images/overfitting.png")
 ```
 
@@ -98,7 +97,6 @@ Given a model the loss function will allow me to best fit that model to my data
 **Variance** is the variability of model prediction. Models with high variance pays a lot of attention to training data and does not generalize on the data which it hasn't seen before. As a result, such models perform very well on training data but has high error rates on test data.
 
 ~~The best ML model~~ strikes a balance between _bias_ and _variance_
-
 
 
 ## Model Interpretation
