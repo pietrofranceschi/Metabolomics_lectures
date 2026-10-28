@@ -2,19 +2,18 @@
 title: "Trees and Forests"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf", message = FALSE, warning = FALSE)
 library(knitr)
 library(tidyverse)
 ```
@@ -23,9 +22,9 @@ library(tidyverse)
 # Decision Trees
 
 
-## Titanic Data {.smaller}
+## Titanic Data
 
-A tibble containing the passenger of the TItanic along with their fate during the accident
+A tibble containing the passengers of the Titanic along with their fate during the accident
 
 
 ```{r, message=FALSE}
@@ -38,8 +37,7 @@ summary(train_titanic)
 ```
 
 
-
-## Decision Trees {.smaller}
+## Decision Trees
 
 ```{r}
 library(readr)
@@ -47,38 +45,44 @@ library(rpart)
 library(rpart.plot)
 ```
 
-Titanic survival _decision tree_
-
-
-
-```{r out.width= "60%", fig.align="center"}
+:::: {.columns align=top}
+::: {.column width="60%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.75\\textheight"}
 fit <- rpart(Survived~., data = train_titanic, method = "class")
 rpart.plot(fit, type = 2, extra = 103)
 ```
+:::
+::: {.column width="40%"}
+Titanic survival _decision tree_
 
 Each node shows
 
 - the predicted class (died or survived),
 - the predicted probability of survival,
 - the percentage of observations in the node.
+:::
+::::
 
 ## Pros and Cons
 
+:::: {.columns align=top}
+::: {.column width="50%"}
+::: box-lightgreen
 **Pros**
 
-::: incremental
 - Trees are versatile (they can combine different types of variables)
 - No problems with variable scaling
 - Interpretable by definition
 :::
-
-<hr>
-
+:::
+::: {.column width="50%"}
+::: {.box-red .fragment}
 **Cons**
 
-::: incremental
 - High **variance** i.e. they do not always do well on the test set ...
 :::
+:::
+::::
 
 ## Selecting the split point: impurity
 
@@ -89,20 +93,20 @@ A perfect split will separate the classes without misclassifications, leaving wi
 Among the different criteria used to define the _impurity_ of a node two stands out:
 
 - the **Gini** index: $\sum_{i\neq{j}}p_{i}p_{j}$
-- the **entropy** : $-\sum_{j}p_{j}log(p_{j})$
+- the **entropy** : $-\sum_{j}p_{j}\log(p_{j})$
 
 were $p_{k}$ is the fraction of samples of class $k$ in the node
 
 ## Best Split on the Age
 
-```{r fig.height=4, fig.width=7, out.width="100%", fig.align="center"}
+```{r fig.height=4, fig.width=7, fig.align="center", out.width="\\linewidth", out.height="0.75\\textheight"}
 train_titanic %>%
   filter(Sex == "male") %>%
   ggplot() +
   geom_histogram(aes(x = Age, fill = Survived), position="identity", alpha = 0.7, col = "white") +
   scale_fill_brewer(palette = "Set1") +
   geom_vline(xintercept = 6.5, col = "red", lty = 2) +
-  geom_text(x = 10, y = 30, label = "Split", size = 4) +
+  annotate("text", x = 10, y = 30, label = "Split", size = 4) +
   theme_light() +
   ggtitle("Males") +
   theme(aspect.ratio = 0.5)
@@ -122,12 +126,12 @@ To do that we need to somehow ~~perturb~~ our dataset, because building differen
 * use only a **subset of the variables** at each split
 * build a **large number** of **simple trees** and "average" their outcomes
 
-## The majority takes all {.smaller}
+## The majority takes all
 
-```{r out.width="70%", fig.align="center"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.7\\textheight"}
 include_graphics("../images/Random_forest_diagram_complete.png")
 ```
-_from Wikipedia_
+\begin{flushright}\tiny\emph{from Wikipedia}\end{flushright}
 
 ## Bagging
 
@@ -141,6 +145,8 @@ This mixture of _bootstrap_ and _averaging_ is technically called ~~bagging~~
 
 ## Advantages
 
-> - **Error estimate**: due to bootstrapping some of the sample are left out (technically they are _out-of-bag_), so an error estimate on an independent set of samples comes for free
-> - **Interpretability**: even if in a less sample way the importance of each variables can be assessed as in decision trees
-> - **Low sensitivity to model parameters**: it appears that in practice RF is robust to the change of settings
+::: incremental
+- **Error estimate**: due to bootstrapping some of the sample are left out (technically they are _out-of-bag_), so an error estimate on an independent set of samples comes for free
+- **Interpretability**: even if in a less sample way the importance of each variables can be assessed as in decision trees
+- **Low sensitivity to model parameters**: it appears that in practice RF is robust to the change of settings
+:::

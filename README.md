@@ -64,7 +64,7 @@ The material (which is growing!) covers the following topics:
 * [Machine Learning for Dummies](Day4/01_ml_intro.pdf)
   * [KOMP data](data/KOMP_data_targeted.RData)
 * PLS and PLS-DA
-* [Decision Trees and Random Forest](Day4/02_decision_trees_random_forest.html)
+* [Decision Trees and Random Forest](Day4/02_decision_trees_random_forest.pdf)
   * Practical: [html](Day4/02a_lab_random_forest.html), [Rmd](Day4/02a_lab_random_forest.Rmd)
 
 
