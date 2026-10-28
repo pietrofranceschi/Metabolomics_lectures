@@ -25,7 +25,7 @@ The material (which is growing!) covers the following topics:
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)
     - Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd)
-* [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.html)
+* [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.pdf)
 * [Multiple testing](Day1/multiple_testing.pdf) - [Rmd](Day1/multiple_testing.Rmd)
     - FWER, Bonferroni, Benjamini-Hochberg FDR, p-value histograms, volcano plots
 

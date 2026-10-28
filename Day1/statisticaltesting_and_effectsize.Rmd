@@ -2,19 +2,18 @@
 title: "Statistical Testing and Effect Size"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf", warning = FALSE, message = FALSE)
 library(knitr)
 library(tidyverse)
 library(effsize)
@@ -32,12 +31,13 @@ means500 <- replicate(50, mean(rnorm(500, 200, 50)))
 ```
 
 
-
 ## The BIG question
 
-<div class="box-red">
-⚠️ <strong>The question:</strong> <br> Is what I'm observing **true beyond my sample**? Can I draw general conclusions from a limited set of samples?
-</div>
+::: box-red
+⚠️ **The question:**
+
+Is what I'm observing **true beyond my sample**? Can I draw general conclusions from a limited set of samples?
+:::
 
 In presence of variability, there will always be the possibility that what I observe in my data cannot be generalized at the population level.
 
@@ -68,7 +68,7 @@ Statistical testing is a procedure which allows us to quantify this level of con
 
 ## p-value worship
 
-```{r, echo=FALSE, fig.align='center', out.width="70%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/pvalueworship.png")
 ```
 
@@ -95,7 +95,7 @@ include_graphics("../images/pvalueworship.png")
 
 ## Let's plot it!
 
-```{r fig.align='center', fig.width=9, fig.height=4.5, out.width="85%"}
+```{r fig.align='center', fig.width=9, fig.height=4.5, out.width="\\linewidth", out.height="0.75\\textheight"}
 tibble(draw = seq_along(means50), m = means50) |>
   ggplot(aes(x = draw, y = m, colour = m < 193)) +
   geom_hline(yintercept = 200, colour = col_above) +
@@ -115,7 +115,7 @@ tibble(draw = seq_along(means50), m = means50) |>
 * The distribution of the means is nicely centered around the population mean!
 * The dashed blue line is the mean of my 50 treated people (193!)
 * The blue dots are "random" draws from the population with an average cholesterol lower than the one we observed: they get below 193 by chance
-* Getting at least that value only by chance is not extremely unlikely ... `r sum(means50 < 193)` blue dots out of 100 (p ≈ `r sum(means50 < 193) / 100`!)
+* Getting at least that value only by chance is not extremely unlikely ... `r sum(means50 < 193)` blue dots out of 100 (p $\approx$ `r sum(means50 < 193) / 100`!)
 :::
 
 ::: {.box-key .fragment}
@@ -140,7 +140,7 @@ The correct wording in my paper should be
 
 I'm stubborn, so I'm convinced that the drug is really working. We redo the same study with a test group of **500** people and we observe once more an average level of 193 ...
 
-```{r fig.align='center', fig.width=9, fig.height=3.5, out.width="75%"}
+```{r fig.align='center', fig.width=9, fig.height=3.5, out.width="\\linewidth", out.height="0.5\\textheight"}
 tibble(draw = seq_along(means500), m = means500) |>
   ggplot(aes(x = draw, y = m, colour = m < 193)) +
   geom_hline(yintercept = 200, colour = col_above) +
@@ -159,9 +159,9 @@ Magic! No more blue dots: now it is significant at the 0.05 level! It is extreme
 
 ## Take-home messages
 
-<div class="box-red">
-⚠️ <strong>We are never sure!</strong>
-</div>
+::: box-red
+⚠️ **We are never sure!**
+:::
 
 ::: incremental
 * The choice of a ~~threshold (here 0.05) for statistical significance is arbitrary~~
@@ -174,7 +174,7 @@ Magic! No more blue dots: now it is significant at the 0.05 level! It is extreme
 
 Unfortunately it turns out that our drug is not so good ... apparently it reduces the cholesterol by only 1% (from 200 to 198)
 
-```{r fig.align='center', fig.width=10, fig.height=3.5, out.width="90%"}
+```{r fig.align='center', fig.width=10, fig.height=3.5, out.width="\\linewidth", out.height="0.5\\textheight"}
 set.seed(42)
 tibble(n = rep(c(5, 50, 500, 5000, 50000), each = 100)) |>
   mutate(draw = rep(1:100, times = 5),
@@ -221,7 +221,7 @@ The *p-value* alone cannot be used to judge the relevance of a research result .
 
 ## Measuring the _effect size_
 
-```{r fig.align='center', fig.width=10, fig.height=3.5, out.width="100%"}
+```{r fig.align='center', fig.width=10, fig.height=3.5, out.width="\\linewidth", out.height="0.6\\textheight"}
 ## two pairs of gaussians with the same sd: means 2 sd apart (small effect) and 5 sd apart (large effect)
 curves <- tibble(x = seq(-20, 20, length.out = 801)) |>
   mutate(`small A` = dnorm(x, -15, 2), `small B` = dnorm(x, -13, 2),
@@ -247,12 +247,15 @@ ggplot(curves, aes(x = x, y = density, fill = group, colour = group,
 3. The variability of the population, not the one of the sampling distribution ;-)
 
 ::: {.box-red .fragment}
-⚠️ <strong>Fold change:</strong> <br> plain or robust, it only says **where** the effect is, not how large it is compared to the variability
+**Fold change:**
+
+plain or robust, it only says **where** the effect is, not how large it is compared to the variability
 :::
 
 ::: {.box-key .fragment}
 Scale the log fold change by the variability → **Cohen's d on log-transformed data**
-<br>(non-parametric alternative: probability of superiority)
+
+(non-parametric alternative: probability of superiority)
 :::
 
 
@@ -274,7 +277,7 @@ Where
 - _t-test_ to test the difference
 - 100 simulated studies for each sample size
 
-```{r fig.align='center', fig.width=10, fig.height=4, out.width="85%"}
+```{r fig.align='center', fig.width=10, fig.height=4, out.width="\\linewidth", out.height="0.55\\textheight"}
 set.seed(123)
 sims <- expand_grid(size = c(3, 5, 20, 50, 100), rep = 1:100) |>
   mutate(res = map(size, \(s) {
@@ -336,12 +339,9 @@ p_thr <- 0.05
 
 ## Effect size and significance: the volcano plot
 
-Very popular in metabolomics papers:
-
-- x-axis: ~~log₂ fold change~~ — the *size* of the effect (?)
-- y-axis: $-\log_{10}(p)$ — the *confidence* in the effect
-
-```{r fig.align='center', out.width="42%", fig.width=7, fig.height=4.5}
+:::: {.columns align=top}
+::: {.column width="55%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight", fig.width=7, fig.height=4.5}
 volcano |>
   ggplot(aes(x = lfc, y = -log10(p), colour = significant)) +
   geom_point(alpha = 0.7, size = 2) +
@@ -352,18 +352,27 @@ volcano |>
   theme_light(base_size = 16) +
   theme(legend.position = "bottom")
 ```
+:::
+::: {.column width="45%"}
+Very popular in metabolomics papers:
+
+- x-axis: ~~$\log_2$ fold change~~ — the *size* of the effect (?)
+- y-axis: $-\log_{10}(p)$ — the *confidence* in the effect
+
 
 . . .
 
-<div class="box-red">
+::: box-red
 ⚠️ The fold change ignores the variability: the same fold change can be a huge effect for a stable metabolite and pure noise for a variable one.
-</div>
+:::
+:::
+::::
 
 ## Volcano plot with Cohen's d
 
-Same data, but on the x-axis a real effect size: ~~Cohen's d~~
-
-```{r fig.align='center', out.width="55%", fig.width=7, fig.height=4.5}
+:::: {.columns align=top}
+::: {.column width="55%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight", fig.width=7, fig.height=4.5}
 volcano |>
   ggplot(aes(x = d, y = -log10(p), colour = significant)) +
   geom_point(alpha = 0.7, size = 2) +
@@ -374,18 +383,24 @@ volcano |>
   theme_light(base_size = 16) +
   theme(legend.position = "bottom")
 ```
+:::
+::: {.column width="45%"}
+Same data, but on the x-axis a real effect size: ~~Cohen's d~~
+
 
 . . .
 
 ::: box-key
 The "volcano" collapses on a curve: for a given sample size, $t = d \sqrt{n/2}$, so p-value and effect size carry the ~~same information~~
 :::
+:::
+::::
 
 ## Report effect sizes with their uncertainty
 
-Cohen's d with its 95% confidence interval for the 20 metabolites with the smallest p-value
-
-```{r fig.align='center', out.width="40%", fig.width=7, fig.height=4.5}
+:::: {.columns align=top}
+::: {.column width="55%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight", fig.width=7, fig.height=4.5}
 volcano |>
   slice_min(p, n = 20) |>
   mutate(id = fct_reorder(paste0("M", id), d)) |>
@@ -399,6 +414,10 @@ volcano |>
   theme_light(base_size = 16) +
   theme(axis.text.y = element_text(size = 8))
 ```
+:::
+::: {.column width="45%"}
+Cohen's d with its 95% confidence interval for the 20 metabolites with the smallest p-value
+
 
 . . .
 
@@ -406,6 +425,8 @@ volcano |>
 With few samples, even "significant" effects are estimated with ~~large uncertainty~~
 :::
 
-<div class="box-blue">
-With 500 metabolites, many of the p &lt; 0.05 are false positives: we need to correct the p-values → <strong>multiple testing</strong>
-</div>
+::: box-blue
+With 500 metabolites, many of the p < 0.05 are false positives: we need to correct the p-values → **multiple testing**
+:::
+:::
+::::
