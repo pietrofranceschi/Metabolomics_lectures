@@ -26,7 +26,7 @@ The material (which is growing!) covers the following topics:
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)
     - Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd)
 * [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.html)
-* [Multiple testing](Day1/multiple_testing.html) - [Rmd](Day1/multiple_testing.Rmd)
+* [Multiple testing](Day1/multiple_testing.pdf) - [Rmd](Day1/multiple_testing.Rmd)
     - FWER, Bonferroni, Benjamini-Hochberg FDR, p-value histograms, volcano plots
 
 ## Day Two
@@ -60,7 +60,7 @@ The material (which is growing!) covers the following topics:
 
 ## Day Four
 
-* Biomarker discovery: the univariate way (see also [Multiple testing](Day1/multiple_testing.html))
+* Biomarker discovery: the univariate way (see also [Multiple testing](Day1/multiple_testing.pdf))
 * [Machine Learning for Dummies](Day4/ML_intro.html)
   * [KOMP data](Day2/KOMP_data_targeted.RData)
 * PLS and PLS-DA

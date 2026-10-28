@@ -2,19 +2,18 @@
 title: "Multiple Testing"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf", warning = FALSE, message = FALSE)
 library(knitr)
 library(tidyverse)
 ```
@@ -29,10 +28,11 @@ This means: if H0 is true, we wrongly reject it **5% of the time**.
 
 . . .
 
-<div class="box-red">
-⚠️ <strong>The metabolomics reality:</strong><br>
-We do not test <em>one</em> hypothesis. We simultaneously test <strong>hundreds or thousands</strong> of variables.
-</div>
+::: box-red
+⚠️ **The metabolomics reality:**
+
+We do not test *one* hypothesis. We simultaneously test **hundreds or thousands** of variables.
+:::
 
 ## A concrete example
 
@@ -61,17 +61,17 @@ We would report **50 "significant" metabolites** — all of them artefacts.
 
 . . .
 
-<div class="box-key">
+::: box-key
 Performing many tests inflates the probability of finding something by chance alone.
-</div>
+:::
 
 # Visualising the problem
 
-## p-values under H₀
+## p-values under $H_0$
 
 When there is **no real effect**, p-values follow a ~~uniform distribution~~ between 0 and 1.
 
-```{r fig.align='center', out.width="50%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
 set.seed(42)
 n_vars <- 1000
 n_samples <- 20
@@ -104,7 +104,7 @@ tibble(p = pvals) %>%
 
 If some variables truly differ between groups, the histogram is ~~no longer flat~~: a spike appears near zero on top of the uniform background.
 
-```{r fig.align='center', out.width="50%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
 set.seed(99)
 n_null_h   <- 950   # variables with no effect
 n_signal_h <- 50    # variables with a true effect
@@ -143,11 +143,9 @@ tibble(p     = c(pv_null, pv_signal),
 . . .
 
 
-<br>
-
-<div class="box-blue">
-<strong>Practical tip:</strong> always plot the p-value histogram before applying any correction — it tells you immediately whether your data contains any signal at all.
-</div>
+::: box-blue
+**Practical tip:** always plot the p-value histogram before applying any correction — it tells you immediately whether your data contains any signal at all.
+:::
 
 # Correction methods
 
@@ -177,7 +175,7 @@ $$\text{FWER} = 1 - (1 - \alpha)^{m}$$
 | 10          | 0.40                    |
 | 50          | 0.92                    |
 | 100         | 0.994                   |
-| 1000        | ≈ 1                     |
+| 1000        | $\approx 1$                   |
 
 ## Bonferroni correction
 
@@ -193,9 +191,9 @@ $$\alpha_{\text{Bonf}} = \frac{0.05}{1000} = 0.00005$$
 
 . . .
 
-<div class="box-red">
-⚠️ <strong>Very conservative.</strong> A true positive must produce an extremely small p-value to survive. In metabolomics with correlated variables this is often too strict.
-</div>
+::: box-red
+⚠️ **Very conservative.** A true positive must produce an extremely small p-value to survive. In metabolomics with correlated variables this is often too strict.
+:::
 
 ## False Discovery Rate (FDR)
 
@@ -214,14 +212,13 @@ The resulting corrected p-values are called ~~q-values~~.
 A q-value of 0.05 means: among all features with $q \leq 0.05$, we expect at most **5% to be false positives**.
 
 
-
 # Summary
 
 ## Take-home messages
 
-<div class="box-red">
-⚠️ <strong>Never report uncorrected p-values</strong> when testing many hypotheses
-</div>
+::: box-red
+**Warning:** never report **uncorrected p-values** when testing many hypotheses
+:::
 
 ::: incremental
 - The **number of tests** matters as much as the threshold

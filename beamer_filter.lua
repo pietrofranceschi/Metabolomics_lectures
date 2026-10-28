@@ -4,6 +4,7 @@
 --   ::: box-red              -> alertblock
 --   ::: box-key              -> block
 --   ::: box-lightgreen       -> exampleblock
+--   ::: box-blue             -> block
 --   ::: {.box-key .fragment} -> same block, revealed with \pause
 --   ::: fragment             -> content revealed with \pause
 --   ::: center               -> centered content
@@ -15,6 +16,7 @@ local envs = {
   ["box-red"] = "alertblock",
   ["box-key"] = "block",
   ["box-lightgreen"] = "exampleblock",
+  ["box-blue"] = "block",
 }
 
 local function latex(s) return pandoc.RawBlock("latex", s) end
