@@ -2,19 +2,18 @@
 title: "Harmonizing ML in R"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 
