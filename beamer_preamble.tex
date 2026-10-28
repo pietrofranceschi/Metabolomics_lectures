@@ -1,0 +1,18 @@
+% Shared preamble of the beamer decks (Warsaw theme)
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{alerted text}{fg=red!50!black}
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+\setbeamertemplate{itemize items}[circle]
+% Warsaw split footline, with the frame number on the right
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,right]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor\hspace*{2ex}%
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,left]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\hspace*{2ex}\insertshorttitle\hfill%
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}%
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}

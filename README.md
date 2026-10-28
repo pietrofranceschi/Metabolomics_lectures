@@ -19,7 +19,7 @@ The material (which is growing!) covers the following topics:
 * [What is Metabolomics](Day1/Metabolomics.html)
 * [Reproducibility and Good Practices in Science](Day1/reproducibility_and_good_practices.html)
     - Three case studies: Benveniste/homeopathy (Nature 1988), the Potti scandal at Duke, chocolate & Nobel prizes (NEJM 2012)
-* [Experimental design](Day1/experimental_design.html)
+* [Experimental design](Day1/experimental_design.pdf)
     - Practical: stratified random sampling [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
 * [Practical Considerations on the study design](Day1/practical_considerations.html)
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)

@@ -2,53 +2,55 @@
 title: "Experimental Design"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio")
 library(knitr)
 ```
 
 
-## Statistics
+## Statistics {.c}
 
+::: center
 **Statistics** is the science which deals with **the collection, the analysis, the visualization and the interpretation** of experimental data.
+:::
 
 
 ## How data are collected ...
 
-<div style="display: flex; align-items: center; gap: 30px;">
-<div style="flex: 1;">
+:::: {.columns align=center}
+::: {.column width="50%"}
 
 * Random samplings
 * Observational studies
 * Experiments
 
-</div>
-<div style="flex: 1;">
-```{r fig.align='center', out.width="80%"}
+:::
+::: {.column width="50%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/picking_flowers.png")
 ```
-</div>
-</div>
+:::
+::::
 
 
 ## Random Samplings (polls)
 
-<div class="box-red">
-⚠️ <strong>Definition:</strong> <br> Random samplings allow to characterize the properties of a finite population without measuring all of its members.
-</div>
+::: box-red
+⚠️ **Definition:**
 
-<br>
+Random samplings allow to characterize the properties of a finite population without measuring all of its members.
+:::
+
 
 **Examples**
 
@@ -59,11 +61,12 @@ include_graphics("../images/picking_flowers.png")
 
 ## Observational Studies
 
-<div class="box-red">
-⚠️ <strong>Definition:</strong> <br> Observational studies are designed with the objective of **identifying relationships** between the different properties of a conceptual population. The role of the experimenter is to perform the **selection of the sample**.
-</div>
+::: box-red
+⚠️ **Definition:**
 
-<br>
+Observational studies are designed with the objective of **identifying relationships** between the different properties of a conceptual population. The role of the experimenter is to perform the **selection of the sample**.
+:::
+
 
 **Examples**
 
@@ -73,11 +76,12 @@ include_graphics("../images/picking_flowers.png")
 
 ## Experiments
 
-<div class="box-red">
-⚠️ <strong>Definition:</strong> <br> **Experiments** are designed with the objective of identifying **causal relations** between the properties of a conceptual population. The role of the experimenter is to **modify the conditions** to verify the presence of causal relationship between the observed properties.
-</div>
+::: box-red
+⚠️ **Definition:**
 
-<br>
+**Experiments** are designed with the objective of identifying **causal relations** between the properties of a conceptual population. The role of the experimenter is to **modify the conditions** to verify the presence of causal relationship between the observed properties.
+:::
+
 
 **Examples**
 
@@ -87,43 +91,44 @@ include_graphics("../images/picking_flowers.png")
 
 ## Important notes
 
-<div style="display: flex; align-items: center; gap: 30px;">
-<div style="flex: 1;">
+:::: {.columns align=center}
+::: {.column width="50%"}
 
 * Causal relations can be assessed only in **experiments**
 * This is really Galileian ;-)
 * Experiments are impossible in many relevant fields like human health and ecology
 
-</div>
-<div style="flex: 1;">
-```{r fig.align='center', out.width="70%"}
+:::
+::: {.column width="50%"}
+```{r fig.align='center', out.width="55%"}
 include_graphics("../images/fieldnotes.jpg")
 ```
-</div>
-</div>
+:::
+::::
 
 ~~Should we then give up on obtaining causal information there?~~
 
 
 ## Mind the chocolate ...
 
-```{r fig.align='center', out.width="50%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.5\\textheight"}
 include_graphics("../images/chocolate.png")
 ```
 
-<div style="font-size: 0.5em; text-align: right;">*New England Journal of Medicine, 2012*</div>
+\begin{flushright}\tiny\emph{New England Journal of Medicine, 2012}\end{flushright}
 
-<div style="font-size: 0.8em;">
-*" ... Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country ..."*
+\small
+\emph{" ... Chocolate consumption enhances cognitive function, which is a sine qua non for winning the Nobel Prize, and it closely correlates with the number of Nobel laureates in each country ..."}
 [**...and more!**](https://tylervigen.com/spurious-correlations)
-</div>
 
 
 ## Planning a sampling {.smaller}
 
-<div class="box-red">
-⚠️ <strong>Key question</strong> <br> What is the best way to sample my population in a ~~representative~~ way?
-</div>
+::: box-red
+⚠️ **Key question**
+
+What is the best way to sample my population in a ~~representative~~ way?
+:::
 
 * Do it ~~randomly~~ to avoid any intentional or unintentional bias (**Randomized Sampling**)
 * Take into account known subpopulations and confounding factors (**Stratified Random Sampling**)
@@ -154,12 +159,12 @@ include_graphics("../images/Random-Numbers-Cloud.png")
 
 ## Planning an observational study
 
-<div class="box-red">
-<strong>Objective:</strong> get a useful and clear answer.<br>
-<strong>Means:</strong> start from a clear, useful and often simple question.
-</div>
+::: box-red
+**Objective:** get a useful and clear answer.
 
-<br>
+**Means:** start from a clear, useful and often simple question.
+:::
+
 
 * Identify the **sampling unit**
 * Decide the number of samples (money, power, ...)
@@ -182,38 +187,38 @@ A variable that influences both the dependent variable and independent variable,
 * *Smoke, cardiovascular disease, alcohol consumption*
 * *Birth order (1st child, 2nd child, etc.), maternal age, Down Syndrome in the child*
 
-```{r fig.align='center', out.width="40%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.4\\textheight"}
 include_graphics("../images/Confounding.png")
 ```
 
 
 ## Notes
 
-<div style="display: flex; align-items: center; gap: 30px;">
-<div style="flex: 1;">
+:::: {.columns align=center}
+::: {.column width="50%"}
 
 * Some confounders can be controlled by careful sampling
     * *Age and Gender on the relation between happiness and chocolate*
 * Some others are impossible to control
     * *Presence of chemical pollution in water streams and altitude of sampling*
 
-</div>
-<div style="flex: 1;">
+:::
+::: {.column width="50%"}
 ```{r fig.align='center', out.width="70%"}
 include_graphics("../images/fieldnotes.jpg")
 ```
-</div>
-</div>
+:::
+::::
 
 
 ## Planning one experiment
 
-<div class="box-red">
-<strong>Objective:</strong> get a useful and clear answer.<br>
-<strong>Means:</strong> start from a clear, useful and often simple question.
-</div>
+::: box-red
+**Objective:** get a useful and clear answer.
 
-<br>
+**Means:** start from a clear, useful and often simple question.
+:::
+
 
 * What is my **experimental unit**?
 * How many samples should I measure?
@@ -222,11 +227,12 @@ include_graphics("../images/fieldnotes.jpg")
 
 ## Experimental Design
 
-<div class="box-red">
-⚠️ <strong>Definition</strong> <br> A strategy to assign the experimental units to the different *treatments* to optimize my capacity of inferring **causal relationships**.
-</div>
+::: box-red
+⚠️ **Definition**
 
-<br>
+A strategy to assign the experimental units to the different *treatments* to optimize my capacity of inferring **causal relationships**.
+:::
+
 
 ~~Control of unwanted sources of variability (technical/biological) to highlight the effects of the intervention~~
 
@@ -239,7 +245,7 @@ The tools: **randomization** and **blocking**
 * Perform a "full" experiment within each block (blocks and study factors will be **orthogonal**)
 * Identify and subtract the variability across the blocks
 
-```{r fig.align='center', out.width="50%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.45\\textheight"}
 include_graphics("../images/blocks.png")
 ```
 
@@ -248,65 +254,65 @@ include_graphics("../images/blocks.png")
 
 ## Examples of common blocking factors
 
-<div style="display: flex; align-items: center; gap: 30px;">
-<div style="flex: 1;">
+:::: {.columns align=center}
+::: {.column width="50%"}
 
 * Location
 * Analytical batch
 * Day
 * Operator
 
-</div>
-<div style="flex: 1;">
+:::
+::: {.column width="50%"}
 ```{r fig.align='center', out.width="70%"}
 include_graphics("../images/usual_suspects.jpg")
 ```
-</div>
-</div>
+:::
+::::
 
 
 ## Randomized Complete Designs
 
-```{r fig.align='center', out.width="90%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/exp_des_1.png")
 ```
 
 
 ## Split Plot Designs
 
-```{r fig.align='center', out.width="90%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/exp_des_2.png")
 ```
 
 
 ## Longitudinal Studies
 
-```{r fig.align='center', out.width="90%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/exp_des_3.png")
 ```
 
 
 ## Crossover Studies
 
-```{r fig.align='center', out.width="90%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/exp_des_4.png")
 ```
 
 
 ## Notes
 
-<div style="display: flex; align-items: center; gap: 30px;">
-<div style="flex: 1;">
+:::: {.columns align=center}
+::: {.column width="50%"}
 
 * Block as much as possible!
 * Repeated measures are more "powerful" because each unit is the control of itself
 * Crossovers can be tricky for the wash-out
 * Repeated measures designs are key when population variability is large (e.g. plants in the field/greenhouse)
 
-</div>
-<div style="flex: 1;">
+:::
+::: {.column width="50%"}
 ```{r fig.align='center', out.width="70%"}
 include_graphics("../images/fieldnotes.jpg")
 ```
-</div>
-</div>
+:::
+::::
