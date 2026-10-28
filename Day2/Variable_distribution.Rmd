@@ -2,33 +2,31 @@
 title: "Distribution of Measured Variables"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 ```
 
 
-
-## Normal Distribution {#notes .smaller}
+## Normal Distribution
 
 - The Normal (Gaussian) distribution has a prominent role in statistics
 - Some sort of "normality" is often the prerequisite of many statistical tools
 - With normal data, ~~the mean is the value with higher probability~~
 - Reasoning on the mean is equivalent is reasoning on the most probable value ...
 
-```{r out.width= "50%", fig.align='center'}
+```{r fig.width=8, fig.height=4, out.width="\\linewidth", out.height="0.45\\textheight", fig.align='center'}
 ## Standard normal distribution:
 
 xvalues <- data.frame(x = c(-10, 10))
@@ -55,7 +53,7 @@ xvalues %>% ggplot(aes(x = x)) +
 
 The distribution of the mean of a ~~sample~~ extracted from every type of distribution is always normal
 
-```{r fig.width=7, fig.align='center'}
+```{r fig.width=10, fig.height=5, out.width="\\linewidth", out.height="0.7\\textheight", fig.align='center'}
 popunif <- runif(10000)
 
 means <- rep(0,500)
@@ -70,7 +68,7 @@ hist(means, main = "Means of repeated sampling (20)", col = "Orange")
 
 ```
 
-## Sampling Distribution {#highlights}
+## Sampling Distribution
 
 **Noteworthy**
 
@@ -102,21 +100,21 @@ Sub populations are typically present in complex experiments
 
 ## Subpopulations
 
-```{r fig.align='center'}
+```{r fig.width=8, fig.height=5, out.width="\\linewidth", out.height="0.65\\textheight", fig.align='center'}
 subpop <- c(rnorm(100,10,3),rnorm(100,20,3))
 
 hist(subpop, breaks = 30)
 abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
 ```
 
-**NB: In many cases subpopulations are unknown!
+**NB:** in many cases subpopulations are unknown!
 
 
-## Lognormal data {.smaller}
+## Lognormal data
 
 Lognormal data are extremely common in metabolomics ...
 
-```{r out.width= "70%", fig.align='center'}
+```{r fig.width=8, fig.height=4.5, out.width="\\linewidth", out.height="0.5\\textheight", fig.align='center'}
 set.seed(124)
 lndata <- rlnorm(200, meanlog = 0, sdlog = 1)
 
@@ -137,10 +135,9 @@ legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd 
 
 Remember that non parametric tests suffer of lack of power and are often completely useless fin investigations with only few samples (5-10)
 
----
+## Log-transformed data
 
-
-```{r fig.align='center'}
+```{r fig.width=8, fig.height=5, out.width="\\linewidth", out.height="0.65\\textheight", fig.align='center'}
 lndata_t <- log10(lndata)
 
 hist(lndata_t, breaks = 50, col = "steelblue", main = "Log trasformed Lognormal Data")
@@ -161,7 +158,7 @@ legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd 
 
 Quantile quantile plots are used to visually compare the **theoretical quantiles** of a distribution with the **sample quantiles**
 
-```{r fig.align='center'}
+```{r fig.width=5, fig.height=5, out.width="\\linewidth", out.height="0.65\\textheight", fig.align='center'}
 a <- rnorm(30)
 par(pty="s")
 qqnorm(a, main = "Normal q-q plot of normal data", pch = 19)
@@ -170,7 +167,7 @@ qqline(a)
 
 ## q-q plot for lognormal data
 
-```{r fig.align='center'}
+```{r fig.width=5, fig.height=5, out.width="\\linewidth", out.height="0.75\\textheight", fig.align='center'}
 par(pty="s")
 qqnorm(lndata, main = "Normal q-q plot of log-normal data", pch = 19, col = "#984ea380")
 qqline(lndata)
@@ -178,6 +175,6 @@ qqline(lndata)
 ```
 
 
-## Take home message {#highlights}
+## Take home message
 
 Before running your statistical machinery give a look to your data to check if what you are doing makes sense ...
