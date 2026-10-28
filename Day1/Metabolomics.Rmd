@@ -2,19 +2,21 @@
 title: "Metabolomics!"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
+header-includes:
+  - \newcommand{\good}{\textcolor{green!50!black}{$\checkmark$}}
+  - \newcommand{\bad}{\textcolor{red!60!black}{$\times$}}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 ```
 
@@ -55,9 +57,9 @@ We use the analytical method of choice to analyze a selected set of metabolites.
 
 ~~The measured variables are metabolites~~
 
-<div class="box-red">
-⚠️ <strong>Warning:</strong> The numbers we collect is the concentration of the individual metabolites.
-</div>
+::: box-red
+⚠️ **Warning:** The numbers we collect is the concentration of the individual metabolites.
+:::
 
 
 ## Untargeted
@@ -66,31 +68,37 @@ We "throw" a raw sample in our instrument, trying to analyze as much signals as 
 
 ~~The measured variables are **not** metabolites~~
 
-<div class="box-red">
-⚠️ <strong>Warning:</strong> The numbers we get are the peak areas of the individual features.
-</div>
+::: box-red
+⚠️ **Warning:** The numbers we get are the peak areas of the individual features.
+:::
 
-## Why targeted, why untargeted {.smaller}
+## Why targeted, why untargeted
 
+\small
+
+:::: {.columns align=top}
+::: {.column width="50%"}
 ### Targeted
 
-1.  😀 ~~quantitative~~ results are obtained "by definition"
-2.  😀 results can be interpreted under the light of the ~~known metabolic pathways~~
-3.  😀 the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited *batch effect*)
-4.  😞 we basically look only to the expected
-
-
+- \good{} ~~quantitative~~ results are obtained "by definition"
+- \good{} results can be interpreted under the light of the ~~known metabolic pathways~~
+- \good{} the analytical results are ~~comparable~~ across experiments and across laboratories (aka limited *batch effect*)
+- \bad{} we basically look only to the expected
+:::
+::: {.column width="50%"}
 ### Untargeted
 
-1.  😀 ~~holistic~~
-2.  😀 open to ~~unexpected~~
-3.  😞 tricky
-4.  😞 hardly quantitative
-5.  😞 not standardized
+- \good{} ~~holistic~~
+- \good{} open to ~~unexpected~~
+- \bad{} tricky
+- \bad{} hardly quantitative
+- \bad{} not standardized
+:::
+::::
 
 ## The ideal Metabolomics road-map
 
-```{r out.width="70%", fig.align="center"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/metabolomics_workflow.png")
 ```
 
@@ -111,38 +119,38 @@ We need an analytic technique:
 
 ## Nuclear Magnetic Resonance
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_nmr_instrument.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_nmr_instrument.pdf")
 ```
 
 ## Molecules and Peaks
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_nmr_spectrum.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_nmr_spectrum.pdf")
 ```
 
 ## Mass Spectrometry
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_ms_instrument.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_ms_instrument.pdf")
 ```
 
 ## Molecules and Ions
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_ms_spectrum.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_ms_spectrum.pdf")
 ```
 
 ## Chromatographic Separation
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_lcms.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_lcms.pdf")
 ```
 
 ## Molecules and features
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_ms_nmr_features.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_ms_nmr_features.pdf")
 ```
 
 ## Molecules and features
@@ -153,13 +161,12 @@ In all the techniques presented so far, ~~each metabolite~~ give rise to a large
 -   **NMR** - the different peaks coming from the resonance of the nuclei present in the molecule.
 -   **LC/GC-MS** - the different ions which are eluting at different time. These mz/rt couples are called *features*
 
-<br><br>
 
-<div class="box-red">
-⚠️ <strong>Warning:</strong> All the variables coming from the same molecule are ~~highly correlated~~.
-</div>
+::: box-red
+⚠️ **Warning:** All the variables coming from the same molecule are ~~highly correlated~~.
+:::
 
-## Sources of Analytical Variability {.smaller}
+## Sources of Analytical Variability
 
 ### 1 - The measurement itself
 
@@ -169,7 +176,7 @@ Even with the perfect instrument the "numbers" will change. Try measuring your t
 
 When chromatographic separation is present, elution times will slightly change from run to run. For GC the situation is better, but far from being perfect
 
-## Sources of Analytical Variability {.smaller}
+## Sources of Analytical Variability
 
 ### 3 - Matrix effects
 
@@ -183,21 +190,25 @@ The approach is so powerful that all aspect related to sample handling/storage/e
 
 ## NMR vs LC/GC MS
 
+:::: {.columns align=top}
+::: {.column width="50%"}
 ### NMR
 
-1.  😀 Reproducible
-2.  😀 Inherently quantitative
-3.  😀 Sensitive to the chemical structure
-4.  😞 Relatively insensitive
-5.  😞 Dynamic range
-
-
+- \good{} Reproducible
+- \good{} Inherently quantitative
+- \good{} Sensitive to the chemical structure
+- \bad{} Relatively insensitive
+- \bad{} Dynamic range
+:::
+::: {.column width="50%"}
 ### LC/GC - MS
 
-1.  😀 Sensitive
-2.  😀 Universal
-3.  😀 With high dynamic range
-4.  😞 Less reproducible (😉)
+- \good{} Sensitive
+- \good{} Universal
+- \good{} With high dynamic range
+- \bad{} Less reproducible (;-))
+:::
+::::
 
 # Pitfalls and caveats
 
@@ -230,8 +241,8 @@ Remember that ~~instruments are sensitive~~, so errors will unavoidably show up 
 
 ## Annotation ...
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_annotation.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_annotation.pdf")
 ```
 
 ## Annotation in Untargeted Metabolomics
