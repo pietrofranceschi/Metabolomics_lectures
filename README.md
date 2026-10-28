@@ -45,7 +45,7 @@ The material (which is growing!) covers the following topics:
 
 ## Day Three
 
-* [Processing LC-MS data with `xcms`](Day3/01_processing_lc_ms.html)
+* [Processing LC-MS data with `xcms`](Day3/01_processing_lc_ms.pdf)
 * Practical: Inspecting raw data [html](Day3/01a_lab_inspecting_raw_data.html), [Rmd](Day3/01a_lab_inspecting_raw_data.Rmd)
 * Practical: Peak picking [html](Day3/01b_lab_peak_picking.html), [Rmd](Day3/01b_lab_peak_picking.Rmd)
 * Practical: Retention time correction and feature definition [html](Day3/01c_lab_rt_correction_feature_definition.html), [Rmd](Day3/01c_lab_rt_correction_feature_definition.Rmd)

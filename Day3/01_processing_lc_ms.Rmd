@@ -2,19 +2,18 @@
 title: "Processing LC MS Data"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf", warning = FALSE, message = FALSE)
 library(knitr)
 library(tidyverse)
 library(patchwork)
@@ -25,7 +24,7 @@ library(plotly)
 ```
 
 
-## What is `xcms` {.smaller}
+## What is `xcms`
 
 Framework for processing and visualization of chromatographically separated and single-spectra mass spectral data.
 
@@ -35,7 +34,7 @@ and still growing ...
 
 [RforMassSpectrometry](https://www.rformassspectrometry.org/)
 
-```{r fig.align='center', fig.height=2, fig.width=3, out.width="70%"}
+```{r fig.align='center', fig.height=2, fig.width=3, out.width="\\linewidth", out.height="0.4\\textheight"}
 p1 <- ggdraw() + draw_image("../images/compoundDB.png", scale = 0.6)
 p2 <- ggdraw() + draw_image("../images/spectra.png", scale = 0.6)
 
@@ -43,8 +42,7 @@ plot_grid(p1, p2)
 ```
 
 
-
-## Outline {.smaller}
+## Outline
 
 -   Data analysis, organization and data matrices
 -   Some thoughts on validation
@@ -56,13 +54,13 @@ plot_grid(p1, p2)
 -   Demo & DIY
 -   Retention time correction and features definition
 -   Demo & DIY
--   Dealing with Fragmentation esperiments
+-   Dealing with Fragmentation experiments
 -   Demo & DIY
 
 ## The data matrix
 
-```{r, echo=FALSE, fig.align='center', out.width="50%"}
-include_graphics("../images/Matrix.svg")
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/Matrix.pdf")
 ```
 
 ## The role of Data Analysis
@@ -76,7 +74,7 @@ Statistics, Bionformatics, Machine Learning, Chemometrics, ..., provide the tool
 
 ## Examples of Organization
 
-```{r fig.align='center', out.width="80%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.75\\textheight"}
 
 a <- tibble(class = rep(c("A","B"), each = 100),
        intensity = c(rnorm(100,10), rnorm(100,11))) %>%
@@ -100,7 +98,6 @@ b|a
 ```
 
 
-
 ## False Positives
 
 ::: incremental
@@ -121,7 +118,7 @@ b|a
 
 . . .
 
-#### Do we always need statistics?
+**Do we always need statistics?**
 
 ## Data hygiene
 
@@ -147,17 +144,17 @@ b|a
 
 ## LC-MS For Dummies
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/LCMS.jpg")
 ```
 
-## Analytical Variability in LC-MS | Mass
+## Analytical Variability in LC-MS: Mass
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/mass_drift.png")
 ```
 
-## Analytical Variability in LC-MS | Retention time
+## Analytical Variability in LC-MS: Retention time
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -171,7 +168,7 @@ apples <- readMSData(fnames, mode = "onDisk")
 bpi <- apples %>% filterRt(c(250,410)) %>% chromatogram(aggregationFun = "max")
 ```
 
-```{r fig.align='center', out.width="80%", fig.height=6}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.75\\textheight", fig.height=6}
 #| fig-height: 6
 #| fig-align: center
 
@@ -179,9 +176,9 @@ plot(bpi, col = "steelblue", main = "BPI")
 ```
 
 
-## Analytical Variability in LC-MS | Intensity
+## Analytical Variability in LC-MS: Intensity
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/Total_ion_current.png")
 ```
 
@@ -200,27 +197,27 @@ include_graphics("../images/Total_ion_current.png")
 *QCs should be representative of the chemical complexity of your samples*
 
 * correct for retention time shifts
-* identify [reliable]{style="color: red"} variables:
+* identify ~~reliable~~ variables:
    * variance in QC should be smaller than in samples
    * their intensity should decrease during dilution
    *    ...
 * help in correcting for bath effects ...
 
-## LC-MS produces 3D data  | (rt,mz,I) {.smaller}
+## LC-MS produces 3D data: (rt,mz,I)
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.5\\textheight"}
 include_graphics("../images/LCMS_data.png")
 ```
 
 
-**Things too look at**
+**Things to look at**
 
 * Extracted Ion Trace/Current (EIT/EIC)
 * Mass Spectra
 
 ## Extracted ion traces
 
-```{r fig.align='center', out.width="80%", fig.height=6}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.75\\textheight", fig.height=6}
 #| fig-height: 6
 #| fig-align: center
 
@@ -231,7 +228,7 @@ plot(proc_trace, col = "coral")
 
 ## Mass Spectra
 
-```{r fig.align='center', out.width="80%", fig.height=6}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.75\\textheight", fig.height=6}
 
 #| fig-height: 6
 #| fig-align: center
@@ -243,7 +240,6 @@ tibble(mz =  mz(ms), i = intensity(ms)) %>%
   ggplot() +
   geom_segment(aes(x = mz, xend = mz, y = 0, yend = i)) +
   theme_bw()
-
 
 
 ```
@@ -259,7 +255,7 @@ Always check your results on the raw data
 
 ## Hands-on: let's switch to RStudio
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/RStudio.png")
 ```
 
@@ -274,7 +270,6 @@ include_graphics("../images/RStudio.png")
 - The same peak can slightly **move** across the injections
 :::
 
-<hr>
 
 . . .
 
@@ -282,24 +277,24 @@ include_graphics("../images/RStudio.png")
 
 ## MatchedFilter
 
-```{r, echo=FALSE, fig.align='center', out.width="100%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
 include_graphics("../images/matchedFilter.png")
 ```
 
-<font size="2">Anal Chem 2006 1;78(3):779-87. doi: 10.1021/ac051437y</font>
+\begin{flushright}\tiny Anal Chem 2006 1;78(3):779-87. doi: 10.1021/ac051437y\end{flushright}
 
 
 ## Cent Wave
 
-```{r, echo=FALSE, fig.align='center', out.width="50%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.68\\textheight"}
 include_graphics("../images/cent_wave.png")
 ```
 
-<font size="2">BMC Bioinformatics 9, 504 (2008). https://doi.org/10.1186/1471-2105-9-504</font>
+\begin{flushright}\tiny BMC Bioinformatics 9, 504 (2008). https://doi.org/10.1186/1471-2105-9-504\end{flushright}
 
 ## Peak Intensity: `into` and `maxo`
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/maxointo.png")
 ```
 
@@ -317,7 +312,7 @@ include_graphics("../images/maxointo.png")
 
 ## Hands-on: let's switch to RStudio
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/RStudio.png")
 ```
 
@@ -332,21 +327,21 @@ include_graphics("../images/RStudio.png")
 
 ## What Next
 
-We have to merge the lists of [chromatographic peaks]{style="color: red"} into a consensus list of [ features peaks]{style="color: red"}, which will be the columns of our data matrix
+We have to merge the lists of ~~chromatographic peaks~~ into a consensus list of ~~features peaks~~, which will be the columns of our data matrix
 
 * *chromatographich peaks* what was detected in the individual samples (mz, rt, intensity)
 * *features* consensus variables which are *grouping* several peaks coming from the different injections (mz, rt, intensity)
 
 ## Grouping - Correspondence
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
-include_graphics("../images/grouping.svg")
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/grouping.pdf")
 ```
 
 ## Grouping - Correspondence
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
-include_graphics("../images/workflow.svg")
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/workflow.pdf")
 ```
 
 
@@ -356,12 +351,12 @@ Available in `xcms` through `obiwarp`
 
 . . .
 
-![](../images/warping.png){width="100%"}
+![](../images/warping.png){width=100% height=70%}
 
 
 ## RT Checks
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/rt_shift.png")
 ```
 
@@ -384,7 +379,6 @@ Even if you do everything well your final data matrix will be full of missing va
 -   "absence" of a metabolite in one or more samples (biology)
 -   that metabolite is below the detection limit (analytics)
 
-<hr>
 
 
 -   missing at random
@@ -393,7 +387,7 @@ Even if you do everything well your final data matrix will be full of missing va
 
 ## Hands-on: let's switch to RStudio
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/RStudio.png")
 ```
 
@@ -414,7 +408,7 @@ include_graphics("../images/RStudio.png")
 
 *DDA*: Data Dependent Acquisition
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
 include_graphics("../images/tandemMS.jpg")
 ```
 
@@ -428,6 +422,6 @@ include_graphics("../images/tandemMS.jpg")
 
 ## Hands-on: let's switch to RStudio
 
-```{r, echo=FALSE, fig.align='center', out.width="80%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/RStudio.png")
 ```
