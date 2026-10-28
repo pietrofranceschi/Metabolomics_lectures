@@ -49,7 +49,7 @@ The material (which is growing!) covers the following topics:
 * Practical: Inspecting raw data [html](Day3/01a_lab_inspecting_raw_data.html), [Rmd](Day3/01a_lab_inspecting_raw_data.Rmd)
 * Practical: Peak picking [html](Day3/01b_lab_peak_picking.html), [Rmd](Day3/01b_lab_peak_picking.Rmd)
 * Practical: Retention time correction and feature definition [html](Day3/01c_lab_rt_correction_feature_definition.html), [Rmd](Day3/01c_lab_rt_correction_feature_definition.Rmd)
-* [SW resources for preprocessing](Day3/02_software_resources_preprocessing.html)
+* [SW resources for preprocessing](Day3/02_software_resources_preprocessing.pdf)
 * [Some words on annotation](Day3/03_annotation.html)
 * Practical: Fragmentation Spectra [html](Day3/03a_lab_fragmentation_spectra.html), [Rmd](Day3/03a_lab_fragmentation_spectra.Rmd)
 * Practical: Compound Annotation [html](Day3/03b_lab_compound_annotation.html), [Rmd](Day3/03b_lab_compound_annotation.Rmd)  
