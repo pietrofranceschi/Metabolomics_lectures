@@ -2,55 +2,56 @@
 title: "LC-MS: from raw data to DM"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 library(MASS)
 ```
 
 
-## Starting Ideas {#notes}
+## Starting Ideas
 
-> 1. Metabolites shows up as peaks in the rt/mz space
-> 2. Each metabolites produces more than one peak
-> 3. The peaks of the same compounds are slightly shifted in the  different samples
+::: incremental
+1. Metabolites shows up as peaks in the rt/mz space
+2. Each metabolites produces more than one peak
+3. The peaks of the same compounds are slightly shifted in the  different samples
+:::
 
 
-## Fragmentation {.smaller}
+## Fragmentation
 
 During ionization chemical structures ~~fragment~~ in different ions
 
-```{r fig.align="center", out.width="90%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.5\\textheight"}
 include_graphics("../../images/LCMS.png")
 ```
 
 A metabolite **produce several peaks on the mz-rt plane**
 
 
-## Extracted Ion Traces  {.smaller}
+## Extracted Ion Traces
 The chromatograms of the ions coming from the same metabolite are locally correlated
 
-```{r fig.align="center", out.width="90%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.5\\textheight"}
 include_graphics("../../images/EIC.png")
 ```
 
 but the ~~same ion can come from different metabolites!~~
 
----
+## Peaks on the mz-rt plane
 
-```{r fig.align="center", out.width="70%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../../images/peaks_plane.png")
 ```
 
@@ -63,8 +64,6 @@ include_graphics("../../images/peaks_plane.png")
 4. Select a good measure of intensity and arrange everything in a data matrix
 
 
-<br>
-
 **Provide reliable ways to visualize all the previous steps and check their consistency**
 
 ## Visualization
@@ -72,12 +71,8 @@ include_graphics("../../images/peaks_plane.png")
 - Inspecting and checking the quality of each step
 - Checking the outcomes of the statistical analysis
 
-<br>
-<br>
 
-<hr>
 ~~A result should be always visible in the raw data ...~~
-<hr>
 
 ## On Instrumental drifts
 
@@ -88,7 +83,7 @@ include_graphics("../../images/peaks_plane.png")
 * The ~~efficiency of the spectrometer degrades with time~~ (the instrument gets dirty)
 
 
-## 0. Get the raw data {.smaller}
+## 0. Get the raw data
 
 Raw LC/Gc-MS are saved in **proprietary** format by the acquisition equipment (Bruker, Agilent, Thermo, Waters, ...).
 
@@ -99,15 +94,11 @@ Before the analysis the raw data have to be **converted** into _open source_ for
 - mzXML
 - **mzML** , more recent and recommended
 
-<br>
-<hr>
-<br>
 
 Conversion tools
 
-* ### Instrument software
+* Instrument software
 * [_proteowizard_](http://proteowizard.sourceforge.net/)
-
 
 
 # 1. Peak Picking
@@ -116,9 +107,6 @@ Conversion tools
 
 **Look for peaks in the mz-rt plane**
 
-<br>
-<hr>
-<br>
 
 
 Almost all software for the analysis of untargeted metabolomics data will propose different algorithms to perform peak picking:
@@ -128,17 +116,16 @@ Almost all software for the analysis of untargeted metabolomics data will propos
 * The practice (and **the awareness**) makes the master
 
 
-
 ## Matched Filter
 
-```{r fig.align="center", out.width="80%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../../images/matchedFilter.png")
 ```
 
 
 ## Cent-Wave
 
-```{r fig.align="center", out.width="55%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../../images/cent_wave.png")
 ```
 
@@ -156,9 +143,6 @@ include_graphics("../../images/cent_wave.png")
 
 **The objective of alignment is to ~~compensate~~ the analytical drifts, without putting together things that should not be aligned**
 
-<br>
-<hr>
-<br>
 
 
 In a multi sample experiment ~~peak lists~~ are
@@ -175,9 +159,6 @@ In a multi sample experiment ~~peak lists~~ are
 
 **The last step is to find a consensus list of variable across the different samples**
 
-<br>
-<hr>
-<br>
 
 After alignment, the list of peaks is now aligned in retention time but:
 
@@ -185,9 +166,9 @@ After alignment, the list of peaks is now aligned in retention time but:
 * a peak could be present only in a group of samples (because a metabolite is missing there)
 * a peak could be missing because it was not correctly identified
 
----
+## Grouping peaks into features
 
-```{r fig.align="center", out.width="60%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../../images/grouping.png")
 ```
 
@@ -212,7 +193,7 @@ The ~~area~~ is often more robust, but can give erratic results if the peak is n
 
 ## maxo - into
 
-```{r fig.align="center", out.width="80%"}
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../../images/maxointo.png")
 ```
 
@@ -220,16 +201,15 @@ include_graphics("../../images/maxointo.png")
 
 Even if aligned the typical DM will be full of **missing values**
 
-<br>
-<hr>
-<br>
 
-> * error in peak picking
-> * error in alignment
-> * compound missing in one or more samples
+::: incremental
+* error in peak picking
+* error in alignment
+* compound missing in one or more samples
+:::
 
 
-## Imputation {.smaller}
+## Imputation
 
 * Remove the features with too many NAs
 * The detection limit is unknown!
@@ -237,9 +217,6 @@ Even if aligned the typical DM will be full of **missing values**
 * Something related to our knowledge of the instrument (noise)
 
 
-<br>
-<hr>
-<br>
 
 **`xcms` implements a `fillPeaks()` function which will integrate the raw ms signal in the area of the peak in all missing samples**
 
@@ -251,9 +228,6 @@ Even if aligned the typical DM will be full of **missing values**
 
 **Some of the features will be measured in an unreliable way and should be discarded**
 
-<br>
-<hr>
-<br>
 
 
 * features with too many missing values in the samples
