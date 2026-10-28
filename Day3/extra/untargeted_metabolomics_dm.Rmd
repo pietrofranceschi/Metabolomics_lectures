@@ -2,29 +2,30 @@
 title: "Untargeted Metabolomics Data Matrix"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 library(MASS)
 ```
 
-## Starting Ideas {#notes}
+## Starting Ideas
 
-> 1. The data matrix will be **FAT**
-> 2. The variable we measure are **not** metabolites
-> 3. We want to process the raw data coming from the instrument and organize them in a data matrix
+::: incremental
+1. The data matrix will be **FAT**
+2. The variable we measure are **not** metabolites
+3. We want to process the raw data coming from the instrument and organize them in a data matrix
+:::
 
 ## LC/GC MS
 
@@ -34,13 +35,12 @@ library(MASS)
 2. The separated molecules are ionized and then weighted in the mass spectrometer
 3. During ionization each molecule produces more than on ion
 
-<hr>
 
 **We have more ions than metabolites**
 
----
+## LC/GC MS: a 3D view
 
-```{r out.width="80%", fig.align= "center"}
+```{r out.width="\\linewidth", out.height="0.8\\textheight", fig.align= "center"}
 include_graphics("../../images/Liquid_chromatography_MS_spectrum_3D_analysis.png")
 ```
 
@@ -50,9 +50,6 @@ include_graphics("../../images/Liquid_chromatography_MS_spectrum_3D_analysis.png
 - Dimension 1: separation time (in sec or minutes)
 - Dimension 2: "weight of the molecule" (measured as mass/charge, _m/z_)
 
-<br>
-<hr>
-<br>
 
 - The intensity of the different ions coming from the same molecule are highly correlated
 - Due to analytical variability retention time and m/z slightly drift over time
@@ -61,7 +58,7 @@ include_graphics("../../images/Liquid_chromatography_MS_spectrum_3D_analysis.png
 
 ## Ion Mobility
 
-```{r out.width="80%", fig.align= "center"}
+```{r out.width="\\linewidth", out.height="0.55\\textheight", fig.align= "center"}
 include_graphics("../../images/ion_mobility.png")
 ```
 
@@ -77,7 +74,6 @@ include_graphics("../../images/ion_mobility.png")
 * Huge ~~matrix effect~~
 
 
-
 ## NMR
 
 **One dimensional data**
@@ -88,9 +84,9 @@ NMR measures a physical property (their frequency of resonance) of atomic nuclei
 2. Each molecule/metabolite produces more than one NMR peak
 3. NMR is more reproducible, but less sensitive compared to MS based analytical techniques
 
----
+## NMR spectrum
 
-```{r out.width="80%", fig.align= "center"}
+```{r out.width="\\linewidth", out.height="0.45\\textheight", fig.align= "center"}
 include_graphics("../../images/nmr_spectroscopy.png")
 ```
 
