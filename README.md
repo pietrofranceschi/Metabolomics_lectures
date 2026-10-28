@@ -21,7 +21,7 @@ The material (which is growing!) covers the following topics:
     - Three case studies: Benveniste/homeopathy (Nature 1988), the Potti scandal at Duke, chocolate & Nobel prizes (NEJM 2012)
 * [Experimental design](Day1/experimental_design.pdf)
     - Practical: stratified random sampling [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
-* [Practical Considerations on the study design](Day1/practical_considerations.html)
+* [Practical Considerations on the study design](Day1/practical_considerations.pdf)
 * [Group Activity: design your study](Day1/Group_activity_study_design.html)
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)
     - Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd)

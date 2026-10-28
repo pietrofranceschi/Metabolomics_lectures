@@ -2,29 +2,29 @@
 title: "Practical Considerations"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 ```
 
 
+## The starting point {.c}
 
-## The starting point
-
-::: {.box-red style="margin-top: 5.5em; text-align: center; font-size: 1.4em; font-weight: 600;"}
-Start from a clear question
+::: box-red
+::: center
+\Large\textbf{Start from a clear question}
+:::
 :::
 
 
@@ -39,7 +39,7 @@ Start from a clear question
 
 ## Controlling analytical variability
 
-```{r fig.height=3, fig.width=8}
+```{r fig.height=3, fig.width=8, fig.align="center", out.width="\\linewidth", out.height="0.5\\textheight"}
 set.seed(123)
 sample_list <- tibble(batch = rep(c("Batch 1","Batch 2"), each = 20),
                       class = rep(c("treated","control"), each = 20),
@@ -69,7 +69,6 @@ sample_list |>
 :::
 
 
-
 ## Your silver bullet: Quality Control Samples (QC)
 
 ::: incremental
@@ -82,7 +81,7 @@ sample_list |>
 
 ## A fairly good sample list
 
-```{r fig.height=3, fig.width=4, fig.align="center"}
+```{r fig.height=3, fig.width=4, fig.align="center", out.width="\\linewidth", out.height="0.42\\textheight"}
 
 tibble(order = 1:14,
        sample = c("blank","QC","QC","QC",rep(c("S","S","S","S","QC"), times = 2))) |>
@@ -111,8 +110,8 @@ tibble(order = 1:14,
 
 ## DDA and Fragmentation
 
-```{r out.width="100%", fig.align="center"}
-include_graphics("../images/scheme_fs_msms.svg")
+```{r fig.align="center", out.width="\\linewidth", out.height="0.55\\textheight"}
+include_graphics("../images/scheme_fs_msms.pdf")
 ```
 
 Experiments combining full scan and fragmentation are quite popular, because fragmentation patterns are needed for metabolite annotation and for setting up quantitative methods
@@ -120,7 +119,7 @@ Experiments combining full scan and fragmentation are quite popular, because fra
 
 ## Use your time wisely
 
-```{r fig.height=3, fig.width=12, out.width="100%", fig.align="center"}
+```{r fig.height=3, fig.width=12, fig.align="center", out.width="\\linewidth", out.height="0.4\\textheight"}
 x <- seq(1, 15, length=40)
 y <- dnorm(x, mean = 10, sd = 1)
 
