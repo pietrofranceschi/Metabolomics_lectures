@@ -40,8 +40,8 @@ The material (which is growing!) covers the following topics:
 * [Multivariate visualization: PCA](Day2/05_pca.pdf)
 
 ### Datasets
-* [KOMP data](Day2/KOMP_data_targeted.RData)
-* [Rubus data](Day2/rubus_targeted.csv)
+* [KOMP data](data/KOMP_data_targeted.RData)
+* [Rubus data](data/rubus_targeted.csv)
 
 ## Day Three
 
@@ -62,7 +62,7 @@ The material (which is growing!) covers the following topics:
 
 * Biomarker discovery: the univariate way (see also [Multiple testing](Day1/08_multiple_testing.pdf))
 * [Machine Learning for Dummies](Day4/01_ml_intro.html)
-  * [KOMP data](Day2/KOMP_data_targeted.RData)
+  * [KOMP data](data/KOMP_data_targeted.RData)
 * PLS and PLS-DA
 * [Decision Trees and Random Forest](Day4/02_decision_trees_random_forest.html)
   * Practical: [html](Day4/02a_lab_random_forest.html), [Rmd](Day4/02a_lab_random_forest.Rmd)

@@ -41,7 +41,9 @@ vignettes/*.pdf
 ## Rstudio Project file
 *.Rproj
 
-/data/
+/data/*
+!/data/KOMP_data_targeted.RData
+!/data/rubus_targeted.csv
 /images/
 /literature/
 
