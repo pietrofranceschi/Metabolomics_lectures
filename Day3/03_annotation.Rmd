@@ -2,19 +2,18 @@
 title: "Annotation"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 ```
 
@@ -32,10 +31,9 @@ library(knitr)
 
 ## Annotation Levels
 
-```{r out.width="60%", fig.align="center"}
+```{r out.width="\\linewidth", out.height="0.8\\textheight", fig.align="center"}
 include_graphics("../images/annotation_levels.png")
 ```
-
 
 
 ## The tools for the trade
@@ -51,7 +49,7 @@ In the case of MS based experiments, the process of annotation requires the inte
 
 ## Fragmentation Experiments
 
-```{r out.width="80%", fig.align="center"}
+```{r out.width="\\linewidth", out.height="0.55\\textheight", fig.align="center"}
 include_graphics("../images/tandemMS.jpg")
 ```
 
