@@ -34,7 +34,7 @@ The material (which is growing!) covers the following topics:
 * Practical: [Wrangling a targeted metabolomics data matrix](Day2/wrangling_targeted_DM.html) -  [Rmd](Day2/wrangling_targeted_DM.Rmd)
 
 ### Focus Topics
-* [Missing values and imputation](Day2/MissingValues.html)
+* [Missing values and imputation](Day2/MissingValues.pdf)
 * [Distribution of the variables](Day2/Variable_distribution.html)
 * [Variable scaling and Sample normalization](Day2/Scaling_and_normalization.html)
 * [Multivariate visualization: PCA](Day2/PCA.html)

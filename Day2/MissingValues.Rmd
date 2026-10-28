@@ -2,19 +2,18 @@
 title: "Missing Values"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 ```
@@ -23,13 +22,12 @@ library(tidyverse)
 
 _In statistics, missing data, or missing values, occur when no data value is stored for the variable in an observation. Missing data are a common occurrence and can have a significant effect on the conclusions that can be drawn from the data._
 
-<br>
 
 - Data can be missing **at random** or **not at random**
 - In **metabolomics** missing values arise when, for a sample, it was not possible to get a specific intensity for a feature/metabolite
 
 
-## Notes {#notes}
+## Notes
 
 In metabolomics missing values pop up for different reasons
 
@@ -39,38 +37,37 @@ In metabolomics missing values pop up for different reasons
 3. A metabolite was "absent" in a sample I'll get a missing value (_eg. red pigment in a an extract of white grape_)
 :::
 
-<br>
 
 1,2 & 3 are **random** or **not random** ?
 
 
-
-
-## Analytical Absence {#highlights}
-
-```{r, echo=FALSE, fig.align='center', out.width="50%"}
-include_graphics("../images/important.png")
-```
-
-<br>
+## Analytical Absence
 
 Having a **Missing** is **not** equivalent of having **zero** concentration!
 
+:::: {.columns align=top}
+::: {.column width="65%"}
 ::: incremental
 - Each analytical method is characterized by a well defined *detection limit*
 - Every concentration between zero and the detection limit will not be detected
 - We never can be 100% sure that something is absent from my sample ...
 :::
+:::
+::: {.column width="35%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.45\\textheight"}
+include_graphics("../images/important.png")
+```
+:::
+::::
 
 Where can we get the detection limit ?
-
 
 
 ## Scenario 1: 1 class
 
 Signal close to the detection limit
 
-```{r fig.align='center', out.width="90%"}
+```{r fig.align='center', fig.width=9, fig.height=4.5, out.width="\\linewidth", out.height="0.6\\textheight"}
 set.seed(123)
 sc1 <- rnorm(50,20,2)
 
@@ -88,7 +85,7 @@ Missing values are "randomly" popping-up
 
 ## Scenario 2: 2 class biomarker
 
-```{r fig.align='center', out.width="90%"}
+```{r fig.align='center', fig.width=9, fig.height=4.5, out.width="\\linewidth", out.height="0.6\\textheight"}
 set.seed(123)
 sc2 <- c(rnorm(25,20,2), rnorm(25,15,2))
 
@@ -107,7 +104,7 @@ Missing values are ~~not~~ "randomly" popping-up
 
 ## Scenario 3: 2 class ??
 
-```{r fig.align='center', out.width="90%"}
+```{r fig.align='center', fig.width=9, fig.height=4.5, out.width="\\linewidth", out.height="0.6\\textheight"}
 set.seed(123)
 sc3 <- c(25,rnorm(24,15,2), rnorm(25,10,2))
 
@@ -122,17 +119,14 @@ legend("topright", legend = c("Class A", "Class B"), pch = c(19,3), bty = "n")
 ```
 
 
----
+## Your turn
 
-```{r, echo=FALSE, fig.align='center', out.width="50%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.6\\textheight"}
 include_graphics("../images/for_you.jpg")
 ```
 
-<br>
-
 
 **What would you propose to do in the previous three cases?**
-
 
 
 ## Dealing with missing values
@@ -141,14 +135,12 @@ include_graphics("../images/for_you.jpg")
 - ~~Impute~~ them put a reasonable number with variability
 - Remove features with too many NAs (scenario 3)
 
-<br>
-<hr>
 
 
 How many NAs are acceptable **depends on the allocation of the samples to the factors of the study**
 
 
-## Imputation {#notes}
+## Imputation
 
 **Imputation** is the process of substituting a missing value with a reasonable number:
 
