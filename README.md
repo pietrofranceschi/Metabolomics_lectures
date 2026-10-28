@@ -22,7 +22,7 @@ The material (which is growing!) covers the following topics:
 * [Experimental design](Day1/experimental_design.pdf)
     - Practical: stratified random sampling [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
 * [Practical Considerations on the study design](Day1/practical_considerations.pdf)
-* [Group Activity: design your study](Day1/Group_activity_study_design.html)
+* [Group Activity: design your study](Day1/Group_activity_study_design.pdf)
 * [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.html)
     - Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd)
 * [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.pdf)
