@@ -2,19 +2,18 @@
 title: "Scaling and Normalization"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
-  revealjs::revealjs_presentation:
-    css: "../cri_css.css"
-    self_contained: true
-    center: false
-    transition: fade
-    reveal_options:
-      slideNumber: "c/t"
-      controls: true
-      progress: false
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf")
 library(knitr)
 library(tidyverse)
 library(MASS)
@@ -28,9 +27,6 @@ Metabolomics aims at measuring the concentration of :
 1. The larger (as possible) number of metabolites
 2. ... over the larger (as possible) range of concentration
 
-<br>
-<hr>
-<br>
 
 ~~We typically are dealing with huge differences in signal across the different variables~~
 
@@ -42,7 +38,7 @@ Metabolomics aims at measuring the concentration of :
 
 ## Same data different scales
 
-```{r fig.height=5, fig.width=7, out.width="80%", fig.align='center'}
+```{r fig.height=5, fig.width=10, out.width="\\linewidth", out.height="0.75\\textheight", fig.align='center'}
 par(pty="s")
 mu1 <- c(-0.5,0)
 mu2 <- c(0.5,0)
@@ -62,18 +58,20 @@ plot(scale(dummy), pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20),
 ```
 
 
-## Take home {#notes}
+## Take home
 
 > - In the multivariate space the "shape" of the sample cloud depends on the absolute scale of the variables
 > - All multivariate methods based on the distance in that space will be affected by the variable scale (e.g. PCA, Clustering, PCoA, ...)
 
 ## How to correct for that
 
+:::: {.columns align=top}
+::: {.column width="40%"}
 - Variable transformation (_e.g. log or sqrt_)
 - Variable scaling (_e.g. unit variance_)
-
-
-```{r}
+:::
+::: {.column width="60%"}
+```{r fig.width=6, fig.height=6, out.width="\\linewidth", out.height="0.75\\textheight", fig.align='center'}
 curve(log10(x), from = 1, to = 100, xaxt="n", yaxt="n", main = "Effect of log transformation",
       xlab = "Original Space", ylab = "Log transformed Space")
 segments(2,0,20,0, lwd = 2, col = "red")
@@ -90,8 +88,10 @@ segments(0,log10(60),0,log10(80), lwd = 2, col = "blue")
 segments(0,log10(60),60,log10(60), lwd = 1, col = "gray", lty = 2)
 segments(0,log10(80),80,log10(80), lwd = 1, col = "gray", lty = 2)
 ```
+:::
+::::
 
-## Notes {#notes}
+## Notes
 
 ::: incremental
 1. The best choice depends on what you want to see
@@ -102,8 +102,7 @@ segments(0,log10(80),80,log10(80), lwd = 1, col = "gray", lty = 2)
 :::
 
 
-
-## Sample Normalization {.smaller}
+## Sample Normalization
 
 The overall metabolite concentration in one or more samples can be different from the others. The sample will show-up as an __outlier__.
 
@@ -114,9 +113,6 @@ The overall metabolite concentration in one or more samples can be different fro
     - reduce response of the instrument (in particular for MS based techniques)
      - ...
 
-<br>
-<hr>
-<br>
 
 **Normalization** is used to compensate for the unwanted difference in sample response
 
@@ -134,9 +130,6 @@ The overall metabolite concentration in one or more samples can be different fro
 2. Quality controls!
 3. Wisely plan (**randomize!**) your analytical sequence to avoid biases
 
-<br>
-<hr>
-<br>
 
 3. Normalize to the overall signal ... mmm   ... )-:
 4. Probabilistic Quotient Normalization (PQN)
@@ -144,7 +137,7 @@ The overall metabolite concentration in one or more samples can be different fro
 
 ## Compositional Data
 
-```{r fig.align='center'}
+```{r fig.width=8, fig.height=4.5, out.width="\\linewidth", out.height="0.6\\textheight", fig.align='center'}
 compdf <- tibble(class = c("A","B"), Var1 = c(30,50), Var2 =  c(20,20)) %>%
   pivot_longer(-class) %>%
   group_by(class) %>%
@@ -182,10 +175,9 @@ The idea behind Probabilistic Quotient Normalization is to identify a __consensu
 
 This design simulates a drop in the response of my pipeline of a factor of 2 while measuring the forth sample
 
----
+## Simulated data
 
-
-```{r fig.align='center'}
+```{r fig.width=9, fig.height=5, out.width="\\linewidth", out.height="0.65\\textheight", fig.align='center'}
 s1 <- rnorm(100,200,10)
 s2 <- rnorm(100,200,10)
 s3 <- rnorm(100,200,10)
@@ -200,14 +192,13 @@ pqndata <- DM %>%
 matplot(t(DM), type = "p", ylab = "Intensity", xlab = "Metabolite")
 
 
-
 ```
 
 Let's take the first sample as reference ...
 
 ## Distribution of ratios
 
-```{r message=FALSE, warning=FALSE, fig.align='center'}
+```{r message=FALSE, warning=FALSE, fig.width=5, fig.height=6, out.width="\\linewidth", out.height="0.8\\textheight", fig.align='center'}
 PQNratios <- apply(DM[2:4,],1,function(r) r/DM[1,]) %>%
   as_tibble() %>%
   pivot_longer(everything())

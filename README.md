@@ -36,7 +36,7 @@ The material (which is growing!) covers the following topics:
 ### Focus Topics
 * [Missing values and imputation](Day2/MissingValues.pdf)
 * [Distribution of the variables](Day2/Variable_distribution.pdf)
-* [Variable scaling and Sample normalization](Day2/Scaling_and_normalization.html)
+* [Variable scaling and Sample normalization](Day2/Scaling_and_normalization.pdf)
 * [Multivariate visualization: PCA](Day2/PCA.html)
 
 ### Datasets
