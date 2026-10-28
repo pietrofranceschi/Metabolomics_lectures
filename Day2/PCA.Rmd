@@ -1,27 +1,28 @@
 ---
-title: "PCA Wines"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
-date: "`r Sys.Date()`"
-output: html_document
+title: "PCA"
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  beamer_presentation:
+    theme: "Warsaw"
+    latex_engine: xelatex
+    slide_level: 2
+    includes:
+      in_header: "../beamer_preamble.tex"
+    pandoc_args: ["--lua-filter=../beamer_filter.lua"]
+classoption: ["aspectratio=169", "t"]
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-```{r}
-library(FactoMineR)
-library(factoextra)
+knitr::opts_chunk$set(echo = FALSE, out.extra = "keepaspectratio", dev = "cairo_pdf", warning = FALSE, message = FALSE)
+library(knitr)
 library(tidyverse)
+library(MASS)
 ```
 
 
-<<<<<<< HEAD
-=======
 ## Multivariate data - the Data Matrix
 
-```{r fig.height=5, fig.width=5, out.width="60%", fig.align='center'}
+```{r fig.height=5, fig.width=5, fig.align='center', out.width="\\linewidth", out.height="0.65\\textheight"}
 par(pty="s")
 plot(1:10,1:10, type = "n", xaxt='n', ann=FALSE, yaxt='n')
 mtext("Variables", side=3)
@@ -35,25 +36,26 @@ text(3,5, cex = 1.5, expression(X[ij]))
 ```
 
 
-The element $X_{ij}$ contains the value of variable `j` in the sample `i`
+The element X[i,j] contains the value of variable `j` in the sample `i`
 
-## Key ides {#notes}
+## Key ideas
 
-> 1. Each sample is a point in the _n_ dimensional space of the measured variables.
-> 2. The measured variables are often redundant
-> 3. To "see" what happens in the large space a clever idea is to **project** the samples in alower dimensional space
-> 4. Projection will always show us a part of the reality
-> 5. There is always an ~~error~~ associated to a projection
+::: incremental
+1. Each sample is a point in the _n_ dimensional space of the measured variables.
+2. The measured variables are often redundant
+3. To "see" what happens in the large space a clever idea is to ~~PROJECT~~ the samples in a lower dimensional space
+4. Projection will always show us a part of the reality
+5. There is always an ~~error~~ associated to a projection
+:::
 
 
-## Intrinsec Dimensionality
+## Intrinsic Dimensionality
 
 In presence of correlation among the variables, the samples actually occupy only a "fraction" of the potential
 multidimensional space. Here a projection is highly informative
 
-<hr>
 
-```{r fig.width=8, fig.height=4, out.width="100%", fig.align='center'}
+```{r fig.width=8, fig.height=4, fig.align='center', out.width="\\linewidth", out.height="0.6\\textheight"}
 library(plot3D)
 par(mfrow = c(1,3))
 scatter3D(runif(50), runif(50), runif(50), colvar = NULL, col = "#4682B480", pch = 19, main = "Intrinsic dim = 3", cex = 2)
@@ -77,20 +79,20 @@ scatter3D(xp, yp, zp, colvar = NULL, col = "#4682B480", pch = 19, main = "Intrin
 
 Projecting the data along **specific latent variables**, we highlight some desired property of the data. In a more broad sense, the latent variables can also be seen as the mathematical representation of the ~~hidden rules~~ which determine the sample behavior
 
-<hr>
 
-> 1. Separation of sample classes (e.g. LDA)
-> 2. Prediction of sample properties (e.g. PLS)
-> 3. Good representation of the multidimensional data structure (e.g PCA, PCoA)
+::: incremental
+1. Separation of sample classes (e.g. LDA)
+2. Prediction of sample properties (e.g. PLS)
+3. Good representation of the multidimensional data structure (e.g PCA, PCoA)
+:::
 
 
 ## Food for brains
 
-```{r, echo=FALSE, fig.align='center', out.width="50%"}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.35\\textheight"}
 include_graphics("../images/brain.jpg")
 ```
 
-<br>
 
 * Some relevant "characteristics" of a system cannot be measures or are difficult to be defined (e.g. health, intelligence)
 * In this sense they are *latent*
@@ -105,16 +107,15 @@ relevant multidimensional aspects of the data.
 
 This representation is constructed "projecting" the samples on the LVs
 
-<hr>
 
 ~~Each projection will result in:~~
 
 * **Scores**: the representation of the samples in the LV space (_the new coordinates_)
-* **Loadings**: the "weight" of the original variables on the single LVs (_the recipe to construct the new variables from the measured ones)
+* **Loadings**: the "weight" of the original variables on the single LVs (_the recipe to construct the new variables from the measured ones_)
 
 ## Dummy Dataset
 
-```{r fig.height=5, fig.width=5, out.width="60%", fig.align='center'}
+```{r fig.height=5, fig.width=5, fig.align='center', out.width="\\linewidth", out.height="0.6\\textheight"}
 par(pty="s")
 mu1 <- c(-1,0)
 mu2 <- c(1,0)
@@ -125,12 +126,14 @@ dummy <- rbind(mvrnorm(20, mu = mu1, Sigma = sigma),
 plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-3,3))
 ```
 
-> What LV will maximize the separation between the two groups? 
-> Can you guess something about the loadings?
+::: incremental
+What LV will maximize the separation between the two groups? 
+Can you guess something about the loadings?
+:::
 
-## LV for class discrimination (LDA) {.smaller}
+## LV for class discrimination (LDA)
 
-```{r fig.height=5, fig.width=5, out.width="50%", fig.align='center'}
+```{r fig.height=5, fig.width=5, fig.align='center', out.width="\\linewidth", out.height="0.55\\textheight"}
 par(pty="s")
 grouping <- rep(c(1,2), each = 20)
 myLDA <- lda(x = dummy, grouping = grouping)
@@ -157,10 +160,10 @@ points(projections*ldadirection[1], projections*ldadirection[2], col = rep(c("#4
 
 The loadings represent the weight of the initial variables along the discriminating direction
 
-* `Var a`: `r ldadirection[1]`
-* `Var b`: `r ldadirection[2]`
+* `Var a`: `r round(ldadirection[1], 2)`
+* `Var b`: `r round(ldadirection[2], 2)`
 
-## Principal Component Analysis (PCA) {.smaller}
+## Principal Component Analysis (PCA)
 
 The aim of PCA is dimension reduction and PCA is the most frequently applied method for computing linear latent variables
 (components). 
@@ -173,11 +176,11 @@ The transformation is defined in such a way way that the first principal compone
 
 ## Animation!
 
-[PCA Animation](http://setosa.io/ev/principal-component-analysis/)
+[PCA Animation](https://setosa.io/ev/principal-component-analysis/): \url{https://setosa.io/ev/principal-component-analysis/}
 
 ## Dummy Dataset
 
-```{r fig.height=5, fig.width=5, out.width="50%", fig.align='center'}
+```{r fig.height=5, fig.width=5, fig.align='center', out.width="\\linewidth", out.height="0.65\\textheight"}
 par(pty="s")
 mu1 <- c(-1,0)
 mu2 <- c(1,0)
@@ -189,11 +192,13 @@ dummy <- rbind(mvrnorm(20, mu = mu1, Sigma = sigma),
 plot(dummy, pch = 19, col = rep(c("#4682B480","#8B000080"), each  =20), xlab = "Var a", ylab = "Var b", xlim = c(-3,3), ylim = c(-3,3))
 ```
 
-> What LV will highlight the direction of maximal variance?
+::: incremental
+What LV will highlight the direction of maximal variance?
+:::
 
-## PCA of the dummy dataset {.smaller}
+## PCA of the dummy dataset
 
-```{r fig.height=5, fig.width=5, out.width="45%", fig.align='center'}
+```{r fig.height=5, fig.width=5, fig.align='center', out.width="\\linewidth", out.height="0.55\\textheight"}
 par(pty="s")
 
 myPCA <- prcomp(x = dummy, center = TRUE)
@@ -218,10 +223,10 @@ points(pcaprojections*pcadirection[1], pcaprojections*pcadirection[2], col = rep
 
 The loadings represent the weight of the initial variables along PC1
 
-* `Var a`: `r abs(pcadirection[1])`
-* `Var b`: `r abs(pcadirection[2])`
+* `Var a`: `r round(abs(pcadirection[1]), 2)`
+* `Var b`: `r round(abs(pcadirection[2]), 2)`
 
-## LDA and PCA {#notes}
+## LDA and PCA
 
 * The latent variable are different!
 * They try to highlight different aspect of the data
@@ -236,9 +241,9 @@ The loadings represent the weight of the initial variables along PC1
 * Combination of several variables that characterize a chemical-technological-biological process into a single or a few "characteristic" variables
 * Make the “latent properties” actually measurable
 
-## Scaling and centering {.smaller}
+## Scaling and centering
 
-```{r fig.height=6, fig.width=8, fig.align='center', out.width="60%"}
+```{r fig.height=6, fig.width=8, fig.align='center', out.width="\\linewidth", out.height="0.55\\textheight"}
 par(pty="s", mfrow = c(1,2))
 
 # Simulate bivariate normal data
@@ -285,7 +290,7 @@ abline(h = 0, lty = 2)
 
 ## Outliers
 
-```{r fig.height=6, fig.width=8, fig.align='center'}
+```{r fig.height=6, fig.width=8, fig.align='center', out.width="\\linewidth", out.height="0.75\\textheight"}
 par(pty="s", mfrow = c(1,2))
 
 bivn_out <- rbind(bivn,c(30,-30),c(25,-25))
@@ -313,7 +318,7 @@ abline(h = 0, lty = 2)
 
 ```
 
-## Notes {#notes}
+## Notes
 
 * Sensitivity to outliers is useful if PCA is used to spot them ;-)
 * *robust* versions of PCA are available to keep all data in
@@ -330,69 +335,62 @@ abline(h = 0, lty = 2)
  
  
  
-## Possible appraoches {#notes}
+## Possible approaches
 
 * t-SNE
 * UMAP
 
 
-## 10 normal groups, 3D | PCA
+## 10 normal groups, 3D: PCA
  
->>>>>>> parent of dff4180 (update)
-```{r}
-DM <- read_csv("data/wines.csv")
-```
+```{r fig.width=5, fig.height=5, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+
+set.seed(123)
+
+## Create 10 groups in 3 dimensions
+Sigma <- matrix(c(0.0005,0,0, 
+                  0,0.0005,0,
+                  0,0,0005), nrow = 3, byrow = TRUE)
+
+multigroup <- tibble(group = paste0("g",1:10)) %>% 
+  mutate(coord = map(group, ~mvrnorm(50, 
+                                     mu = c(runif(1),runif(1), runif(1)), 
+                                     Sigma = Sigma))) %>% 
+  unnest(coord) 
+
+## do a flat PCA projection 
+myPCA4 <- prcomp(x = scale(multigroup[,2]))
 
 
-```{r}
-summary(DM)
-```
-<<<<<<< HEAD
-
-
-```{r}
-DM %>% 
+cbind.data.frame(group = multigroup$group, myPCA4$x) %>% 
   ggplot() + 
-  geom_point(aes(x = vintages, y = flavonoids, col = vintages), position = position_jitter(width = 0.1))
+  geom_point(aes(x = PC1, y = PC2, col = group)) + 
+  theme_light() + 
+  theme(aspect.ratio = 1)
+
 ```
+ 
+## 10 normal groups, 3D: t-SNE
+ 
+```{r fig.width=5, fig.height=5, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+library(Rtsne)
 
+mytsne <- Rtsne(scale(multigroup[,2]), perplexity = 5)
 
-
-Proviamo a fare una PCA
-
-```{r}
-myPCA <- PCA(DM %>% select(-vintages) %>% log10(.), 
-             scale.unit = TRUE, graph = FALSE)
+cbind.data.frame(group = multigroup$group, dir1 = mytsne$Y[,1], dir2 = mytsne$Y[,2]) %>% 
+  ggplot() + 
+  geom_point(aes(x = dir1, y = dir2, col = group)) + 
+  theme_light() + 
+  theme(aspect.ratio = 1)
 ```
-
-
-
-```{r}
-fviz_pca_ind(myPCA, habillage = factor(DM$vintages), geom = "point")
-```
-
-
-```{r}
-summary(myPCA)
-```
-=======
  
  
->>>>>>> parent of dff4180 (update)
+## Notes
+
+* Complex methods can be attractive but they could be misleading
+* Methods will hardly work when the number of samples is too small!
+* Complex does not necessarily mean more powerful
 
 
 
-
-
-```{r}
-fviz_pca_var(myPCA)
-```
-
-
-```{r}
-fviz_pca_biplot(myPCA, habillage = factor(DM$vintages), geom = "point", axes = c(1,3))
-```
-```{r}
-fviz_eig(myPCA)
-```
 

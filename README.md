@@ -37,7 +37,7 @@ The material (which is growing!) covers the following topics:
 * [Missing values and imputation](Day2/MissingValues.pdf)
 * [Distribution of the variables](Day2/Variable_distribution.pdf)
 * [Variable scaling and Sample normalization](Day2/Scaling_and_normalization.pdf)
-* [Multivariate visualization: PCA](Day2/PCA.html)
+* [Multivariate visualization: PCA](Day2/PCA.pdf)
 
 ### Datasets
 * [KOMP data](Day2/KOMP_data_targeted.RData)
