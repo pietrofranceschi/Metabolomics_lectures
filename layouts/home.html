@@ -1,33 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ site.Title }}</title>
-  {{ with resources.Get "css/style.css" | minify | fingerprint }}
-  <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
-  {{ end }}
-</head>
-<body>
-  <!-- Warsaw headline: dark half on the left, blue half on the right -->
-  <div class="headline"><span></span><span></span></div>
-
-  <main class="page">
-    {{ .Content }}
-  </main>
-
-  <!-- Warsaw footline -->
-  <footer class="footline">
-    <span>Pietro Franceschi | Fondazione Edmund Mach</span>
-    <span><a href="https://github.com/pietrofranceschi/Metabolomics_lectures">Source on GitHub</a></span>
-  </footer>
-
-  <script>
-    // links whose text is just the file type ("html", "Rmd") keep only the badge
-    document.querySelectorAll(".page a").forEach(function (a) {
-      var ext = a.getAttribute("href").split(".").pop().toLowerCase();
-      if (a.textContent.trim().toLowerCase() === ext) a.classList.add("badge-only");
-    });
-  </script>
-</body>
-</html>
+{{ define "main" }}
+  {{- /* the day cards need no dash between the link and its description */ -}}
+  {{ .Content | replaceRE `</a>\s*—\s*` "</a>" | safeHTML }}
+{{ end }}

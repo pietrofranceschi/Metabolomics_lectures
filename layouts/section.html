@@ -1,0 +1,12 @@
+{{ define "footline" }}
+  {{- $days := sort site.Sections "Path" }}
+  {{- $prev := false }}{{ $next := false }}
+  {{- range $i, $d := $days }}
+    {{- if eq $d $ }}
+      {{- if gt $i 0 }}{{ $prev = index $days (sub $i 1) }}{{ end }}
+      {{- if lt (add $i 1) (len $days) }}{{ $next = index $days (add $i 1) }}{{ end }}
+    {{- end }}
+  {{- end }}
+  <span>{{ with $prev }}<a href="{{ .RelPermalink }}">&larr; {{ partial "title.html" . }}</a>{{ else }}<a href="{{ site.Home.RelPermalink }}">&larr; Course home</a>{{ end }}</span>
+  <span>{{ with $next }}<a href="{{ .RelPermalink }}">{{ partial "title.html" . }} &rarr;</a>{{ else }}<a href="{{ site.Home.RelPermalink }}">Course home &rarr;</a>{{ end }}</span>
+{{ end }}

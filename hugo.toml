@@ -1,30 +1,46 @@
 baseURL = "https://pietrofranceschi.github.io/Metabolomics_lectures/"
 title = "Metabolomics Lectures"
-# a single home page built from README.md, plus the course files as they are
-disableKinds = ["page", "section", "taxonomy", "term", "rss", "sitemap", "404"]
-
-[markup.goldmark.parser]
-  autoHeadingID = true
+# home page from README.md, one page per day from DayN/README.md,
+# and the course files published as they are next to their day page
+disableKinds = ["page", "taxonomy", "term", "rss", "sitemap", "404"]
+# keep "Day1/" so the day page and its files share the same folder
+disablePathToLower = true
 
 [module]
   [[module.mounts]]
     source = "README.md"
     target = "content/_index.md"
   [[module.mounts]]
+    source = "Day1/README.md"
+    target = "content/Day1/_index.md"
+  [[module.mounts]]
+    source = "Day2/README.md"
+    target = "content/Day2/_index.md"
+  [[module.mounts]]
+    source = "Day3/README.md"
+    target = "content/Day3/_index.md"
+  [[module.mounts]]
+    source = "Day4/README.md"
+    target = "content/Day4/_index.md"
+  [[module.mounts]]
     source = "assets"
     target = "assets"
   [[module.mounts]]
     source = "Day1"
     target = "static/Day1"
+    files = ["! README.md"]
   [[module.mounts]]
     source = "Day2"
     target = "static/Day2"
+    files = ["! README.md"]
   [[module.mounts]]
     source = "Day3"
     target = "static/Day3"
+    files = ["! README.md"]
   [[module.mounts]]
     source = "Day4"
     target = "static/Day4"
+    files = ["! README.md"]
   [[module.mounts]]
     source = "data"
     target = "static/data"

@@ -37,10 +37,17 @@ a:hover { text-decoration: underline; }
 
 .headline {
   display: flex;
-  height: 10px;
+  font-size: 0.8rem;
+  color: #fff;
 }
-.headline span:first-child { flex: 1; background: #000; }
-.headline span:last-child { flex: 1; background: var(--structure); }
+.headline span {
+  flex: 1;
+  min-height: 1.6rem;
+  padding: 0.25rem 1rem;
+}
+.headline span:first-child { background: #000; text-align: right; }
+.headline span:last-child { background: var(--structure); }
+.headline a { color: #fff; }
 
 .footline {
   display: flex;
@@ -159,8 +166,38 @@ code {
 .page a.badge-only { font-size: 0; }
 .page a.badge-only::after { font-size: 0.68rem; margin-left: 0.15em; }
 
+/* Home page: the list of days as cards -------------------------------- */
+
+.home h2 + ul {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  padding: 0;
+}
+.home h2 + ul li {
+  margin: 0;
+  padding: 0 0.75rem 0.75rem;
+  background: var(--block-bg);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.home h2 + ul li::before { display: none; }
+.home h2 + ul li a {
+  display: block;
+  margin: 0 -0.75rem 0.5rem;
+  padding: 0.45rem 0.75rem;
+  color: #fff;
+  font-size: 1.2rem;
+  background: linear-gradient(to right, var(--navy), #000);
+  border-radius: 4px 4px 0 0;
+}
+.home h2 + ul li a:hover { text-decoration: none; background: var(--structure); }
+
 @media (max-width: 600px) {
   body { font-size: 16px; }
   .page > h1:first-child { font-size: 1.5rem; }
   .page h2 { font-size: 1.25rem; }
+  .home h2 + ul { grid-template-columns: 1fr; }
 }

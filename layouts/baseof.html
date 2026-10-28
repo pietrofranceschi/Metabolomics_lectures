@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+{{- $title := partial "title.html" . }}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $title }} | {{ site.Title }}{{ end }}</title>
+  {{ with resources.Get "css/style.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
+  {{ end }}
+</head>
+<body class="{{ if .IsHome }}home{{ else }}day{{ end }}">
+  <!-- Warsaw headline: course on the left, current day on the right -->
+  <header class="headline">
+    <span><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></span>
+    <span>{{ if not .IsHome }}{{ $title }}{{ end }}</span>
+  </header>
+
+  <main class="page">
+    {{ block "main" . }}{{ .Content }}{{ end }}
+  </main>
+
+  <!-- Warsaw footline -->
+  <footer class="footline">
+    {{ block "footline" . }}
+    <span>Pietro Franceschi | Fondazione Edmund Mach</span>
+    <span><a href="https://github.com/pietrofranceschi/Metabolomics_lectures">Source on GitHub</a></span>
+    {{ end }}
+  </footer>
+
+  <script>
+    // links whose text is just the file type ("html", "Rmd") keep only the badge
+    document.querySelectorAll(".page a").forEach(function (a) {
+      var ext = a.getAttribute("href").split(".").pop().toLowerCase();
+      if (a.textContent.trim().toLowerCase() === ext) a.classList.add("badge-only");
+    });
+  </script>
+</body>
+</html>
