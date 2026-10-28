@@ -17,7 +17,7 @@ The material (which is growing!) covers the following topics:
 * [Our R cheatsheet](Day1/Our_R_cheatsheet.html) - [Rmd](Day1/Our_R_cheatsheet.Rmd)
     - Practical: `tidyverse` & `purrr` hands on
 * [What is Metabolomics](Day1/Metabolomics.html)
-* [Reproducibility and Good Practices in Science](Day1/reproducibility_and_good_practices.html)
+* [Reproducibility and Good Practices in Science](Day1/reproducibility_and_good_practices.pdf)
     - Three case studies: Benveniste/homeopathy (Nature 1988), the Potti scandal at Duke, chocolate & Nobel prizes (NEJM 2012)
 * [Experimental design](Day1/experimental_design.pdf)
     - Practical: stratified random sampling [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
