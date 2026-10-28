@@ -1,0 +1,30 @@
+baseURL = "https://pietrofranceschi.github.io/Metabolomics_lectures/"
+title = "Metabolomics Lectures"
+# a single home page built from README.md, plus the course files as they are
+disableKinds = ["page", "section", "taxonomy", "term", "rss", "sitemap", "404"]
+
+[markup.goldmark.parser]
+  autoHeadingID = true
+
+[module]
+  [[module.mounts]]
+    source = "README.md"
+    target = "content/_index.md"
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
+  [[module.mounts]]
+    source = "Day1"
+    target = "static/Day1"
+  [[module.mounts]]
+    source = "Day2"
+    target = "static/Day2"
+  [[module.mounts]]
+    source = "Day3"
+    target = "static/Day3"
+  [[module.mounts]]
+    source = "Day4"
+    target = "static/Day4"
+  [[module.mounts]]
+    source = "data"
+    target = "static/data"

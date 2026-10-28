@@ -1,0 +1,166 @@
+/* GitHub Pages theme matching the beamer slides (Warsaw, beamer default blue) */
+
+:root {
+  --structure: #3333b2;        /* beamer structure colour */
+  --navy: #191959;             /* frame title, left */
+  --alert: #800000;            /* red!50!black, \alert and alertblock */
+  --alert-bg: #f2e6e6;
+  --example: #007f00;          /* exampleblock */
+  --example-bg: #e6f2e6;
+  --block-bg: #ebebf7;
+  --text: #222;
+  --muted: #555;
+  --bg: #fff;
+  --shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--bg);
+  font-family: "Latin Modern Sans", "CMU Sans Serif", "Lato", "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+a { color: var(--structure); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Warsaw headline and footline ------------------------------------------ */
+
+.headline {
+  display: flex;
+  height: 10px;
+}
+.headline span:first-child { flex: 1; background: #000; }
+.headline span:last-child { flex: 1; background: var(--structure); }
+
+.footline {
+  display: flex;
+  margin-top: 3rem;
+  font-size: 0.8rem;
+  color: #fff;
+}
+.footline span {
+  flex: 1;
+  padding: 0.35rem 1rem;
+}
+.footline span:first-child { background: #000; text-align: right; }
+.footline span:last-child { background: var(--structure); }
+.footline a { color: #fff; }
+
+/* Page ----------------------------------------------------------------- */
+
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* the README title becomes the rounded blue title box of the first slide */
+.page > h1:first-child {
+  margin: 2.5rem auto 2rem;
+  max-width: 640px;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  background: var(--structure);
+  color: #fff;
+  font-weight: normal;
+  font-size: 2rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+/* each day starts like a frame title */
+.page h2 {
+  margin: 2.5rem 0 1rem;
+  padding: 0.45rem 1rem;
+  color: #fff;
+  font-weight: normal;
+  font-size: 1.5rem;
+  background: linear-gradient(to right, var(--navy), #000);
+}
+
+/* sub-headings (Focus Topics, Datasets) as beamer block titles */
+.page h3 {
+  margin: 1.5rem 0 0.5rem;
+  padding: 0.2rem 0.75rem;
+  color: #fff;
+  font-weight: normal;
+  font-size: 1.05rem;
+  background: var(--structure);
+  border-radius: 4px 4px 0 0;
+}
+.page h3 + ul {
+  margin-top: 0;
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  background: var(--block-bg);
+  border-radius: 0 0 4px 4px;
+  box-shadow: var(--shadow);
+}
+
+/* Lists: beamer circle bullets ----------------------------------------- */
+
+.page ul { list-style: none; padding-left: 1.5rem; }
+.page li { position: relative; margin: 0.3rem 0; }
+.page li::before {
+  content: "";
+  position: absolute;
+  left: -1.1rem;
+  top: 0.55em;
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  background: var(--structure);
+}
+.page li li { font-size: 0.92rem; color: var(--muted); margin: 0.15rem 0; }
+.page li li::before { width: 0.35em; height: 0.35em; top: 0.6em; }
+
+code {
+  font-family: "Latin Modern Mono", "Fira Mono", Consolas, monospace;
+  font-size: 0.92em;
+  color: var(--alert);
+}
+
+/* File-type badges after each link ------------------------------------- */
+
+.page a[href$=".pdf"]::after,
+.page a[href$=".html"]::after,
+.page a[href$=".Rmd"]::after,
+.page a[href$=".RData"]::after,
+.page a[href$=".csv"]::after {
+  display: inline-block;
+  margin-left: 0.4em;
+  padding: 0 0.4em;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  vertical-align: 0.15em;
+}
+.page a[href$=".pdf"]::after { content: "SLIDES"; background: var(--structure); }
+.page a[href$=".html"]::after { content: "HTML"; background: var(--alert); }
+.page a[href$=".Rmd"]::after { content: "Rmd"; background: #555; }
+.page a[href$=".RData"]::after,
+.page a[href$=".csv"]::after { content: "DATA"; background: var(--example); }
+
+/* links whose text is only the file type ("html", "Rmd") show just the badge */
+.page a.badge-only { font-size: 0; }
+.page a.badge-only::after { font-size: 0.68rem; margin-left: 0.15em; }
+
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .page > h1:first-child { font-size: 1.5rem; }
+  .page h2 { font-size: 1.25rem; }
+}
