@@ -41,7 +41,7 @@ options(knitr.table.format = "latex")
 ::::
 :::: {.column width=.4}
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
-  include_graphics("../images/bias.png")
+  include_graphics("../../images/bias.png")
 ```
 ::::
 :::
@@ -50,7 +50,7 @@ options(knitr.table.format = "latex")
 ## Reproducibility in Science
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
-  include_graphics("../images/reproducibility.png")
+  include_graphics("../../images/reproducibility.png")
 ```
 
 \tiny
@@ -80,7 +80,7 @@ Nature. 2016;533:452-454. doi: 10.1038/533452a
 ## Minimum Reporting Standards
 
 ```{r, echo=FALSE, fig.align='center', out.width="50%"}
-  include_graphics("../images/minreports.png")
+  include_graphics("../../images/minreports.png")
 ```
 
 
@@ -99,7 +99,7 @@ Nature. 2016;533:452-454. doi: 10.1038/533452a
 ::::
 :::: {.column width=.4}
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
-  include_graphics("../images/standard.png")
+  include_graphics("../../images/standard.png")
 ```
 ::::
 :::
@@ -117,7 +117,7 @@ Nature. 2016;533:452-454. doi: 10.1038/533452a
 ::::
 :::: {.column width=.3}
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
-  include_graphics("../images/share.png")
+  include_graphics("../../images/share.png")
 ```
 ::::
 :::
@@ -125,7 +125,7 @@ Nature. 2016;533:452-454. doi: 10.1038/533452a
 ## Please ... be FAIR
 
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
-  include_graphics("../images/FAIR_data_principles.jpg")
+  include_graphics("../../images/FAIR_data_principles.jpg")
 ```
 
 
@@ -134,13 +134,13 @@ Nature. 2016;533:452-454. doi: 10.1038/533452a
 
 
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
-  include_graphics("../images/value.jpg")
+  include_graphics("../../images/value.jpg")
 ```
 
 ## Standardization can be tricky: chemical names
 
 ```{r, echo=FALSE, fig.align='center', out.width="65%"}
-  include_graphics("../images/chem_nam_std.png")
+  include_graphics("../../images/chem_nam_std.png")
 ```
 
 \small
@@ -153,7 +153,7 @@ What is good for a computer is not necessarily good for a man ...
 
 
 ```{r, echo=FALSE, fig.align='center', out.width="30%"}
-  include_graphics("../images/isa.png")
+  include_graphics("../../images/isa.png")
 ```
 
 [https://isa-tools.org/](https://isa-tools.org/)
@@ -164,7 +164,7 @@ What is good for a computer is not necessarily good for a man ...
 *Minimum Information About Plant Phenotyping Experiments*
 
 ```{r, echo=FALSE, fig.align='center', out.width="30%"}
-  include_graphics("../images/miappe.png")
+  include_graphics("../../images/miappe.png")
 ```
 
 [https://www.miappe.org/](https://www.miappe.org/)
@@ -173,7 +173,7 @@ What is good for a computer is not necessarily good for a man ...
 ## Annotation Levels
 
 ```{r, echo=FALSE, fig.align='center', out.width="60%"}
-  include_graphics("../images/annotation_levels.png")
+  include_graphics("../../images/annotation_levels.png")
 ```
 \tiny
 *Metabolomics Standard Initiative*
@@ -190,7 +190,7 @@ What is good for a computer is not necessarily good for a man ...
 ::::
 :::: {.column width=.4}
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
-  include_graphics("../images/OpenSwissKnife.png")
+  include_graphics("../../images/OpenSwissKnife.png")
 ```
 ::::
 :::
@@ -204,7 +204,7 @@ What is good for a computer is not necessarily good for a man ...
 
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
-  include_graphics("../images/met_rep.png")
+  include_graphics("../../images/met_rep.png")
 ```
 
 
@@ -223,7 +223,7 @@ What is good for a computer is not necessarily good for a man ...
   * Singularity: [https://apptainer.org/](https://apptainer.org/)
 
 ```{r, echo=FALSE, fig.align='center', out.width="80%"}
-  include_graphics("../images/workflows_metabolomics.png")
+  include_graphics("../../images/workflows_metabolomics.png")
 ```
 
 
@@ -232,7 +232,7 @@ What is good for a computer is not necessarily good for a man ...
 Databases of spectra are useful for **annotation** and for the training of **machine based** annotation approaches
 
 ```{r, echo=FALSE, fig.align='center', out.width="100%"}
-  include_graphics("../images/spectra_db.png")
+  include_graphics("../../images/spectra_db.png")
 ```
 [*https://wiki.metabolomicssociety.org/index.php/Databases*](https://wiki.metabolomicssociety.org/index.php/Databases)
 

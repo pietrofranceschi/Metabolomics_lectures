@@ -3,7 +3,7 @@ title: "Harmonizing ML in R"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
   revealjs::revealjs_presentation:
-    css: "../cri_css.css"
+    css: "../../cri_css.css"
     self_contained: true
     center: false
     transition: fade

@@ -30,7 +30,7 @@ to keep code, results and comments together. This is a big step towards reproduc
 To compile a file from RStudio press the **Knit** button, or from the console run
 
 ```{r eval=FALSE}
-rmarkdown::render("Our_R_cheatsheet.Rmd")
+rmarkdown::render("00_lab_r_cheatsheet.Rmd")
 ```
 
 ## Pipes

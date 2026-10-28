@@ -3,7 +3,7 @@ title: "Untargeted Metabolomics Data Matrix"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
   revealjs::revealjs_presentation:
-    css: "../cri_css.css"
+    css: "../../cri_css.css"
     self_contained: true
     center: false
     transition: fade
@@ -41,7 +41,7 @@ library(MASS)
 ---
 
 ```{r out.width="80%", fig.align= "center"}
-include_graphics("../images/Liquid_chromatography_MS_spectrum_3D_analysis.png")
+include_graphics("../../images/Liquid_chromatography_MS_spectrum_3D_analysis.png")
 ```
 
 
@@ -62,7 +62,7 @@ include_graphics("../images/Liquid_chromatography_MS_spectrum_3D_analysis.png")
 ## Ion Mobility
 
 ```{r out.width="80%", fig.align= "center"}
-include_graphics("../images/ion_mobility.png")
+include_graphics("../../images/ion_mobility.png")
 ```
 
 
@@ -91,7 +91,7 @@ NMR measures a physical property (their frequency of resonance) of atomic nuclei
 ---
 
 ```{r out.width="80%", fig.align= "center"}
-include_graphics("../images/nmr_spectroscopy.png")
+include_graphics("../../images/nmr_spectroscopy.png")
 ```
 
 

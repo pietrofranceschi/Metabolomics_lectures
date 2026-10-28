@@ -14,30 +14,30 @@ The material (which is growing!) covers the following topics:
 
 ## Day One
 
-* [Our R cheatsheet](Day1/Our_R_cheatsheet.html) - [Rmd](Day1/Our_R_cheatsheet.Rmd)
+* [Our R cheatsheet](Day1/00_lab_r_cheatsheet.html) - [Rmd](Day1/00_lab_r_cheatsheet.Rmd)
     - Practical: `tidyverse` & `purrr` hands on
-* [What is Metabolomics](Day1/Metabolomics.pdf)
-* [Reproducibility and Good Practices in Science](Day1/reproducibility_and_good_practices.pdf)
+* [What is Metabolomics](Day1/01_what_is_metabolomics.pdf)
+* [Reproducibility and Good Practices in Science](Day1/02_reproducibility.pdf)
     - Three case studies: Benveniste/homeopathy (Nature 1988), the Potti scandal at Duke, chocolate & Nobel prizes (NEJM 2012)
-* [Experimental design](Day1/experimental_design.pdf)
-    - Practical: stratified random sampling [html](Day1/stratified_random_sampling.html) - [Rmd](Day1/stratified_random_sampling.Rmd)
-* [Practical Considerations on the study design](Day1/practical_considerations.pdf)
-* [Group Activity: design your study](Day1/Group_activity_study_design.pdf)
-* [Data analysis in metabolomics](Day1/Metabolomics_data_matrix.pdf)
-    - Practical: [Fat data matrices and false positives](Day1/False_Positives.html) - [Rmd](Day1/False_Positives.Rmd)
-* [Statistical testing and effect size](Day1/statisticaltesting_and_effectsize.pdf)
-* [Multiple testing](Day1/multiple_testing.pdf) - [Rmd](Day1/multiple_testing.Rmd)
+* [Experimental design](Day1/03_experimental_design.pdf)
+    - Practical: stratified random sampling [html](Day1/03a_lab_stratified_sampling.html) - [Rmd](Day1/03a_lab_stratified_sampling.Rmd)
+* [Practical Considerations on the study design](Day1/04_practical_considerations.pdf)
+* [Group Activity: design your study](Day1/05_group_activity_study_design.pdf)
+* [Data analysis in metabolomics](Day1/06_data_analysis.pdf)
+    - Practical: [Fat data matrices and false positives](Day1/06a_lab_false_positives.html) - [Rmd](Day1/06a_lab_false_positives.Rmd)
+* [Statistical testing and effect size](Day1/07_statistical_testing_effect_size.pdf)
+* [Multiple testing](Day1/08_multiple_testing.pdf) - [Rmd](Day1/08_multiple_testing.Rmd)
     - FWER, Bonferroni, Benjamini-Hochberg FDR, p-value histograms, volcano plots
 
 ## Day Two
 
-* Practical: [Wrangling a targeted metabolomics data matrix](Day2/wrangling_targeted_DM.html) -  [Rmd](Day2/wrangling_targeted_DM.Rmd)
+* Practical: [Wrangling a targeted metabolomics data matrix](Day2/01_lab_wrangling_targeted_dm.html) -  [Rmd](Day2/01_lab_wrangling_targeted_dm.Rmd)
 
 ### Focus Topics
-* [Missing values and imputation](Day2/MissingValues.pdf)
-* [Distribution of the variables](Day2/Variable_distribution.pdf)
-* [Variable scaling and Sample normalization](Day2/Scaling_and_normalization.pdf)
-* [Multivariate visualization: PCA](Day2/PCA.pdf)
+* [Missing values and imputation](Day2/02_missing_values.pdf)
+* [Distribution of the variables](Day2/03_variable_distribution.pdf)
+* [Variable scaling and Sample normalization](Day2/04_scaling_normalization.pdf)
+* [Multivariate visualization: PCA](Day2/05_pca.pdf)
 
 ### Datasets
 * [KOMP data](Day2/KOMP_data_targeted.RData)
@@ -45,14 +45,14 @@ The material (which is growing!) covers the following topics:
 
 ## Day Three
 
-* [Processing LC-MS data with `xcms`](Day3/processing_LC_MS.html)
-* Practical: Inspecting raw data [html](Day3/Inspecting_raw_data.html), [Rmd](Day3/Inspecting_raw_data.Rmd)
-* Practical: Peak picking [html](Day3/peak_picking.html), [Rmd](Day3/peak_picking.Rmd)
-* Practical: Retention time correction and feature definition [html](Day3/rt_corr_feat_def.html), [Rmd](Day3/rt_corr_feat_def.Rmd)
-* [SW resources for preprocessing](Day3/software_resources_for_preprocessing.html)
-* [Some words on annotation](Day3/annotation.html)
-* Practical: Fragmentation Spectra [html](Day3/fragmentation_spectra.html), [Rmd](Day3/fragmentation_spectra.Rmd)
-* Practical: Compound Annotation [html](Day3/annotation_exercise.html), [Rmd](Day3/annotation_exercise.Rmd)  
+* [Processing LC-MS data with `xcms`](Day3/01_processing_lc_ms.html)
+* Practical: Inspecting raw data [html](Day3/01a_lab_inspecting_raw_data.html), [Rmd](Day3/01a_lab_inspecting_raw_data.Rmd)
+* Practical: Peak picking [html](Day3/01b_lab_peak_picking.html), [Rmd](Day3/01b_lab_peak_picking.Rmd)
+* Practical: Retention time correction and feature definition [html](Day3/01c_lab_rt_correction_feature_definition.html), [Rmd](Day3/01c_lab_rt_correction_feature_definition.Rmd)
+* [SW resources for preprocessing](Day3/02_software_resources_preprocessing.html)
+* [Some words on annotation](Day3/03_annotation.html)
+* Practical: Fragmentation Spectra [html](Day3/03a_lab_fragmentation_spectra.html), [Rmd](Day3/03a_lab_fragmentation_spectra.Rmd)
+* Practical: Compound Annotation [html](Day3/03b_lab_compound_annotation.html), [Rmd](Day3/03b_lab_compound_annotation.Rmd)  
 
 ### Datasets
 
@@ -60,12 +60,12 @@ The material (which is growing!) covers the following topics:
 
 ## Day Four
 
-* Biomarker discovery: the univariate way (see also [Multiple testing](Day1/multiple_testing.pdf))
-* [Machine Learning for Dummies](Day4/ML_intro.html)
+* Biomarker discovery: the univariate way (see also [Multiple testing](Day1/08_multiple_testing.pdf))
+* [Machine Learning for Dummies](Day4/01_ml_intro.html)
   * [KOMP data](Day2/KOMP_data_targeted.RData)
 * PLS and PLS-DA
-* [Decision Trees and Random Forest](Day4/Decision_Trees_and_RandomForest.html)
-  * Practical: [html](Day4/Random_Forest_in_practice.html), [Rmd](Day4/Random_Forest_in_practice.Rmd)
+* [Decision Trees and Random Forest](Day4/02_decision_trees_random_forest.html)
+  * Practical: [html](Day4/02a_lab_random_forest.html), [Rmd](Day4/02a_lab_random_forest.Rmd)
 
 
 

@@ -21,7 +21,7 @@ library(effsize)
 Read in the untargeted data
 
 ```{r}
-load("Day3/processed_wines_data.RData")
+load("../../Day3/processed_wines_data.RData")
 ```
 
 

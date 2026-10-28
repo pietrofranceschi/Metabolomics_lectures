@@ -3,7 +3,7 @@ title: "LC-MS: from raw data to DM"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:
   revealjs::revealjs_presentation:
-    css: "../cri_css.css"
+    css: "../../cri_css.css"
     self_contained: true
     center: false
     transition: fade
@@ -33,7 +33,7 @@ library(MASS)
 During ionization chemical structures ~~fragment~~ in different ions
 
 ```{r fig.align="center", out.width="90%"}
-include_graphics("../images/LCMS.png")
+include_graphics("../../images/LCMS.png")
 ```
 
 A metabolite **produce several peaks on the mz-rt plane**
@@ -43,7 +43,7 @@ A metabolite **produce several peaks on the mz-rt plane**
 The chromatograms of the ions coming from the same metabolite are locally correlated
 
 ```{r fig.align="center", out.width="90%"}
-include_graphics("../images/EIC.png")
+include_graphics("../../images/EIC.png")
 ```
 
 but the ~~same ion can come from different metabolites!~~
@@ -51,7 +51,7 @@ but the ~~same ion can come from different metabolites!~~
 ---
 
 ```{r fig.align="center", out.width="70%"}
-include_graphics("../images/peaks_plane.png")
+include_graphics("../../images/peaks_plane.png")
 ```
 
 ## Pre processing workflow
@@ -132,14 +132,14 @@ Almost all software for the analysis of untargeted metabolomics data will propos
 ## Matched Filter
 
 ```{r fig.align="center", out.width="80%"}
-include_graphics("../images/matchedFilter.png")
+include_graphics("../../images/matchedFilter.png")
 ```
 
 
 ## Cent-Wave
 
 ```{r fig.align="center", out.width="55%"}
-include_graphics("../images/cent_wave.png")
+include_graphics("../../images/cent_wave.png")
 ```
 
 
@@ -188,7 +188,7 @@ After alignment, the list of peaks is now aligned in retention time but:
 ---
 
 ```{r fig.align="center", out.width="60%"}
-include_graphics("../images/grouping.png")
+include_graphics("../../images/grouping.png")
 ```
 
 
@@ -213,7 +213,7 @@ The ~~area~~ is often more robust, but can give erratic results if the peak is n
 ## maxo - into
 
 ```{r fig.align="center", out.width="80%"}
-include_graphics("../images/maxointo.png")
+include_graphics("../../images/maxointo.png")
 ```
 
 ## Missing Features
