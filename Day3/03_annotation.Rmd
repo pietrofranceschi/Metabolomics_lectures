@@ -69,10 +69,59 @@ include_graphics("../images/scheme_fs_msms.pdf")
 * ...
 
 
+# In silico annotation
+
 ## Chemoinformatics and predictive models
 
-* [Sirius](https://bio.informatik.uni-jena.de/software/sirius/)
-* [Metfrag](https://ipb-halle.github.io/MetFrag/)
+When the compound is not in any spectral library, the MS/MS spectrum can be compared with *structures*, which are available for millions of compounds
+
+```{r out.width="\\linewidth", out.height="0.62\\textheight", fig.align="center"}
+include_graphics("../images/scheme_insilico.pdf")
+```
+
+## SIRIUS: how it works
+
+::: incremental
+1. **Molecular formula**: from the isotope pattern and from a *fragmentation tree*, which explains the fragments as losses from the precursor
+2. **CSI:FingerID**: a machine learning model predicts from the MS/MS spectrum the *molecular fingerprint* (presence/absence of substructures) and searches it in structure databases (PubChem, biological databases)
+3. **CANOPUS**: predicts the compound class from the fingerprint, also when the structure is in no database
+:::
+
+::: {.box-key .fragment}
+**SIRIUS 4:** \footnotesize Dührkop K. et al. (2019) Nature Methods 16, 299--302 \
+CSI:FingerID: Dührkop K. et al. (2015) PNAS 112, 12580--12585 \
+CANOPUS: Dührkop K. et al. (2021) Nature Biotechnology 39, 462--471
+
+\weblink{https://bio.informatik.uni-jena.de/software/sirius/}{bio.informatik.uni-jena.de/software/sirius}
+:::
+
+## MetFrag: how it works
+
+::: incremental
+1. **Candidates**: all the structures in a database (PubChem, ChemSpider, ...) with the mass (or formula) of the precursor
+2. **In silico fragmentation**: the bonds of each candidate are broken, producing all its possible fragments
+3. **Scoring**: the candidates are ranked by how well their fragments explain the measured peaks
+4. **Additional evidence** can be added to the score: retention time, number of references, similarity with library spectra
+:::
+
+::: {.box-key .fragment}
+**MetFrag:** \footnotesize Wolf S. et al. (2010) BMC Bioinformatics 11, 148 \
+MetFrag relaunched: Ruttkies C. et al. (2016) Journal of Cheminformatics 8, 3
+
+\weblink{https://msbi.ipb-halle.de/MetFrag/}{msbi.ipb-halle.de/MetFrag}
+:::
+
+## In silico annotation: notes
+
+::: incremental
+- The result is a **ranked list of candidates**, not an identification
+- The right answer is not always the first ... and it can be missing if the compound is not in the database
+- Chemical and biological knowledge is still needed: is the candidate plausible in my samples?
+:::
+
+::: {.box-red .fragment}
+⚠️ In silico annotations are *putative* (level 2--3): only a chemical standard gives the final confirmation
+:::
 
 # Molecular Networks
 
