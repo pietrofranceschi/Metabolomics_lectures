@@ -120,7 +120,9 @@ sample_meta_data <- sample_meta_data |>
 
 
 * As expected we have missing data, which most likely show up for metabolites with very low concentrations. 
-* This statement is not always true because the detection limit con vary between different compounds.
+* This statement is not always true because the detection limit can vary between different compounds.
+
+> **Missing values** (why they show up, how to handle them, how to impute them) are the topic of the focus presentation [Missing values and imputation](02_missing_values.pdf)
 
 
 To check that we organize the matrix in a different way also joining the concentration data with the sample metadata
@@ -205,7 +207,7 @@ DM_nest |>
 ```
 
 
-As we discussed in the lecture, it is difficult to decide which metabolites have too many missing values ...
+As discussed in the [missing values presentation](02_missing_values.pdf), it is difficult to decide which metabolites have too many missing values ...
 
 When we have a "limited" number of variables the best approach is to plot the data. With the `DM_nest` we can do that quite efficiently
 
@@ -385,7 +387,7 @@ The previous univariate journey should have been already pointing out some inter
 
 The subsequent step is to look to visualize the multivariate structure of the data to spot larger scale patterns.
 
-In order to do that it is necessary to impute the data matrix, substituting NAs with meaningful numbers.
+In order to do that it is necessary to impute the data matrix, substituting NAs with meaningful numbers (see the [missing values presentation](02_missing_values.pdf)):
 
 1. The number should have a variability
 2. The number should not know anything about the experimental design
