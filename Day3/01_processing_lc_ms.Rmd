@@ -393,7 +393,7 @@ Even if you do everything well your final data matrix will be full of missing va
 -   "absence" of a metabolite in one or more samples (biology)
 -   that metabolite is below the detection limit (analytics)
 
-
+Depending on their origin, missing values can be
 
 -   missing at random
 -   missing not at random
