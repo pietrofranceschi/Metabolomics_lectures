@@ -293,6 +293,25 @@ We can follow the spirit of the previous plot by defining a function and using i
 
 An alternative could be to `unnest` the data and rely on faceting ...
 
+Let's start by putting all the samples of each metabolite in a single q-q plot, without considering the study groups
+
+```{r fig.height=14, fig.width=8}
+DM_nest |> 
+  dplyr::select(CompoundName,data) |> 
+  unnest(data) |> 
+  ggplot(aes(sample = I)) +
+  stat_qq(col = "steelblue", alpha = 0.6) + 
+  stat_qq_line() + 
+  facet_wrap(~CompoundName, scales = "free_y", ncol = 5) +
+  theme_light() + 
+  theme(aspect.ratio = 1)
+```
+
+* The points are far from the lines: no sign of normal distribution. Most of the plots bend upwards, the typical shape of a long right tail (as for lognormal data)
+* Some metabolites (look at 12(13)Ep-9-KODE, Tauro-ß-Muricholic acid or Tauro-g-Muricholic acid) show a flat stretch followed by a steep jump: as we have seen in the presentation (q-q plot with two sub-populations), this is the signature of groups of samples with different intensities
+
+Which groups? If we map the color and the shape of the points to the study factors, `stat_qq()` calculates a separate q-q plot for each group of samples
+
 
 ```{r fig.height=14, fig.width=8}
 DM_nest |> 
