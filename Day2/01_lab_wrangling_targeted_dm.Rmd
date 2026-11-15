@@ -452,13 +452,43 @@ DM_i <- DM |>
 ```
 
 
-As we have seen, log transformation is helpful ...
-
+Before PCA we have to think about the scale of the variables (see the [Variable scaling and sample normalization](04_scaling_normalization.pdf) presentation). Here the median intensities go from about 1 (oxylipins) to more than 100 (bile acids), and single samples reach 10^5^: without any correction the PCA would be dominated by a few intense bile acids. We use both the remedies discussed in the presentation: a log transformation (below) and unit variance scaling (`scale.unit = TRUE` in the `PCA()` call).
 
 ```{r}
 DM_i <- DM_i |> 
   mutate(across(starts_with("CPD"), ~log10(.x)))
 ```
+
+What about **sample normalization**? Here it is not needed: we are dealing with targeted assays performed on the same volume of plasma, so we do not expect dilution effects like the ones we would see, for example, in urine.
+
+It is anyway a good idea to look at the overall metabolic content of each sample, something similar to the Total Ion Current (TIC) of a chromatogram. A simple sum of the intensities would be dominated by the few intense bile acids, so we use the median of the log intensities of each sample: every metabolite has the same weight and the median is not affected by the very small numbers we used to impute the NAs
+
+```{r}
+overall <- DM_i |> 
+  dplyr::select(MouseID, starts_with("CPD")) |> 
+  pivot_longer(starts_with("CPD"), values_to = "logI") |> 
+  group_by(MouseID) |> 
+  summarise(med_logI = median(logI)) |> 
+  left_join(sample_meta_data)
+
+overall |> 
+  ggplot(aes(x = Gender, y = med_logI)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(aes(col = Gender), width = 0.2, alpha = 0.7) +
+  scale_color_manual(values = c(Female = "#8B3A3A", Male = "steelblue")) +
+  labs(y = "Median log10 intensity", x = "") +
+  theme_light() +
+  theme(legend.position = "none")
+```
+
+```{r}
+## the samples with the highest and lowest overall content
+overall |> arrange(desc(med_logI)) |> slice(1:5)
+overall |> arrange(med_logI) |> slice(1:5)
+```
+
+* The overall content is higher in females (median `r round(median(overall$med_logI[overall$Gender == "Female"]), 2)`) than in males (median `r round(median(overall$med_logI[overall$Gender == "Male"]), 2)`): this is biology, not dilution, and normalizing the samples would partly remove it!
+* A few samples have a markedly higher (or lower) overall content: keep an eye on them in the PCA. Look also at the genotype of the samples at the top of the list ... is it chance?
 
 And now PCA!
 
@@ -472,7 +502,8 @@ library(factoextra)
 myPCA <- PCA(DM_i |> 
                column_to_rownames("MouseID") |> 
                dplyr::select(starts_with("CPD")), 
-             graph = FALSE, scale.unit = TRUE   ## to avoid factmineR producing a plot by default
+             graph = FALSE,      ## to avoid FactoMineR producing a plot by default
+             scale.unit = TRUE   ## unit variance scaling
              )
 ```
 
