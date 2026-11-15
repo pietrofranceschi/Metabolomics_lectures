@@ -141,7 +141,7 @@ In presence of known subpopulations, stratified random sampling results in a mor
 
 ## Stratified Random Sampling
 
-```{r fig.align='center', out.width="60%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
 include_graphics("../images/Stratified_sampling.png")
 ```
 
@@ -152,7 +152,7 @@ The most reasonable way to "smear out" the effects of unknown biases is to do ev
 
 ~~Random is not a synonym of HAPHAZARD~~
 
-```{r fig.align='center', out.width="40%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.5\\textheight"}
 include_graphics("../images/Random-Numbers-Cloud.png")
 ```
 
@@ -204,7 +204,7 @@ include_graphics("../images/Confounding.png")
 
 :::
 ::: {.column width="50%"}
-```{r fig.align='center', out.width="70%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
 include_graphics("../images/fieldnotes.jpg")
 ```
 :::
@@ -264,7 +264,7 @@ include_graphics("../images/blocks.png")
 
 :::
 ::: {.column width="50%"}
-```{r fig.align='center', out.width="70%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
 include_graphics("../images/usual_suspects.jpg")
 ```
 :::
@@ -280,7 +280,7 @@ include_graphics("../images/exp_des_1.png")
 
 ## Split Plot Designs
 
-```{r fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.72\\textheight"}
 include_graphics("../images/exp_des_2.png")
 ```
 
@@ -311,7 +311,7 @@ include_graphics("../images/exp_des_4.png")
 
 :::
 ::: {.column width="50%"}
-```{r fig.align='center', out.width="70%"}
+```{r fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
 include_graphics("../images/fieldnotes.jpg")
 ```
 :::
