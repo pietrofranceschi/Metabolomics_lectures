@@ -1,15 +1,18 @@
 ---
 title: "Inspecting raw LC-MS Data"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
-output: html_document
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 library(xcms)
 library(MsExperiment)
 library(tidyverse)
@@ -35,13 +38,13 @@ In the last years a huge effort has been made to set up a full `xcms` centric ec
 
 ## The Data
 
-For our demo we will use a subset of a dataset on wines which have been recently acquired at the Fondazione E. Mach in Italy. The dataset has been designed for training purposes and includes MS and DDA (MS2 e MS3) (in positive and negative polarity) acquisition of a 20 wines with the following characteristics:
+For our demo we will use a subset of a dataset on wines which have been recently acquired at the Fondazione E. Mach in Italy. The dataset has been designed for training purposes and includes full scan MS and DDA (MS2 and MS3) acquisitions, in positive and negative polarity, of 20 wines with the following characteristics:
 
 * 2 colors: red (n=10), white (n=10)
 * 12 varieties
 
 
-The acquisition sequences included blanks, pooled QC and samples. Al data were acquired with a HPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
+The acquisition sequences included blanks, pooled QC and samples. All data were acquired with an HPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
 
 
 ## Reading one injection
@@ -49,36 +52,35 @@ The acquisition sequences included blanks, pooled QC and samples. Al data were a
 To understand how the data behaves, let's start reading in the data coming from one injection
 
 ```{r}
-
-raw_one <- readMsExperiment(
-  spectraFiles = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML", mode = "ondisk")  
+## the spectra are kept on disk and read only when needed, so RAM is not filled up
+raw_one <- readMsExperiment(spectraFiles = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML")
 ```
 
 
-Let's look to the object
+Let's look at the object
 
 ```{r}
 raw_one
 ```
 
 
-It is important that along the process one can be able to visualize the raw data, so let's give a look to the structure of the R object we created.
+It is important that along the process one can be able to visualize the raw data, so let's have a look at the structure of the R object we created.
 
-Let's first get the retention times where spectra were collected
+Let's first get the retention times (in seconds) where the spectra were collected
 
 ```{r}
 ## method to extract the retention times
 rtime(raw_one)[1:20]
 ```
 
-The variable names should be read as "F(ile)x.S(can)000y". Since we are dealing with a DDA experiment, the data contains a combination of full scan and fragmentation spectra, so each one of the previous Scans should show either the full family of ions coming from the source, or what is produced by fragmenting a specific **precursor**
+Since we are dealing with a DDA experiment, the data contain a combination of full scan and fragmentation spectra, so each one of the previous scans shows either the full family of ions coming from the source, or what is produced by fragmenting a specific **precursor**
 
 ```{r}
-## this gives the type of experiment of the 
+## the MS level of each spectrum: 1 = full scan, 2 and 3 = fragmentation
 msLevel(spectra(raw_one))[1:10]
 ```
 
-As you see, they are interleaved. 
+As you see, they are interleaved: one full scan, one MS2 spectrum (fragments of a precursor) and one MS3 spectrum (fragments of a fragment), and so on.
 
 ## Full Scans
 
@@ -86,13 +88,13 @@ Let's now get out the full scans
 
 ```{r}
 ## I'm telling xcms to filter only scans acquired in "Full scan mode"
-fs_raw <- raw_one %>% filterMsLevel(1)
+fs_raw <- raw_one |> filterMsLevel(1)
 
 fs_raw
 ```
 
 
-We already now how the `rt` will look like, but what about `mz` and `intensity`
+We already know what the `rt` looks like, but what about `mz` and `intensity`?
 
 ```{r}
 rt <- rtime(fs_raw)
@@ -100,17 +102,17 @@ mz <- mz(spectra(fs_raw))
 I <-  intensity(spectra(fs_raw))
 ```
 
-And their structure ...
+And their structure ... the first two scans
 
 ```{r}
-glimpse(mz[1:4])
+mz[1:2]
 ```
 
 ```{r}
-glimpse(I[1:4])
+I[1:2]
 ```
 
-So both object are lists: for every scan we have a vector of `mz` and a vector of `I`: a spectrum. We have 3D data!
+So both objects are lists: for every scan we have a vector of `mz` and a vector of `I`: a spectrum. We have 3D data!
 
 ### Plot by hand
 
@@ -137,11 +139,7 @@ plotSpectra(spectra(fs_raw)[1])
 This is an alternative 2D visualization of the ion map
 
 ```{r}
-
-raw_spectra <- spectra(fs_raw)
-
-## we create a tibble of spectra ...effsize
-
+## we create a tibble of spectra: one row per scan, with its mz and intensity vectors
 spectra_tibble <- tibble(rt = rt, 
                          mz = as.list(mz),
                          I = as.list(I))
@@ -150,9 +148,9 @@ spectra_tibble <- tibble(rt = rt,
 
 ```{r}
 
-ggplotly(spectra_tibble  %>% unnest(c(mz, I)) %>% 
-  filter(mz > 230 & mz < 310) %>% 
-  filter(rt > 200 & rt< 300) %>% 
+ggplotly(spectra_tibble |> unnest(c(mz, I)) |> 
+  filter(mz > 230 & mz < 310) |> 
+  filter(rt > 200 & rt < 300) |> 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
   scale_color_viridis_c() + 
@@ -160,7 +158,7 @@ ggplotly(spectra_tibble  %>% unnest(c(mz, I)) %>%
 ```
 
 
-As we have discussed in the presentation, the different metabolites present in the sample will show-up as peaks in their ion chromatograms, basically because when more molecule of a specific type are reaching the ionization source, more ions associated to that molecule are produced.
+As we have discussed in the presentation, the different metabolites present in the sample will show-up as peaks in their ion chromatograms, basically because when more molecules of a specific type are reaching the ionization source, more ions associated to that molecule are produced.
 
 The previous map shows that the ion around m/z 295.0445 could show an interesting profile over time ...
 
@@ -179,16 +177,15 @@ As before we can get out the data and manually plot the trace
 plot(rtime(chr_raw[1,1]), intensity(chr_raw[1,1]), type = "b")
 ```
 
-Note: the structure of the `Mchromatograms` is "matrix like" because it is designed to work best with many ions and many files.
+Note: the structure of the `MChromatograms` is "matrix like" because it is designed to work best with many ions and many files.
 
 Just to show what I mean let's read in the data coming from two different injections
 
 ```{r}
 two_raw <- readMsExperiment(
   spectraFiles = c("../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
-            "../data/wines/x020_wht_gewurz_A_1_NEG_DDA.mzML"),
-  msLevel. = 1, ## we read only MS1
-  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+                   "../data/wines/x020_wht_gewurz_A_1_NEG_DDA.mzML")) |> 
+  filterMsLevel(1)  ## we keep only the full scans
 ```
 
 
@@ -203,9 +200,7 @@ chr_raw_2 <- chromatogram(two_raw,
 chr_raw_2
 ```
 
-Here we could extract the rt and intensity for the separate files, but we can plot them with a handy `xcms` method
-
-The plot can be also obtained by a specific method, which is also giving some additional info
+Here we could extract the rt and intensity for the separate files, but we can plot them with a handy `xcms` method, which also gives some additional info
 
 ```{r}
 plot(chr_raw_2)
@@ -217,23 +212,30 @@ Here we see a clear difference between the two traces, looking to the names we s
 **Note** The previous plot shows a typical characteristic of Orbitrap (and in general FT) instruments: the signal off peaks is almost invariably zero. As we will see this can be a problem in presence of missing data, since no "real" noise can be integrated there.
 
 
-## DIY
+## Something for you!
 
-* Play around with the previous 2d map and look for potentially interesting ions. Plot their chromatogram
-* Look how the quality of the mass spectrum is changing across one chromatographic peak (Advanced)
-* If you look to the map, can you say why the signal with high intensity are organized in vertical groups?
-* The trace around 289 seems to show two horizontal peaks. What does it mean? Can you interpret that?
+1. Play around with the previous 2D map and look for potentially interesting ions. Plot their chromatogram
+2. Look how the quality of the mass spectrum changes across one chromatographic peak (Advanced)
+3. If you look at the map, can you say why the signals with high intensity are organized in vertical groups?
+4. The map around m/z 289.07 seems to show two separate spots along the retention time. What does it mean? Can you interpret that?
 
+## A possible solution
 
+**3.** The ions in a vertical group share the same retention time: they elute together because they come from the same molecule (adducts, isotopes, in-source fragments), or from molecules which are not separated by the chromatography.
+
+**4.** Let's extract the ion chromatogram
 
 ```{r}
 # extract the chromatogram
 chromatogram(two_raw, 
-              mz = 289.07 + 0.01*c(-1, 1), 
-              rt = 250 + 60*c(-1, 1)) %>% 
-  plot(.)
-
+             mz = 289.07 + 0.01*c(-1, 1), 
+             rt = 250 + 60*c(-1, 1)) |> 
+  plot()
 ```
+
+Two chromatographic peaks with the same m/z, but different retention times: two different molecules giving an ion of the same mass, for example two isomers (same elemental formula, different structure) which are separated by the chromatography.
+
+In wine a very good candidate is the pair **catechin / epicatechin**, whose [M-H]^-^ ion has m/z 289.0718 ... but this is a matter of annotation, which we will discuss later today.
 
 
 
