@@ -24,7 +24,7 @@ library(tidyverse)
 - The Normal (Gaussian) distribution has a prominent role in statistics
 - Some sort of "normality" is often the prerequisite of many statistical tools
 - With normal data, ~~the mean is the value with higher probability~~
-- Reasoning on the mean is equivalent is reasoning on the most probable value ...
+- Reasoning on the mean is equivalent to reasoning on the most probable value ...
 
 ```{r fig.width=8, fig.height=4, out.width="\\linewidth", out.height="0.45\\textheight", fig.align='center'}
 ## Standard normal distribution:
@@ -64,7 +64,7 @@ for(i in 1:500){
 
 par(mfrow = c(1,2))
 hist(popunif, main = "Arbitrary Population", col = "steelblue")
-hist(means, main = "Means of repeated sampling (20)", col = "Orange")
+hist(means, main = "Means of repeated sampling (10)", col = "Orange")
 
 ```
 
@@ -72,14 +72,16 @@ hist(means, main = "Means of repeated sampling (20)", col = "Orange")
 
 **Noteworthy**
 
-> 1. The sampling distribution get's narrower as the sample increases
-> 2. This is the ultime reasons why measuring more samples leads to smaller _p-values_
+::: incremental
+1. The sampling distribution gets narrower as the sample size increases
+2. This is the ultimate reason why measuring more samples leads to smaller _p-values_
+:::
 
 
 ## Formally
 
 - Mean of the sampling distribution: $\mu_{pop}$
-- Variance of the sampling distribution: $\frac{\sigma}{\sqrt(N)}$
+- Standard deviation of the sampling distribution (standard error): $\frac{\sigma}{\sqrt{N}}$
 
 
 Where $N$ is the size of the sample
@@ -96,7 +98,9 @@ We are often dealing with data non normally distributed
 4. Outliers
 :::
 
+::: fragment
 Sub populations are typically present in complex experiments
+:::
 
 ## Subpopulations
 
@@ -129,18 +133,21 @@ legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd 
 
 ## Solutions
 
-> 1. **Non-parametric** approaches (Kruskall-Wallis, quantile-regression, permutations, bootstrap, ...)
-> 2. Variable **transformations**
+::: incremental
+1. **Non-parametric** approaches (Kruskal-Wallis, quantile-regression, permutations, bootstrap, ...)
+2. Variable **transformations**
+:::
 
-
-Remember that non parametric tests suffer of lack of power and are often completely useless fin investigations with only few samples (5-10)
+::: fragment
+Remember that non parametric tests suffer from lack of power and are often completely useless in investigations with only few samples (5-10)
+:::
 
 ## Log-transformed data
 
 ```{r fig.width=8, fig.height=5, out.width="\\linewidth", out.height="0.65\\textheight", fig.align='center'}
 lndata_t <- log10(lndata)
 
-hist(lndata_t, breaks = 50, col = "steelblue", main = "Log trasformed Lognormal Data")
+hist(lndata_t, breaks = 50, col = "steelblue", main = "Log transformed Lognormal Data")
 abline(v = mean(lndata_t), col  ="red", lwd = 2)
 abline(v = median(lndata_t), col  ="darkgreen", lwd = 2)
 legend("topright", legend = c("mean","median"), col = c("red","darkgreen"), lwd = 1, box.lwd = 0)
