@@ -18,11 +18,13 @@ library(readxl)
 
 ## Dataset and description
 
-[**KOMP Plasma Metabolomics Dataset**](https://www.kaggle.com/desertman/komp-plasma-metabolomics-dataset)
+[**KOMP Plasma Metabolomics Dataset**](https://www.kaggle.com/datasets/desertman/komp-plasma-metabolomics-dataset) (Kaggle id: `desertman/komp-plasma-metabolomics-dataset`, CC0 license)
 
-Mouse knockouts facilitate the study of gene functions. Often, multiple abnormal phenotypes are induced when a gene is inactivated. The International Mouse Phenotyping Consortium (IMPC) has generated thousands of mouse knockouts and cataloged their phenotype data. We have acquired metabolomics data from 220 plasma samples from 30 unique mouse gene knockouts and corresponding wild-type mice from the IMPC. To acquire comprehensive metabolomics data, we have used liquid chromatography (LC) combined with mass spectrometry (MS) for detecting polar and lipophilic compounds in an untargeted approach. We have also used targeted methods to measure bile acids, steroids and oxylipins. In addition, we have used gas chromatography GC-TOFMS for measuring primary metabolites. The metabolomics dataset reports 832 unique structurally identified metabolites from 124 chemical classes as determined by ChemRICH software
+These data were not measured by us: they were acquired at the West Coast Metabolomics Center (UC Davis) and published by Barupal et al., [*A Comprehensive Plasma Metabolomics Dataset for a Cohort of Mouse Knockouts within the International Mouse Phenotyping Consortium*](https://doi.org/10.3390/metabo9050101), Metabolites 9(5), 101 (2019). The full dataset, including the raw files, is deposited in the Metabolomics Workbench (study [ST001154](https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study&StudyID=ST001154)); we downloaded it from Kaggle.
 
-In this demo we will use only the metabolites quantified in the targeted assays. The belong to the chemical classes of _bile acids, steroids and oxylipins_
+Mouse knockouts facilitate the study of gene functions. Often, multiple abnormal phenotypes are induced when a gene is inactivated. The International Mouse Phenotyping Consortium (IMPC) has generated thousands of mouse knockouts and cataloged their phenotype data. The authors acquired metabolomics data from 220 plasma samples from 30 unique mouse gene knockouts and corresponding wild-type mice from the IMPC. They used liquid chromatography (LC) combined with mass spectrometry (MS) for detecting polar and lipophilic compounds in an untargeted approach, targeted methods to measure bile acids, steroids and oxylipins, and gas chromatography (GC-TOFMS) for primary metabolites. The dataset reports 832 unique structurally identified metabolites from 124 chemical classes, as determined by the ChemRICH software.
+
+In this demo we will use only the metabolites quantified in the targeted assays. They belong to the chemical classes of _bile acids, steroids and oxylipins_
 
 
 Here we get the data
