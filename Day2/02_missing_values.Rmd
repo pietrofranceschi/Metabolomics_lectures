@@ -38,7 +38,9 @@ In metabolomics missing values pop up for different reasons
 :::
 
 
+::: fragment
 1,2 & 3 are **random** or **not random** ?
+:::
 
 
 ## Analytical Absence
@@ -60,7 +62,9 @@ include_graphics("../images/important.png")
 :::
 ::::
 
+::: fragment
 Where can we get the detection limit ?
+:::
 
 
 ## Scenario 1: 1 class
