@@ -279,6 +279,8 @@ Considering that we have 220 samples the level of missingness is never extremely
 
 ## Variable Distribution
 
+> **The distribution of the measured variables** (normal and lognormal data, transformations, q-q plots) is the topic of the focus presentation [Distribution of the variables](03_variable_distribution.pdf)
+
 The need of displaying the intensity in log scale is already suggesting that the distribution of the intensities is far from being normal. This is not unexpected in metabolomics. In real life what I do is to work almost invariably with log-transformed datasets.
 
 For sure
