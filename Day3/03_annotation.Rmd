@@ -50,7 +50,7 @@ In the case of MS based experiments, the process of annotation requires the inte
 ## Fragmentation Experiments
 
 ```{r out.width="\\linewidth", out.height="0.55\\textheight", fig.align="center"}
-include_graphics("../images/tandemMS.jpg")
+include_graphics("../images/scheme_fs_msms.pdf")
 ```
 
 * Fragmentation patterns are sensitive to the chemical structure
