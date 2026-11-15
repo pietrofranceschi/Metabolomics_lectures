@@ -176,6 +176,12 @@ Even with the perfect instrument the "numbers" will change. Try measuring your t
 
 When chromatographic separation is present, elution times will slightly change from run to run. For GC the situation is better, but far from being perfect
 
+## Chromatographic drifts
+
+```{r fig.align="center", out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/scheme_rt_shift.pdf")
+```
+
 ## Sources of Analytical Variability
 
 ### 3 - Matrix effects
