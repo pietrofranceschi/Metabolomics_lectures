@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r message=FALSE, warning=FALSE}
 library(MetaboCoreUtils)
 library(xcms)
+library(MsExperiment)
 library(MetaboAnnotation)
 library(RColorBrewer)
 library(plotly)
