@@ -79,3 +79,29 @@ function Div(el)
     return out
   end
 end
+
+-- An incremental list (\item<+->) leaves beamer's overlay counter one step
+-- ahead, so a \pause after it would add an empty overlay (a duplicate page).
+-- Within a slide, once an incremental list has been seen, reveal later
+-- fragments with \onslide<+-> instead, which uses the counter as it stands.
+local function fix_pauses(blocks, state)
+  for i, b in ipairs(blocks) do
+    if b.t == "Header" and b.level <= 2 then
+      state.ahead = false
+    elseif b.t == "RawBlock" and b.format == "latex" and b.text == "\\pause" then
+      if state.ahead then blocks[i] = latex("\\onslide<+->") end
+    elseif b.t == "Div" then
+      if b.classes:includes("incremental") then
+        state.ahead = true
+      else
+        fix_pauses(b.content, state)
+      end
+    end
+  end
+  return blocks
+end
+
+function Pandoc(doc)
+  doc.blocks = fix_pauses(doc.blocks, { ahead = false })
+  return doc
+end
