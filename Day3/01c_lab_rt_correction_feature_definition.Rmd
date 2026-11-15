@@ -47,8 +47,10 @@ We already know that our dataset contains blank injections. They could be used t
 no_blank_id <- which(sampleData(raw_data)$variety != "blank")
 ## subset the data with a specific xcms function
 raw_data <- filterFile(raw_data, file = no_blank_id)
-## check the metadata
-sampleData(raw_data)
+## check the metadata (the descriptive columns)
+sampleData(raw_data) |>
+  as_tibble() |>
+  dplyr::select(inj_ord, color, variety, bottle, rep)
 ```
 
 Let's now visualize the amount of retention time shift looking at the ion trace of a compound which should be present in almost all samples:
@@ -190,7 +192,11 @@ Ok now that we have the definition of the features, let's get the final data mat
 
 ```{r}
 DM <- featureValues(raw_data, value = "into")
-head(DM)
+dim(DM)
+## the first features in the first samples, with short sample names (just for display)
+dm_corner <- DM[1:6, 1:6]
+colnames(dm_corner) <- sampleData(raw_data)$inj_ord[1:6]
+dm_corner
 ```
 
 
@@ -209,14 +215,16 @@ raw_data_filled <- fillChromPeaks(raw_data, param = ChromPeakAreaParam())
 
 ```{r}
 DM <- featureValues(raw_data_filled, value = "into")
-head(DM)
+dm_corner <- DM[1:6, 1:6]
+colnames(dm_corner) <- sampleData(raw_data_filled)$inj_ord[1:6]
+dm_corner
 ```
 
 The definition of each feature can be extracted with a specific function:
 
 ```{r}
 feat <- featureDefinitions(raw_data_filled)
-feat
+as_tibble(feat, rownames = "feat_id")
 ```
 
 
