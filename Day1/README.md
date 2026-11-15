@@ -10,7 +10,8 @@
 * [Practical Considerations on the study design](04_practical_considerations.pdf)
 * [Group Activity: design your study](05_group_activity_study_design.pdf)
 * [Data analysis in metabolomics](06_data_analysis.pdf)
-    - Practical: [Fat data matrices and false positives](06a_lab_false_positives.html) - [Rmd](06a_lab_false_positives.Rmd)
+    - Demo: [The curse of dimensionality](06a_demo_curse_dimensionality.html) - [Rmd](06a_demo_curse_dimensionality.Rmd)
+    - Practical: [Fat data matrices and false positives](06b_lab_false_positives.html) - [Rmd](06b_lab_false_positives.Rmd)
 * [Statistical testing and effect size](07_statistical_testing_effect_size.pdf)
 * [Multiple testing](08_multiple_testing.pdf) - [Rmd](08_multiple_testing.Rmd)
     - FWER, Bonferroni, Benjamini-Hochberg FDR, p-value histograms, volcano plots

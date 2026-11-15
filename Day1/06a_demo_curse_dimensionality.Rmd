@@ -1,0 +1,197 @@
+---
+title: "The Curse of Dimensionality"
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+set.seed(123)
+```
+
+## Intro
+
+In the lecture we said that metabolomics data matrices are *fat*: many more variables than samples. Intuitively, measuring more should be better ... but is it?
+
+In this demo we look at what happens to the "geometry" of our samples when the number of measured variables grows. The tool is the **distance matrix**: the distance between every pair of samples. Many of the methods we will use in the course (clustering, PCA, k-nearest neighbours, ...) are based, more or less explicitly, on distances.
+
+## A two group experiment
+
+```{r}
+n_per_group <- 10
+delta <- 2
+nvars <- 10^(0:5)
+```
+
+We have two groups of `r n_per_group` samples each (`A` and `B`), drawn from two populations with the same standard deviation (1) but different means: the difference is `r delta` standard deviations, a large effect!
+
+Only **one** variable (the "biomarker") carries this difference. All the other variables we measure are just noise: same distribution in the two groups. This is a realistic picture of an untargeted metabolomics experiment, where most of the features have nothing to do with our scientific question.
+
+We simulate `r length(nvars)` scenarios, measuring `r paste(format(nvars, big.mark = ",", scientific = FALSE), collapse = ", ")` variables
+
+```{r}
+group <- rep(c("A", "B"), each = n_per_group)
+
+## first column: the biomarker; the remaining nvar - 1 columns: noise
+make_dm <- function(nvar) {
+  biomarker <- rnorm(2 * n_per_group, mean = ifelse(group == "B", delta, 0))
+  noise <- matrix(rnorm(2 * n_per_group * (nvar - 1)), nrow = 2 * n_per_group)
+  cbind(biomarker, noise)
+}
+
+curse <- tibble(nvar = nvars) |>
+  mutate(DM = map(nvar, make_dm))
+
+curse
+```
+
+## Distance matrices
+
+For each data matrix we calculate the euclidean distance between all pairs of samples
+
+```{r}
+curse <- curse |>
+  mutate(D = map(DM, \(m) as.matrix(dist(m))))
+```
+
+The distances get larger and larger as we add variables, so to compare the scenarios we divide each matrix by its largest distance. In the plot, the samples are ordered by group: the first `r n_per_group` belong to `A`, the last `r n_per_group` to `B`
+
+```{r fig.width=9, fig.height=6}
+## from matrix to long table: one row per pair of samples
+to_long <- function(d) {
+  tibble(s1 = as.vector(row(d)), s2 = as.vector(col(d)), dist = as.vector(d / max(d)))
+}
+
+curse |>
+  mutate(long = map(D, to_long),
+         nvar = paste(scales::label_comma()(nvar), if_else(nvar == 1, "variable", "variables")),
+         nvar = fct_inorder(nvar)) |>
+  dplyr::select(nvar, long) |>
+  unnest(long) |>
+  ggplot(aes(x = s1, y = s2, fill = dist)) +
+  geom_tile() +
+  geom_hline(yintercept = n_per_group + 0.5, colour = "orange") +
+  geom_vline(xintercept = n_per_group + 0.5, colour = "orange") +
+  scale_fill_gradient(low = "white", high = "steelblue", limits = c(0, 1)) +
+  scale_y_reverse() +
+  facet_wrap(vars(nvar)) +
+  coord_equal() +
+  labs(x = "Sample", y = "Sample", fill = "Relative\ndistance") +
+  theme_light()
+```
+
+* With **one** variable the two groups are clearly visible: small distances (light) inside the groups, large distances (dark) between them
+* Adding noise variables, the block structure fades away ... with 1,000 variables or more it is gone
+* With many variables the matrix becomes almost uniform: **all samples are at about the same distance from each other**
+
+## Putting numbers on it
+
+Three numbers summarize what we see:
+
+* **separation**: the probability that a distance between samples of different groups is larger than a distance between samples of the same group. 1 means perfectly separated groups, 0.5 means no groups at all
+* **between/within**: the average distance between samples of different groups divided by the average distance between samples of the same group. If the groups are visible, this is larger than 1
+* **relative contrast**: (largest distance - smallest distance) / smallest distance. It tells us how different "near" and "far" are (we plot its log10)
+
+In the plot, the dashed lines show the values we expect when there are no groups
+
+```{r}
+summarize_d <- function(d) {
+  ut <- upper.tri(d)
+  same <- outer(group, group, "==")
+  b <- d[ut & !same]
+  w <- d[ut & same]
+  tibble(separation = mean(outer(b, w, ">")),
+         between_within = mean(b) / mean(w),
+         rel_contrast = (max(d[ut]) - min(d[ut])) / min(d[ut]))
+}
+
+curse_summary <- curse |>
+  mutate(s = map(D, summarize_d)) |>
+  dplyr::select(nvar, s) |>
+  unnest(s)
+
+curse_summary
+```
+
+```{r fig.width=10, fig.height=3.5}
+## dashed lines: the values we expect when there are no groups
+indices <- c("separation", "between/within", "log10(relative contrast)")
+no_groups <- tibble(index = factor(indices[1:2], levels = indices), value = c(0.5, 1))
+
+curse_summary |>
+  transmute(nvar, separation, `between/within` = between_within,
+            `log10(relative contrast)` = log10(rel_contrast)) |>
+  pivot_longer(-nvar, names_to = "index") |>
+  mutate(index = factor(index, levels = indices)) |>
+  ggplot(aes(x = nvar, y = value)) +
+  geom_hline(data = no_groups, aes(yintercept = value), colour = "#8B3A3A", linetype = "dashed") +
+  geom_line(colour = "steelblue") +
+  geom_point(colour = "steelblue", size = 3) +
+  scale_x_log10(labels = scales::label_comma()) +
+  facet_wrap(vars(index), scales = "free_y") +
+  labs(x = "Number of variables", y = "") +
+  theme_light()
+```
+
+* separation goes from `r round(curse_summary$separation[1], 2)` to `r round(curse_summary$separation[length(nvars)], 2)` and between/within from `r round(curse_summary$between_within[1], 2)` to `r round(curse_summary$between_within[length(nvars)], 2)`: the groups disappear
+* the relative contrast goes from `r round(curse_summary$rel_contrast[1])` to `r round(curse_summary$rel_contrast[length(nvars)], 3)`: "near" and "far" lose their meaning. This is called **distance concentration**
+
+> **The biomarker is still there, in the first column of every matrix! But the distances are dominated by the noise of all the other variables. This is the curse of dimensionality: in a high dimensional space the data are sparse, and every sample is far from all the others.**
+
+## Is it the number of variables?
+
+Not really ... it is the number of **useless** variables. Let's repeat the simulation where *all* the variables are different between the two groups
+
+```{r}
+make_dm_all <- function(nvar) {
+  matrix(rnorm(2 * n_per_group * nvar, mean = ifelse(group == "B", delta, 0)),
+         nrow = 2 * n_per_group)
+}
+
+curse_all <- tibble(nvar = nvars) |>
+  mutate(D = map(nvar, \(p) as.matrix(dist(make_dm_all(p)))),
+         s = map(D, summarize_d)) |>
+  dplyr::select(nvar, s) |>
+  unnest(s)
+
+curse_all
+```
+
+Now separation goes from `r round(curse_all$separation[1], 2)` to `r round(curse_all$separation[length(nvars)], 2)`: the groups get *clearer* as the variables grow, because each variable adds a bit of signal and the noise averages out. The relative contrast still shrinks, but it stays far from 0: the distances between the groups remain clearly larger than those within.
+
+> **In metabolomics we measure thousands of features, but only a handful of them are related to our question. More variables means more noise, not more information.**
+
+This is why with fat data matrices we need to be careful with distance based methods and with any approach that "looks at everything at once" ... and, as we will see in the practical, it is also why random noise can produce convincing patterns.
+
+## Something for you!
+
+1. Play around and try to understand what I did
+2. Repeat the simulation with 10 biomarkers instead of 1 (the other variables are still noise). How many variables can you measure before the groups disappear?
+
+## A possible solution
+
+We add a parameter with the number of biomarkers: the first `n_bio` columns are different between the two groups
+
+```{r}
+make_dm_bio <- function(nvar, n_bio) {
+  n_bio <- min(n_bio, nvar)
+  bio <- matrix(rnorm(2 * n_per_group * n_bio, mean = ifelse(group == "B", delta, 0)),
+                nrow = 2 * n_per_group)
+  noise <- matrix(rnorm(2 * n_per_group * (nvar - n_bio)), nrow = 2 * n_per_group)
+  cbind(bio, noise)
+}
+
+bio10 <- tibble(nvar = nvars) |>
+  mutate(D = map(nvar, \(p) as.matrix(dist(make_dm_bio(p, n_bio = 10)))),
+         s = map(D, summarize_d)) |>
+  dplyr::select(nvar, s) |>
+  unnest(s)
+
+bio10
+```
+
+With 10 biomarkers the groups survive longer (separation `r round(bio10$separation[bio10$nvar == 100], 2)` with 100 variables, against `r round(curse_summary$separation[curse_summary$nvar == 100], 2)` with a single biomarker), but in the end the noise wins: separation drops to `r round(bio10$separation[length(nvars)], 2)`. More good variables delay the curse, they do not remove it.
