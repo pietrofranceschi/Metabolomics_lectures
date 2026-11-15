@@ -123,14 +123,11 @@ legend("topright", legend = c("Class A", "Class B"), pch = c(19,3), bty = "n")
 ```
 
 
-## Your turn
+## Your turn {.c}
 
-```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.6\\textheight"}
-include_graphics("../images/for_you.jpg")
-```
-
-
+::: center
 **What would you propose to do in the previous three cases?**
+:::
 
 
 ## Dealing with missing values
