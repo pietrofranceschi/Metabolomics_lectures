@@ -105,7 +105,8 @@ Sub populations are typically present in complex experiments
 ## Subpopulations
 
 ```{r fig.width=8, fig.height=5, out.width="\\linewidth", out.height="0.65\\textheight", fig.align='center'}
-subpop <- c(rnorm(100,10,3),rnorm(100,20,3))
+set.seed(123)
+subpop <- c(rnorm(100,10,2),rnorm(100,20,2))
 
 hist(subpop, breaks = 30)
 abline(v = c(10,20), col = "red", lty = 2, lwd = 2, main = "2 sub-populations")
@@ -180,6 +181,24 @@ qqnorm(lndata, main = "Normal q-q plot of log-normal data", pch = 19, col = "#98
 qqline(lndata)
 
 ```
+
+
+## q-q plot with two sub-populations
+
+The same data of the *Subpopulations* slide: two normal populations mixed together
+
+```{r fig.width=10, fig.height=5, out.width="\\linewidth", out.height="0.55\\textheight", fig.align='center'}
+popcol <- rep(c("steelblue", "orange"), each = 100)
+par(mfrow = c(1, 2), pty = "s")
+qqnorm(subpop, main = "All samples together", pch = 19, col = "#3C545480")
+qqline(subpop)
+qqnorm(subpop, main = "Colored by sub-population", pch = 19, col = popcol)
+qqline(subpop)
+```
+
+::: fragment
+Two flatter stretches (one per group) joined by a steep jump: the signature of sub-populations in the data
+:::
 
 
 ## Take home message
