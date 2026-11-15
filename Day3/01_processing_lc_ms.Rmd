@@ -363,7 +363,9 @@ Available in `xcms` through `obiwarp`
 
 . . .
 
-![](../images/warping.png){width=100% height=70%}
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.6\\textheight"}
+include_graphics("../images/warping.png")
+```
 
 
 ## RT Checks
