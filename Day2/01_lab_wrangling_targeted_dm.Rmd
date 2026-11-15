@@ -165,11 +165,12 @@ DM_nest |>
   
 ```
 
-Which actually shows what we expected. High number of missing values are visible only with low median intensities ... note the log scale in x. 
+This is not exactly what we expected! If missing values were only due to concentrations below the detection limit, the metabolites with many NAs should all sit on the left of the plot, at low median intensity (note the log scale in x). Instead:
 
-This is telling us that there is a distinction of metabolites in two groups showing a marked difference in concentration
+* the median intensities form two clouds, one at low and one at high intensity, so the metabolites seem to belong to two groups showing a marked difference in intensity
+* the metabolites with the largest number of NAs are mostly in the middle of the intensity range, and some of the less intense metabolites have only a few NAs
 
-Is this effect dependent on the class of metabolite? 
+The median intensity alone does not explain the missing values. The detection limit depends on the compound and on the analytical method, and in this dataset the metabolites were measured with different assays ... is the pattern dependent on the class of metabolite?
 
 
 ```{r}
