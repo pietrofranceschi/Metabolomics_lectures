@@ -205,8 +205,8 @@ include_graphics("../images/Total_ion_current.png")
 
 ## LC-MS produces 3D data: (rt,mz,I)
 
-```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.5\\textheight"}
-include_graphics("../images/LCMS_data.png")
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.55\\textheight"}
+include_graphics("../images/scheme_lcms.pdf")
 ```
 
 
