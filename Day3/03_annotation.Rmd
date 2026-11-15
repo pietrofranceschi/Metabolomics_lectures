@@ -10,6 +10,8 @@ output:
       in_header: "../beamer_preamble.tex"
     pandoc_args: ["--lua-filter=../beamer_filter.lua"]
 classoption: ["aspectratio=169", "t"]
+header-includes:
+  - \newcommand{\weblink}[2]{$\rightarrow$ \href{#1}{\textcolor{blue!60!black}{\textbf{#2}}}}
 ---
 
 ```{r setup, include=FALSE}
@@ -72,6 +74,66 @@ include_graphics("../images/scheme_fs_msms.pdf")
 * [Sirius](https://bio.informatik.uni-jena.de/software/sirius/)
 * [Metfrag](https://ipb-halle.github.io/MetFrag/)
 
-## Molecular Networks
-* [GNPS](https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp?redirect=auth)
+# Molecular Networks
+
+## Molecular Networks: the idea
+
+::: incremental
+- Molecules sharing part of their structure produce similar fragments
+- MS/MS spectra can be compared two by two: the more fragments they share, the higher their similarity
+:::
+
+```{r out.width="\\linewidth", out.height="0.5\\textheight", fig.align="center"}
+include_graphics("../images/scheme_mn_similarity.pdf")
+```
+
+## From similarities to a network
+
+```{r out.width="\\linewidth", out.height="0.6\\textheight", fig.align="center"}
+include_graphics("../images/scheme_mn_network.pdf")
+```
+
+::: fragment
+Clusters are chemical families: one identified node helps to annotate its neighbours, even when they are not in any database
+:::
+
+## GNPS
+
+### Global Natural Products Social Molecular Networking
+Web platform for molecular networking: public spectral libraries, classical and feature-based molecular networks, now in its second version (GNPS2)
+
+\weblink{https://gnps2.org/}{gnps2.org}
+
+### Reference
+Wang M. et al. (2016) *Sharing and community curation of mass spectrometry data with Global Natural Products Social Molecular Networking*. Nature Biotechnology 34, 828--837
+
+## Feature-Based Molecular Networking
+
+- The output of the preprocessing (`xcms`, MZmine, MS-DIAL) is exported to GNPS: the feature table and one MS/MS spectrum for each feature
+
+::: fragment
+- The nodes are the **features** of our data matrix:
+    * isomers with different retention times are kept separate
+    * nodes carry the intensities: the study design can be shown on the network (e.g. red vs white wines)
+:::
+
+::: {.box-key .fragment}
+**Reference:** Nothias L.-F. et al. (2020) *Feature-based molecular networking in the GNPS analysis environment*. Nature Methods 17, 905--908
+:::
+
+## Molecular networks: our work
+
+### Noise filtering in MS/MS spectra
+Removing noise peaks increases the similarity of related spectra and gives networks with fewer false connections; with a data-driven choice of the threshold
+
+Dalla Valle N. et al. (2025) Analytical Chemistry 97, 15873--15882
+
+\weblink{https://doi.org/10.1021/acs.analchem.5c02109}{doi.org/10.1021/acs.analchem.5c02109}
+
+### Neutral molecular networks
+MS/MS spectra acquired in positive and negative ionization are merged in "neutral pseudo-spectra": one network, independent of the polarity
+
+Dalla Valle N. et al. (2026) Analytica Chimica Acta 1415, 345708
+
+\weblink{https://doi.org/10.1016/j.aca.2026.345708}{doi.org/10.1016/j.aca.2026.345708}
 
