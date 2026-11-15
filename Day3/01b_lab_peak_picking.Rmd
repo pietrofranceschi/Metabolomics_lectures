@@ -1,15 +1,17 @@
 ---
 title: "Picking Peaks"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
-date: "`r Sys.Date()`"
-output: html_document
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 library(xcms)
 library(MsExperiment)
 library(Spectra)
@@ -21,20 +23,20 @@ library(plotly)
 
 A fast recap about what we know about metabolites in LC-MS ...
 
-* Every metabolite is more-or-less separated by the chromatographic column in time. 
+* Every metabolite is more-or-less separated by the chromatographic column in time.
 * In the ideal world, every metabolite would "elute" in a narrow time window: we do not live in an ideal world
 * Inside the ionization source every metabolite is transformed in a cloud of ions (fragments, isotopes, adducts, ...)
 
 So every metabolite ...
 
 * produces a peak in the ion "current" of all the ions produced during its ionization
-* every metabolite produces peaks in more than one ionic trace
+* produces peaks in more than one ionic trace
 * in many cases the same ion could be produced in the ionization of different metabolites
 
 So ...
 
 * to find metabolites we have to automatically look for peaks in the mz/rt plane
-* we will have much more peaks than metabolites... and this will make the analysis of our data matrix extremely challenging
+* we will have many more peaks than metabolites ... and this will make the analysis of our data matrix extremely challenging
 
 
 ## Peak Picking
@@ -46,38 +48,38 @@ There are some important points to remember.
 * there is no perfect solution: every algorithm will miss something you would pick
 * anyway an automatic solution is better because it is reproducible
 * every algorithm will have parameters to tune
-* expert knowledge will be useful at some point 
+* expert knowledge will be useful at some point
 
 Working on a representative file will help you in fine tuning and benchmarking your parameters.
 
-Let's start reading in a raw file: 
+Let's start reading in a raw file:
 
 ```{r}
-raw_one <- readMsExperiment(
-  spectraFiles = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML",
-  msLevel. = 1, ## we read only MS1
-  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+## the spectra are kept on disk and read only when needed, so RAM is not filled up
+raw_one <- readMsExperiment(spectraFiles = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML")
 ```
 
-I'll now show to you how to perform peak picking with two algorithms available in `xcms`. In the 99% of the case you will use only one of them (CentWave), but it is nice - once in the life - to really put your hands in the machine. 
+The file contains full scans (MS1) and fragmentation spectra (MS2 and MS3): peak picking works on the full scans only.
+
+I'll now show you how to perform peak picking with two algorithms available in `xcms`. In 99% of the cases you will use only one of them (CentWave), but it is nice - once in a lifetime - to really put your hands in the machine.
 
 
 ## Peak picking: matched filter
 
-The "older" and most sounding way of finding peaks implemented in `xcms` is the `matched filter` algorithm.
+The "older" and most intuitive way of finding peaks implemented in `xcms` is the `matched filter` algorithm.
 
 A full description of the parameters of the algorithm can be found in the [`xcms` manual](https://bioconductor.org/packages/release/bioc/manuals/xcms/man/xcms.pdf), here we focus on:
 
 * **binSize:** the "width" of the bins used to extract the ionic traces where we look for peaks
 * **fwhm:** the "expected" width of the peak in the chromatographic direction
-* **snthresh:** the signal-to-noise threshold used to say: "yeah, this is a peak and not a bump in the noise" 
+* **snthresh:** the signal-to-noise threshold used to say: "yeah, this is a peak and not a bump in the noise"
 
 In `xcms` the parameters of the algorithm are stored into a specific object:
 
 ```{r}
 mf <- MatchedFilterParam(binSize = 0.1, ## width of the mz slice
                          fwhm = 6,      ## estimated width of the peaks in seconds
-                         snthresh = 5) 
+                         snthresh = 5)
 mf
 ```
 
@@ -87,106 +89,100 @@ Now I can use the previous parameters to find the peaks in **one** sample:
 ## this function is used to find the chromatographic peaks with the previous parameters
 raw_one_mf_picked <- findChromPeaks(raw_one, param = mf)
 
-raw_one_mf_picked 
+raw_one_mf_picked
 ```
 
-Ok, the software did his job. As you can see it was able to fine 638 peaks in this sample. As you can see the `raw_one_mf_picked` still holds peaks and raw data. The peak  table can be extracted with a specific method
+Ok, the software did its job: it was able to find `r nrow(chromPeaks(raw_one_mf_picked))` peaks in this sample. As you can see, `raw_one_mf_picked` still holds peaks and raw data. The peak table can be extracted with a specific method
 
 
 ```{r}
-mf_peaks <- chromPeaks(raw_one_mf_picked) 
+mf_peaks <- chromPeaks(raw_one_mf_picked)
 dim(mf_peaks)
 head(mf_peaks, 5)
 ```
 
 
-Let's walk to the most relevant columns:
+Let's walk through the most relevant columns:
 
 - rownames gives the id of each chromatographic peak. **CPxxx** stands for Chromatographic Peak xxx
 - mz* columns identify the mz slice (remember that mz is measured over time so it's slightly changing from scan to scan)
 - rt* columns identify the boundaries and the apex of each chromatographic peak
-- into, intf, maxo and maxf are measures of intensity of the peak. What is normally used are maxo and into which are the signal at the apex of the peak and the integral of the signal across the peak area, respectively.
+- into, intf, maxo and maxf are measures of intensity of the peak. The ones normally used are maxo and into, which are the signal at the apex of the peak and the integral of the signal across the peak area, respectively.
 - sample: this column is telling us where each peak was found
 
-Let's now give a look to the position of the peaks in the mz/rt plane. The size of the point will be proportional to the intensity
+Let's now have a look at the position of the peaks in the mz/rt plane. The size of the point will be proportional to the intensity
 
 ```{r}
-mf_peaks %>% 
-  as.data.frame() %>% 
-  mutate(into = sqrt(into)) %>% 
-  ggplot() + 
-  geom_point(aes(x = rt, y = mz, alpha = into, col = into)) + 
-  scale_color_viridis_c() + 
+mf_peaks |>
+  as.data.frame() |>
+  mutate(into = sqrt(into)) |>
+  ggplot() +
+  geom_point(aes(x = rt, y = mz, alpha = into, col = into)) +
+  scale_color_viridis_c() +
   theme_bw()
 ```
 
-If you go back to the previous demo, we were focusing on a specific area of the raw signal which was particularly promising
+If you go back to the previous demo, we were focusing on a specific area of the raw signal which was particularly promising. To show the raw signal we use only the full scans
 
 ```{r}
+fs_one <- raw_one |> filterMsLevel(1)
 
-
-rt <- rtime(raw_one)
-mz <- mz(spectra(raw_one))
-I <-  intensity(spectra(raw_one))
-
-spectra_tibble <- tibble(rt = rt, 
-                         mz = as.list(mz),
-                         I = as.list(I))
-
-
+spectra_tibble <- tibble(rt = rtime(fs_one),
+                         mz = as.list(mz(spectra(fs_one))),
+                         I = as.list(intensity(spectra(fs_one))))
 ```
 
 
 ```{r}
-sub_peaks_mf <- mf_peaks %>% 
-  as.data.frame() %>% 
-  filter(mz > 284 & mz < 300) %>% 
-  filter(rt > 200 & rt < 300) 
+sub_peaks_mf <- mf_peaks |>
+  as.data.frame() |>
+  filter(mz > 284 & mz < 300) |>
+  filter(rt > 200 & rt < 300)
 
-ggplotly(spectra_tibble %>% 
-           unnest(c(mz,I)) %>%
-  filter(mz > 284 & mz < 300) %>% 
-  filter(rt > 200 & rt < 300) %>% 
-  ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
-  geom_point(data = sub_peaks_mf, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
-  scale_color_viridis_c() + 
+ggplotly(spectra_tibble |>
+  unnest(c(mz,I)) |>
+  filter(mz > 284 & mz < 300) |>
+  filter(rt > 200 & rt < 300) |>
+  ggplot() +
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) +
+  geom_point(data = sub_peaks_mf, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) +
+  scale_color_viridis_c() +
   theme_light())
 ```
 
-What we see: 
+What we see:
 
 * the algorithm did a reasonably good job, even if there are several areas with potentially high signal which were not picked
 * as expected many horizontal traces are showing more than one peak! This is the signature that these ions are produced in the ionization of several metabolites
-* something interesting is happening around 250 s: it seems that there many ions are showing a peak, but the position of the maxima is not exactly the same. They could be different metabolites, or maybe the algorithm was not finding the peak maxima at the same rt.
+* something interesting is happening around 250 s: it seems that many ions are showing a peak, but the position of the maxima is not exactly the same. They could be different metabolites, or maybe the algorithm was not finding the peak maxima at the same rt.
 
 
 This view gives an idea of the boundaries of the peaks:
 
 ```{r}
-spectra_tibble %>% 
-           unnest(c(mz,I)) %>%
-  filter(mz > 284 & mz < 300) %>% 
-  filter(rt > 200 & rt < 300) %>% 
-  ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
-  geom_point(data = sub_peaks_mf, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
-  geom_segment(data = sub_peaks_mf, aes(x = rtmin, xend = rtmax, y = mz, yend = mz), col = "red") + 
-  scale_color_viridis_c() + 
+spectra_tibble |>
+  unnest(c(mz,I)) |>
+  filter(mz > 284 & mz < 300) |>
+  filter(rt > 200 & rt < 300) |>
+  ggplot() +
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) +
+  geom_point(data = sub_peaks_mf, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) +
+  geom_segment(data = sub_peaks_mf, aes(x = rtmin, xend = rtmax, y = mz, yend = mz), col = "red") +
+  scale_color_viridis_c() +
   theme_light()
 ```
 
-So some lines are superimposed, some others not. Tricky business! 
+So some lines are superimposed, some others not. Tricky business!
 
 
 ## Peak Picking Cent Wave
 
-Peak picking can also be performed with another algorithm: `CentWave`. The algorithm applied here is more clever and better suited for high resolution data. As we have seen in the lecture, it relies on the fact that the mass trace get stable in presence of a strong ionic signal.
+Peak picking can also be performed with another algorithm: `CentWave`. The algorithm applied here is more clever and better suited for high resolution data. As we have seen in the lecture, it relies on the fact that the mass trace gets stable in presence of a strong ionic signal.
 
-Also here many parameters (and others are not mentioned). I highlight here some of them:  
+Also here there are many parameters (and others are not mentioned). I highlight some of them:
 
-* **peakwidth:** this is the expected range of the width of the chromatographic peaks. In this case from 5 to 30 seconds. 
-* **ppm:** this is the expected mass shift of the signal of a "true" ion due to electric noise
+* **peakwidth:** this is the expected range of the width of the chromatographic peaks. In this case from 5 to 30 seconds.
+* **ppm:** the tolerated deviation (in parts per million) of the m/z of the same ion between consecutive scans: the m/z of a "true" ion is never exactly the same in all the scans
 * **prefilter:** this is an initial filter which will consider valid only ion traces which are preserving a signal of more than I (50,000) counts for at least k (5) scans.
 * **noise:** this is the minimum signal which will be considered
 
@@ -204,103 +200,101 @@ If we run the peak picking with this new algorithm...
 ```{r}
 raw_one_cw_picked <- findChromPeaks(raw_one, param = cwp)
 
-raw_one_cw_picked 
+raw_one_cw_picked
 ```
 
-Ok here we see that the number of spotted peaks is different. If you think to it it is not strange: different method different results. 
+Ok, here the number of peaks is different (`r nrow(chromPeaks(raw_one_cw_picked))` against `r nrow(chromPeaks(raw_one_mf_picked))`). If you think about it, it is not strange: different methods, different results.
 
-The first natural question you can ask is: where are you getting the parameters? Well, as I already told you at some point the "expert knowledge" enters the process. Reasonable guess for them is always coming from a good knowledge of the analytical pipeline. Optimal value could be optimized in an automatic way (like IPO does), but reasonable guesses are fundamental to restrict the quest for the optimal solution in a multidimensional space. So either you understand the analytics, or you should go and speak with you "analytical" colleague.
+The first natural question you can ask is: where are you getting the parameters? Well, as I already told you at some point the "expert knowledge" enters the process. Reasonable guesses always come from a good knowledge of the analytical pipeline. The values can be optimized in an automatic way (like IPO does), but reasonable guesses are fundamental to restrict the quest for the optimal solution in a multidimensional space. So either you understand the analytics, or you should go and speak with your "analytical" colleague.
 
 The second question. Are we getting comparable results?
 
 ```{r}
-cw_peaks <- chromPeaks(raw_one_cw_picked) 
+cw_peaks <- chromPeaks(raw_one_cw_picked)
 dim(cw_peaks)
 head(cw_peaks, 5)
 ```
 
 ```{r}
-ggplotly(mf_peaks %>% 
-  as.data.frame() %>% 
-  ggplot() + 
-  geom_point(aes(x = rt, y = mz), col = "red", pch = 3, alpha = 0.5) + 
-  geom_point(cw_peaks %>% as_tibble(), mapping = aes(x = rt, y = mz), col = "blue", pch = 1, alpha = 0.5) +
+ggplotly(mf_peaks |>
+  as.data.frame() |>
+  ggplot() +
+  geom_point(aes(x = rt, y = mz), col = "red", pch = 3, alpha = 0.5) +
+  geom_point(data = as_tibble(cw_peaks), mapping = aes(x = rt, y = mz), col = "blue", pch = 1, alpha = 0.5) +
   theme_bw())
 ```
 
 
-Different, isn't it? In some cases the two algorithms are coherent, in others the results are markedly different. Centwave it is also giving this strange horizontal line at large rt
+Different, isn't it? In some cases the two algorithms are coherent (red: matched filter, blue: centWave), in others the results are markedly different. CentWave is also giving this strange horizontal line at large rt
 
 
-Let's give a look to our subregion: 
+Let's have a look at our subregion:
 
 
 ```{r}
-sub_peaks_cw <- cw_peaks %>% 
-  as.data.frame() %>% 
-  filter(mz > 284 & mz < 300) %>% 
-  filter(rt > 200 & rt < 300) 
+sub_peaks_cw <- cw_peaks |>
+  as.data.frame() |>
+  filter(mz > 284 & mz < 300) |>
+  filter(rt > 200 & rt < 300)
 
-ggplotly( spectra_tibble %>% 
-           unnest(c(mz,I)) %>%
-  filter(mz > 284 & mz < 300) %>% 
-  filter(rt > 200 & rt < 300) %>% 
-  ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
-  geom_point(data = sub_peaks_cw, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
-  scale_color_viridis_c() + 
+ggplotly(spectra_tibble |>
+  unnest(c(mz,I)) |>
+  filter(mz > 284 & mz < 300) |>
+  filter(rt > 200 & rt < 300) |>
+  ggplot() +
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) +
+  geom_point(data = sub_peaks_cw, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) +
+  scale_color_viridis_c() +
   theme_light())
 ```
 
 ### Comments
 
-* For high resolution spectra as the one we have `centWave` is non to be more reliable results
-* In the first steps of your analysis you will tune-check-tune the parameters to find a reasonable compromise 
+* For high resolution spectra like ours, `centWave` is known to give more reliable results
+* In the first steps of your analysis you will tune-check-tune the parameters to find a reasonable compromise
 * Your experience will drive this optimization: do you see molecules that should be there (standards, known compounds) in the peaklist?
 
 
 
 
-## Peak Picking all Dataset
+## Peak Picking on the full Dataset
 
-In real life situations, when you are happy with your peak picking parameters you run the process on all your samples. `xcms` is designed for that, the only thing you have to do is to load more than on e file.
+In real life situations, when you are happy with your peak picking parameters you run the process on all your samples. `xcms` is designed for that, the only thing you have to do is to load more than one file.
 
 In view of the step in which the peak list will be merged together it is important also to add to the object containing the raw data any type of meta information which is associated to the samples. Typical meta information includes:
 
 * the filename
-* the class of the sample (QC, blank, sample, standard) 
+* the class of the sample (QC, blank, sample, standard)
 * the study factors (treated, control, time, color, ...)
 * the batch and/or injection order (to spot analytical drifts)
 
-In `xcms` all these infos are stored in an `AnnotatedDataFrame` object.
+In an `MsExperiment` (and in `xcms`) all this information is stored in the `sampleData` table.
 
-Typically all these infos should be included in the filename, or in a csv which links the filename with the metadata. In the dataset we are using everything is in the file name, so let's process them. In the following we will assume that the data are stored as `mzML` inside the `data` subfolder.
+Typically all this information should be included in the filename, or in a csv which links the filename with the metadata. In the dataset we are using everything is in the file name, so let's process them. In the following we will assume that the data are stored as `mzML` files inside the `data/wines` folder.
 
 
 ```{r}
 library(tools)  ## just to use file_path_sans_ext
-phenodata <- tibble(filepath = list.files("../data/wines/", pattern = ".mzML", full.names = TRUE)) %>% 
-  filter(!grepl("mix",filepath)) %>%     ## remove the injections of the standard mixes 
-  mutate(fname = file_path_sans_ext(basename(filepath))) %>% 
-  separate(fname, into = c("inj_ord", "color", "variety", "bottle", "rep", "polarity", "mode"), 
-           sep = "_", remove = FALSE) 
+phenodata <- tibble(filepath = list.files("../data/wines/", pattern = ".mzML", full.names = TRUE)) |>
+  filter(!grepl("mix",filepath)) |>     ## remove the injections of the standard mixes
+  mutate(fname = file_path_sans_ext(basename(filepath))) |>
+  separate(fname, into = c("inj_ord", "color", "variety", "bottle", "rep", "polarity", "mode"),
+           sep = "_", remove = FALSE)
 
-## to see the content 
+## to see the content
 phenodata
 ```
 
-Here we read the data in: 
+Here we read the data in:
 
 ```{r}
 raw_data <- readMsExperiment(
-  spectraFiles = phenodata$filepath, 
-  msLevel. = 1,
-  sampleData = phenodata, ## this is the structure of xcms holding phenotypic data
-  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+  spectraFiles = phenodata$filepath,
+  sampleData = phenodata)  ## the sample metadata travel with the data
 ```
 
 
-And perform the peak picking with centwave:
+And perform the peak picking with centWave:
 
 ```{r}
 register(SerialParam()) ## Setting xcms in serial mode
@@ -314,31 +308,31 @@ save(raw_data, file = "wines.RData")
 ```
 
 
-Let's give a look to the content of the full dataset:
+Let's have a look at the content of the full dataset:
 
 ```{r}
 raw_data
 ```
 
-Here we are dealing with 29 files with different characteristics. After the peak picking optimization step we are confident that the parameters we have been choosing should give reasonably good results. Before going on, it is however useful to make some additional checks on the data quality.
+Here we are dealing with `r nrow(sampleData(raw_data))` files with different characteristics. After the peak picking optimization step we are confident that the parameters we have been choosing should give reasonably good results. Before going on, it is however useful to make some additional checks on the data quality.
 
-The first thing to do is to monitor the TIC of the 29 experiments to spot potential drops of the signal during the analysis:
+The first thing to do is to monitor the overall signal of the `r nrow(sampleData(raw_data))` injections to spot potential drops during the analysis. We extract the Total Ion Chromatogram (TIC, the sum of all the ions in each scan) and the Base Peak Chromatogram (BPC, the most intense ion in each scan):
 
 
 ```{r}
-tics <- chromatogram(raw_data, 
+tics <- chromatogram(raw_data,
                      aggregationFun = "sum", ## "sum" for "TIC" / "max" for "BPC"
-                     include = "none")     ## this argument is required to avoid 
+                     include = "none")     ## this argument is required to avoid
                                            ## including all the chromatograms of the picked peaks
 ```
 ```{r}
-bpi <- chromatogram(raw_data, 
+bpi <- chromatogram(raw_data,
                      aggregationFun = "max", ## "sum" for "TIC" / "max" for "BPC"
-                     include = "none")     ## this argument is required to avoid 
+                     include = "none")     ## this argument is required to avoid
                                            ## including all the chromatograms of the picked peaks
 ```
 
-We now plot them, with colors matching the sample class:
+We now plot the BPCs, which are more readable than the TICs, with colors matching the sample class:
 
 
 ```{r}
@@ -356,79 +350,78 @@ plot(bpi, col = mypalette[sampleData(raw_data)$color], xlim = c(50,200))
 
 
 
-The plot shows already nice things: 
+The plot shows already nice things:
 
 * QCs are nicely superimposed
 * The two colors are well separated
 
-The trend with the injection can be visualized as follows:
+The trend along the injections can be visualized by summing up the TIC of each injection:
 
 ```{r}
-## Visualize the overall trend in TIC along the injections
-tc <- split(tic(spectra(raw_data)), f = fromFile(raw_data))
-full_tics <- sapply(tc, sum)
+## total signal of each injection: the sum of its TIC (full scans only)
+full_tics <- sapply(seq_len(ncol(tics)), \(i) sum(intensity(tics[1, i]), na.rm = TRUE))
 
-sampleData(raw_data) %>% 
-  data.frame(.) %>% 
-  tibble() %>% 
-  add_column(full_tics = full_tics) %>% 
-  ggplot() + 
-  geom_point(aes(x = inj_ord, y = full_tics, col = color), size = 2) + 
-  theme_bw() + 
+sampleData(raw_data) |>
+  as_tibble() |>
+  add_column(full_tics = full_tics) |>
+  mutate(injection = parse_number(inj_ord)) |>   ## "x016" -> 16
+  ggplot() +
+  geom_point(aes(x = injection, y = full_tics, col = color), size = 2) +
+  scale_color_manual(values = mypalette, labels = c(red = "red", X = "Blank & QC", wht = "white")) +
+  labs(x = "Injection order", y = "Total signal (sum of the TIC)", col = "") +
+  theme_bw() +
   theme(aspect.ratio = 0.3)
 ```
 
-So no clear trend is visible in the data. X here represents QC, blanks and StdMixes
+No clear trend along the injections is visible in the data. The three blanks have, as expected, a much lower signal, and the red wines show a higher total signal than the white ones
 
 Another type of visualization that I find useful with reasonably small datasets is the following:
 
 ```{r fig.height=7, fig.width=14}
-chromPeaks(raw_data) %>% 
-  as_tibble() %>% 
-  ggplot() + 
-  geom_point(aes(x = rt, y = mz, col = log10(maxo)), size = 0.5, alpha = 0.5) + 
-  scale_color_viridis_c() + 
-  facet_wrap(~factor(sample)) + 
-  theme_bw() + 
+chromPeaks(raw_data) |>
+  as_tibble() |>
+  ggplot() +
+  geom_point(aes(x = rt, y = mz, col = log10(maxo)), size = 0.5, alpha = 0.5) +
+  scale_color_viridis_c() +
+  facet_wrap(~factor(sample)) +
+  theme_bw() +
   theme(aspect.ratio = 0.5)
 ```
 
 
-Here we see the peak maps of the different files. It is clear that each map is expected to be slightly different, but rally outlying samples will show up clearly. Look to the blanks (i.e., samples `r which(sampleData(raw_data)$variety == "blank")`), for example, or to the horizontal lines which are present in many files.
+Here we see the peak maps of the different files. It is clear that each map is expected to be slightly different, but really outlying samples will show up clearly. Look at the blanks (i.e., samples `r which(sampleData(raw_data)$variety == "blank")`), for example, or to the horizontal lines which are present in many files.
 
 
-## DIY
+## Something for you!
 
-Something for you now:
-
-* Play around with the pick picking parameters and discuss what is the meaning of each one of them.
-* Try to use what we have done so far to understand what happens in correspondence of the horizontal lines visible in many samples. To do that you should find the "troublesome" mz and extract its chromatogram across the full set of samples.
-* Can you try to check the mz and rt of the same peak across the 29 samples (use the `filterFile` function to get rid of the blanks!)? Are they the same?
+1. Play around with the peak picking parameters and discuss the meaning of each one of them.
+2. Try to use what we have done so far to understand what happens in correspondence of the horizontal lines visible in many samples. To do that you should find the "troublesome" mz and extract its chromatogram across the full set of samples.
+3. Can you check the mz and rt of the same peak across the `r nrow(sampleData(raw_data))` samples (use the `filterFile` function to get rid of the blanks!)? Are they the same?
 
 
+## A possible solution
 
-## Exercise
+**2.** Let's look at the peaks of one sample (number 24), where a horizontal line is clearly visible
 
 ```{r}
-pk_24 <- chromPeaks(raw_data) %>% 
-  as_tibble() %>% 
+pk_24 <- chromPeaks(raw_data) |>
+  as_tibble() |>
   filter(sample == 24)
-  
 ```
 
-
-
 ```{r}
-ggplotly(pk_24 %>% 
-  ggplot() + 
-  geom_point(aes(x = rt, y = mz)) + 
+ggplotly(pk_24 |>
+  ggplot() +
+  geom_point(aes(x = rt, y = mz)) +
   theme_bw())
 ```
 
 
+The line is at m/z 115.04: let's extract its chromatogram
+
 ```{r}
 # extract the chromatogram
-chr_raw <- chromatogram(raw_data, 
+chr_raw <- chromatogram(raw_data,
                         mz = 115.040 + 0.02*c(-1, 1),
                         rt = c(200,700))
 
@@ -438,4 +431,6 @@ chr_raw
 ```{r}
 plot(chr_raw[[24]], ylim = c(0,3000000))
 ```
+
+There are two real chromatographic peaks (around 240 s and 360 s), followed by a long, low and noisy signal, which centWave splits in a series of tiny "peaks": they are false positives. The other horizontal lines, at the end of the run, show up in almost all the files, including the blanks: they are produced by the LC-MS system and by the solvents, not by the wines.
 
