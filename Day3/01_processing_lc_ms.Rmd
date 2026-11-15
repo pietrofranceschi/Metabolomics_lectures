@@ -332,6 +332,18 @@ We have to merge the lists of ~~chromatographic peaks~~ into a consensus list of
 * *chromatographich peaks* what was detected in the individual samples (mz, rt, intensity)
 * *features* consensus variables which are *grouping* several peaks coming from the different injections (mz, rt, intensity)
 
+## Correspondence in m/z: binning
+
+::: incremental
+- The m/z of the same ion changes slightly from scan to scan and from sample to sample
+- Modern mass spectrometers are very accurate: a few ppm (5 ppm at m/z 300 is $\pm 0.0015$)
+- The m/z axis can then be cut in narrow slices (*bins*): the peaks of the same ion in the different samples fall in the same bin
+:::
+
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.42\\textheight"}
+include_graphics("../images/scheme_mz_binning.pdf")
+```
+
 ## Grouping - Correspondence
 
 ```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
