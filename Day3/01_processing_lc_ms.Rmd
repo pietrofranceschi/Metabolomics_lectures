@@ -353,7 +353,7 @@ include_graphics("../images/grouping.pdf")
 ## Grouping - Correspondence
 
 ```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
-include_graphics("../images/workflow.pdf")
+include_graphics("../images/scheme_workflow.pdf")
 ```
 
 
