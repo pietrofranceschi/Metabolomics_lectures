@@ -93,11 +93,11 @@ Since our mouse ID is a number without the leading "KOMP_" we fix this on the fl
 
 
 ```{r}
-DM <- DM %>% 
-  column_to_rownames("CompoundID") %>% 
-  t(.) %>% 
-  as_tibble(rownames = "Sampname") %>% 
-  separate(Sampname, c("One","MouseID"),"_") %>% ## split the column
+DM <- DM |> 
+  column_to_rownames("CompoundID") |> 
+  t() |> 
+  as_tibble(rownames = "Sampname") |> 
+  separate(Sampname, c("One","MouseID"),"_") |> ## split the column
   dplyr::select(-One) 
 
 DM
@@ -114,7 +114,7 @@ head(DM[,1:20])
 Now I fix the sample name in the `sample_meta`
 
 ```{r}
-sample_meta_data <- sample_meta_data %>% 
+sample_meta_data <- sample_meta_data |> 
   mutate(MouseID = as.character(MouseID))
 ```
 
@@ -126,9 +126,9 @@ sample_meta_data <- sample_meta_data %>%
 To check that we organize the matrix in a different way also joining the concentration data with the sample metadata
 
 ```{r}
-DM_nest <- DM %>% 
-  left_join(sample_meta_data) %>% 
-  pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") %>% 
+DM_nest <- DM |> 
+  left_join(sample_meta_data) |> 
+  pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") |> 
   nest(data = -CompoundID)
 ```
 
@@ -152,10 +152,10 @@ The new tibble can be efficiently used to inspect the data in a univariate persp
 For example, the number of NAs in relation of the median intensity can be visualized as
 
 ```{r}
-DM_nest %>% 
+DM_nest |> 
   mutate(nnas = map_dbl(data,function(p) sum(is.na(p$I))),      ## calculate the univariate statistics "on the fly"
-         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
-  filter(nnas > 0) %>% ## we keep only features with at least one NA!
+         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) |> 
+  filter(nnas > 0) |> ## we keep only features with at least one NA!
   ggplot() +   ## plot them
   geom_point(aes(x = medI, y = nnas)) + 
   scale_x_log10() + 
@@ -174,11 +174,11 @@ Is this effect dependent on the class of metabolite?
 library(plotly)
 
 
-ggplotly(DM_nest %>% 
-  left_join(metabolite_meta) %>% 
+ggplotly(DM_nest |> 
+  left_join(metabolite_meta) |> 
   mutate(nnas = map_dbl(data,~sum(is.na(.x$I))),                  ## calculate the univariate statistics "on the fly"
-         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
-  filter(nnas > 0) %>% ## we keep only features with at leas on NA!
+         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) |> 
+  filter(nnas > 0) |> ## we keep only features with at leas on NA!
   ggplot(aes(x = medI, y = nnas, col = Assay, text = CompoundName)) +   ## plot them
   geom_point() + 
   scale_x_log10() + 
@@ -191,11 +191,11 @@ That's strange ... the largest number of NAs is corresponding to lower intensiti
 It is worth highlighting the name of the metabolites showing a number of NAs larger than 50 ...
 
 ```{r}
-DM_nest %>% 
-  left_join(metabolite_meta) %>% 
+DM_nest |> 
+  left_join(metabolite_meta) |> 
   mutate(nnas = map_dbl(data,~sum(is.na(.x$I))),                  ## calculate the univariate statistics "on the fly"
-         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) %>% 
-  filter(nnas > 0) %>% ## we keep only features with at leas on NA!
+         medI = map_dbl(data,~median(.x$I, na.rm = TRUE))) |> 
+  filter(nnas > 0) |> ## we keep only features with at leas on NA!
   ggplot(aes(x = medI, y = nnas, col = Assay)) +   ## plot them
   geom_point(size = 2) + 
   geom_text(aes(label=ifelse(nnas>50,CompoundName,'')), size = 4, nudge_y = -3) + 
@@ -213,7 +213,7 @@ To do that I create a custom plotting function which takes as input the tibble o
 
 ```{r fig.height=3, fig.width=8}
 myplot <- function(t,l = ""){
-  p <- t %>% 
+  p <- t |> 
   ggplot() + 
   geom_jitter(aes(x = Genotype, y = I, color = Gender, shape = Zygosity), width = 0.1) + 
   scale_shape_manual(values = c(19,3,1)) + 
@@ -235,8 +235,8 @@ And I recursively apply it to the nested data tibbles ...
 
 
 ```{r}
-DM_nest <- DM_nest %>%
-  left_join(metabolite_meta %>% dplyr::select(CompoundID,CompoundName)) %>% 
+DM_nest <- DM_nest |>
+  left_join(metabolite_meta |> dplyr::select(CompoundID,CompoundName)) |> 
   mutate(rawplots = map2(data,CompoundName, ~myplot(.x,.y)))
 
 ## adding compound names as names oif the list of plots
@@ -290,9 +290,9 @@ An alternative could be to `unnest` the data and rely on faceting ...
 
 
 ```{r fig.height=14, fig.width=8}
-DM_nest %>% 
-  dplyr::select(CompoundName,data) %>% 
-  unnest(data) %>% 
+DM_nest |> 
+  dplyr::select(CompoundName,data) |> 
+  unnest(data) |> 
   ggplot(aes(sample = I)) +
   stat_qq(aes(col = Gender, shape = Zygosity)) + 
   scale_shape_manual(values = c(19,3,1)) + 
@@ -312,10 +312,10 @@ Ok, the plot is "ugly" (maybe creating a set of plots as we did before could hav
 
 Let's focus on it
 ```{r}
-DM_nest %>% 
-  dplyr::select(CompoundName,data) %>% 
-  unnest(data) %>% 
-  filter(CompoundName == "12(13)Ep-9-KODE") %>% 
+DM_nest |> 
+  dplyr::select(CompoundName,data) |> 
+  unnest(data) |> 
+  filter(CompoundName == "12(13)Ep-9-KODE") |> 
   ggplot(aes(sample = I)) +
   stat_qq(aes(col = Gender, shape = Zygosity)) + 
   scale_shape_manual(values = c(19,3,1)) + 
@@ -337,10 +337,10 @@ The interpretation for that would, most likely require a chat with a good bioche
 Let's look to the global effect of a log transformation on the q-q plots
 
 ```{r fig.height=14, fig.width=8}
-DM_nest %>% 
-  ungroup() %>% 
-  dplyr::select(CompoundName,data) %>% 
-  unnest(data) %>% 
+DM_nest |> 
+  ungroup() |> 
+  dplyr::select(CompoundName,data) |> 
+  unnest(data) |> 
   ggplot(aes(sample = log10(I))) +
   stat_qq(aes(col = Gender, shape = Zygosity)) + 
   scale_color_brewer(palette = "Set1") + 
@@ -370,8 +370,8 @@ names(DM_nest$data) <- DM_nest$CompoundName
 ```
 
 ```{r}
-critical_1 <- DM_nest$data$`Taurodeoxycholic acid` %>% 
-  filter(I > 1500) %>% 
+critical_1 <- DM_nest$data$`Taurodeoxycholic acid` |> 
+  filter(I > 1500) |> 
   pull(MouseID)
 
 critical_1
@@ -421,7 +421,7 @@ myimputer <- function(v){
 Now we apply it to the full set of columns
 
 ```{r}
-DM_i <- DM %>% 
+DM_i <- DM |> 
   mutate(across(starts_with("CPD"), ~ myimputer(.x)))
 ```
 
@@ -430,7 +430,7 @@ As we have seen, log transformation is helpful ...
 
 
 ```{r}
-DM_i <- DM_i %>% 
+DM_i <- DM_i |> 
   mutate(across(starts_with("CPD"), ~log10(.x)))
 ```
 
@@ -443,8 +443,8 @@ library(factoextra)
 
 ```{r}
 
-myPCA <- PCA(DM_i %>% 
-               column_to_rownames("MouseID") %>% 
+myPCA <- PCA(DM_i |> 
+               column_to_rownames("MouseID") |> 
                dplyr::select(starts_with("CPD")), 
              graph = FALSE, scale.unit = TRUE   ## to avoid factmineR producing a plot by default
              )
@@ -474,21 +474,21 @@ PC_12_scores <- facto_summarize(myPCA,
                                 "ind", 
                                 axes = c(1,2),
                                 result = "coord"
-                                ) %>%    ## get the data from the PCA object
-  mutate(name = as.character(name)) %>%  
-  as_tibble() %>% 
+                                ) |>    ## get the data from the PCA object
+  mutate(name = as.character(name)) |>  
+  as_tibble() |> 
   ## transform the sample name to a character
-  dplyr::rename("MouseID" = "name") %>%     ## align the name with the correct name
+  dplyr::rename("MouseID" = "name") |>     ## align the name with the correct name
   left_join(sample_meta_data)        ## join with the sample data
 
-PC_12_scores %>% 
+PC_12_scores |> 
   arrange(desc(Dim.2))
 ```
 
 ```{r fig.height=6, fig.width=8}
-PC_12_scores %>% 
+PC_12_scores |> 
   ggplot() + 
-  geom_point(data = PC_12_scores %>% select(Dim.1,Dim.2), 
+  geom_point(data = PC_12_scores |> select(Dim.1,Dim.2), 
              mapping = aes(x= Dim.1, y = Dim.2), col = "gray80", size = 0.2) + 
   geom_hline(yintercept = 0, lty = 2)+ 
   geom_vline(xintercept = 0, lty = 2)+ 
@@ -562,12 +562,12 @@ Suppose, for example, that you would like to construct a more informative variab
 
 
 ```{r fig.height=8, fig.width=6}
-facto_summarize(myPCA, "var", axes = c(1,2)) %>% 
-  as_tibble() %>% 
-  dplyr::select(name, contrib) %>% 
-  left_join(metabolite_meta, by = c("name" = "CompoundID")) %>% 
-  arrange(contrib) %>% 
-  mutate(CompoundName = factor(CompoundName, levels = CompoundName)) %>% 
+facto_summarize(myPCA, "var", axes = c(1,2)) |> 
+  as_tibble() |> 
+  dplyr::select(name, contrib) |> 
+  left_join(metabolite_meta, by = c("name" = "CompoundID")) |> 
+  arrange(contrib) |> 
+  mutate(CompoundName = factor(CompoundName, levels = CompoundName)) |> 
   ggplot() + 
   geom_point(aes(x = CompoundName,  y= contrib, col = Assay), size = 2) + 
   geom_segment(aes(x = CompoundName,  yend = contrib, col = Assay, xend = CompoundName, y = 0)) + 
@@ -600,16 +600,16 @@ For illustrative purposes let's focus on the Female-Male Comparison.
 ```{r}
 ## here i nest the imputed data matrix, most likely I could do the testing also in the "non" imputed one
 ## we also add the gender of the animal
-DM_i_nest <- DM_i %>% 
-  pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") %>% 
-  left_join(sample_meta_data) %>% 
+DM_i_nest <- DM_i |> 
+  pivot_longer(starts_with("CPD"), names_to = "CompoundID", values_to = "I") |> 
+  left_join(sample_meta_data) |> 
   nest(data = -c(CompoundID))
 ```
 
 Now we run the tests on the metabolites
 
 ```{r}
-DM_i_nest <- DM_i_nest %>% 
+DM_i_nest <- DM_i_nest |> 
   mutate(wilcoxon = map(data, ~ wilcox.test(I ~ Gender, data = .x, exact = FALSE)))
 ```
 
@@ -623,7 +623,7 @@ DM_i_nest$wilcoxon[[10]]
 Now we extract the p-values
 
 ```{r}
-DM_i_nest <- DM_i_nest %>% 
+DM_i_nest <- DM_i_nest |> 
   mutate(ps = map_dbl(wilcoxon, ~.x$p.value))
 ```
 
@@ -639,8 +639,8 @@ We see a clear enrichment of the "low" p values. One could ask what would be the
 Let's try so simulate this case. To do that I scramble the intensities for each metabolite, so I'll destroy the assiciation between the intensity and the gender
 
 ```{r}
-DM_i_nest <- DM_i_nest %>% 
-  mutate(permuted_data = map(data, ~ .x %>% mutate(I = sample(I))))
+DM_i_nest <- DM_i_nest |> 
+  mutate(permuted_data = map(data, ~ .x |> mutate(I = sample(I))))
   
 ```
 
@@ -648,8 +648,8 @@ Let's now run a wikoxon test on the permuted data
 
 
 ```{r}
-DM_i_nest <- DM_i_nest %>% 
-  mutate(wilcoxon_p = map(permuted_data, ~ wilcox.test(I ~ Gender, data = .x, exact = FALSE))) %>% 
+DM_i_nest <- DM_i_nest |> 
+  mutate(wilcoxon_p = map(permuted_data, ~ wilcox.test(I ~ Gender, data = .x, exact = FALSE))) |> 
   mutate(ps_p = map_dbl(wilcoxon_p, ~.x$p.value))
 ```
 
@@ -673,8 +673,8 @@ Let's stick to Cohen's d. In the same time I'll also calculate the p-values corr
 ```{r}
 library(effsize)
 
-DM_i_nest <- DM_i_nest %>%  
-  mutate(pcorr = p.adjust(ps, method = "BH")) %>%    ## here I'm calculating the corrected p-values
+DM_i_nest <- DM_i_nest |>  
+  mutate(pcorr = p.adjust(ps, method = "BH")) |>    ## here I'm calculating the corrected p-values
   mutate(cohend = map_dbl(data, ~cohen.d(I ~ Gender, data = .x)$estimate))  ## here I'm calculating the effect size
 ```
 
@@ -683,8 +683,8 @@ Now we use the effect size and the p value to create a volcano plot
 
 ```{r}
 library(plotly)
-ggplotly(DM_i_nest %>% 
-           left_join(metabolite_meta %>% select(CompoundID,CompoundName, Assay)) %>% 
+ggplotly(DM_i_nest |> 
+           left_join(metabolite_meta |> select(CompoundID,CompoundName, Assay)) |> 
            ggplot(aes(text=CompoundName)) + 
            geom_hline(yintercept = 1.3, lty = 2, col = "red") + 
            geom_point(aes(x = cohend, y = -log10(ps), fill = Assay), size = 3, pch = 21) + 
@@ -696,9 +696,9 @@ Now we focus on the compound which are significant at the 0.01 level and we sort
 
 
 ```{r}
-markers <- DM_i_nest %>% 
-  filter(pcorr < 0.01) %>% 
-  arrange(desc(abs(cohend))) %>% 
+markers <- DM_i_nest |> 
+  filter(pcorr < 0.01) |> 
+  arrange(desc(abs(cohend))) |> 
   left_join(metabolite_meta)
 
 head(markers)
@@ -732,8 +732,8 @@ Unfortunately, the pairs visualization is manageable only with a small number of
 
 ```{r}
 ## here I get the names of the first 5
-focuscp <- markers %>% 
-  slice(1:5) %>% 
+focuscp <- markers |> 
+  slice(1:5) |> 
   pull(CompoundID)
 ```
 
@@ -745,10 +745,10 @@ names(mypalette) <- unique(sample_meta_data$Gender)
 
 par(pty="s")
 
-DM_i %>% 
-  dplyr::select(all_of(focuscp)) %>% 
-  as.matrix(.) %>% 
-  pairs(., col = mypalette[sample_meta_data$Gender], pch = 19)
+DM_i |> 
+  dplyr::select(all_of(focuscp)) |> 
+  as.matrix() |> 
+  pairs(col = mypalette[sample_meta_data$Gender], pch = 19)
 
 
 ```
