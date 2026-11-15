@@ -182,6 +182,10 @@ mtext("Samples", side = 2, line = 0.5)
 FAT DATA MATRIX
 :::
 
+::: fragment
+*What this means in practice? We will see it in a while, in the practical session "Fat data matrices and false positives"*
+:::
+
 
 # Analyzing data matrices
 
