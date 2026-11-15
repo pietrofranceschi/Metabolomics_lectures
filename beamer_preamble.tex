@@ -30,3 +30,12 @@
   \end{beamercolorbox}}%
   \vskip0pt%
 }
+% Content of the closing slide, appended to every deck by beamer_filter.lua
+% (a deck can drop it with "closing-slide: false" in its YAML header)
+\newcommand{\closingslide}{%
+  \centering
+  {\usebeamerfont{title}\usebeamercolor[fg]{structure}\Huge Questions?\par}
+  \vspace{2.5em}
+  {\large Pietro Franceschi\par}
+  \vspace{0.4em}
+  {\normalsize\texttt{pietro.franceschi@fmach.it}\par}}

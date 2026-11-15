@@ -1,4 +1,5 @@
 ---
+closing-slide: false
 title: "Harmonizing ML in R"
 author: "Pietro Franceschi | pietro.franceschi@fmach.it"
 output:

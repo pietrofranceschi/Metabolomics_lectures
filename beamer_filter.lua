@@ -101,7 +101,14 @@ local function fix_pauses(blocks, state)
   return blocks
 end
 
+-- Closing slide (content: \closingslide in beamer_preamble.tex), appended to
+-- every deck unless its YAML header says "closing-slide: false".
 function Pandoc(doc)
   doc.blocks = fix_pauses(doc.blocks, { ahead = false })
+  if doc.meta["closing-slide"] ~= false then
+    doc.blocks:insert(pandoc.Header(2, {},
+      pandoc.Attr("", { "plain", "c", "noframenumbering" })))
+    doc.blocks:insert(latex("\\closingslide"))
+  end
   return doc
 end
