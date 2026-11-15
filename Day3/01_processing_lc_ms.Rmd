@@ -295,7 +295,7 @@ include_graphics("../images/cent_wave.png")
 ## Peak Intensity: `into` and `maxo`
 
 ```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
-include_graphics("../images/maxointo.png")
+include_graphics("../images/scheme_into_maxo.pdf")
 ```
 
 
