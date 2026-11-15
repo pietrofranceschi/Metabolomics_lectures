@@ -59,7 +59,7 @@ Let's start reading in a raw file:
 raw_one <- readMsExperiment(spectraFiles = "../data/wines/x016_X_QC_X_4_NEG_DDA.mzML")
 ```
 
-The file contains full scans (MS1) and fragmentation spectra (MS2 and MS3): peak picking works on the full scans only.
+The file contains full scans (MS1) and fragmentation spectra (MS2 and MS3): chromatographic peaks are searched in the full scans only. This is the default of `findChromPeaks()`, but in the code below we make it explicit with `msLevel = 1L`. The fragmentation spectra stay in the object: we will use them later for annotation.
 
 I'll now show you how to perform peak picking with two algorithms available in `xcms`. In 99% of the cases you will use only one of them (CentWave), but it is nice - once in a lifetime - to really put your hands in the machine.
 
@@ -87,7 +87,7 @@ Now I can use the previous parameters to find the peaks in **one** sample:
 
 ```{r}
 ## this function is used to find the chromatographic peaks with the previous parameters
-raw_one_mf_picked <- findChromPeaks(raw_one, param = mf)
+raw_one_mf_picked <- findChromPeaks(raw_one, param = mf, msLevel = 1L)  ## peaks are searched in the full scans
 
 raw_one_mf_picked
 ```
@@ -198,7 +198,7 @@ cwp
 If we run the peak picking with this new algorithm...
 
 ```{r}
-raw_one_cw_picked <- findChromPeaks(raw_one, param = cwp)
+raw_one_cw_picked <- findChromPeaks(raw_one, param = cwp, msLevel = 1L)
 
 raw_one_cw_picked
 ```
@@ -298,7 +298,7 @@ And perform the peak picking with centWave:
 
 ```{r}
 register(SerialParam()) ## Setting xcms in serial mode
-raw_data <- findChromPeaks(raw_data, param = cwp)
+raw_data <- findChromPeaks(raw_data, param = cwp, msLevel = 1L)
 ```
 
 To spare time we save the picked object ...
