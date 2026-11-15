@@ -90,55 +90,33 @@ curse |>
 
 ## Putting numbers on it
 
-Three numbers summarize what we see:
-
-* **separation**: the probability that a distance between samples of different groups is larger than a distance between samples of the same group. 1 means perfectly separated groups, 0.5 means no groups at all
-* **between/within**: the average distance between samples of different groups divided by the average distance between samples of the same group. If the groups are visible, this is larger than 1
-* **relative contrast**: (largest distance - smallest distance) / smallest distance. It tells us how different "near" and "far" are (we plot its log10)
-
-In the plot, the dashed lines show the values we expect when there are no groups
+One number summarizes what we see: the **between/within** ratio, the average distance between samples of different groups divided by the average distance between samples of the same group. If the groups are visible, this is larger than 1; if there are no groups, it is 1
 
 ```{r}
-summarize_d <- function(d) {
+between_within <- function(d) {
   ut <- upper.tri(d)
   same <- outer(group, group, "==")
-  b <- d[ut & !same]
-  w <- d[ut & same]
-  tibble(separation = mean(outer(b, w, ">")),
-         between_within = mean(b) / mean(w),
-         rel_contrast = (max(d[ut]) - min(d[ut])) / min(d[ut]))
+  mean(d[ut & !same]) / mean(d[ut & same])
 }
 
-curse_summary <- curse |>
-  mutate(s = map(D, summarize_d)) |>
-  dplyr::select(nvar, s) |>
-  unnest(s)
+curse <- curse |>
+  mutate(bw = map_dbl(D, between_within))
 
-curse_summary
+curse |> dplyr::select(nvar, bw)
 ```
 
-```{r fig.width=10, fig.height=3.5}
-## dashed lines: the values we expect when there are no groups
-indices <- c("separation", "between/within", "log10(relative contrast)")
-no_groups <- tibble(index = factor(indices[1:2], levels = indices), value = c(0.5, 1))
-
-curse_summary |>
-  transmute(nvar, separation, `between/within` = between_within,
-            `log10(relative contrast)` = log10(rel_contrast)) |>
-  pivot_longer(-nvar, names_to = "index") |>
-  mutate(index = factor(index, levels = indices)) |>
-  ggplot(aes(x = nvar, y = value)) +
-  geom_hline(data = no_groups, aes(yintercept = value), colour = "#8B3A3A", linetype = "dashed") +
+```{r fig.width=5, fig.height=3.5}
+curse |>
+  ggplot(aes(x = nvar, y = bw)) +
+  geom_hline(yintercept = 1, colour = "#8B3A3A", linetype = "dashed") +
   geom_line(colour = "steelblue") +
   geom_point(colour = "steelblue", size = 3) +
   scale_x_log10(labels = scales::label_comma()) +
-  facet_wrap(vars(index), scales = "free_y") +
-  labs(x = "Number of variables", y = "") +
+  labs(x = "Number of variables", y = "between/within") +
   theme_light()
 ```
 
-* separation goes from `r round(curse_summary$separation[1], 2)` to `r round(curse_summary$separation[length(nvars)], 2)` and between/within from `r round(curse_summary$between_within[1], 2)` to `r round(curse_summary$between_within[length(nvars)], 2)`: the groups disappear
-* the relative contrast goes from `r round(curse_summary$rel_contrast[1])` to `r round(curse_summary$rel_contrast[length(nvars)], 3)`: "near" and "far" lose their meaning. This is called **distance concentration**
+The ratio goes from `r round(curse$bw[1], 2)` to `r round(curse$bw[length(nvars)], 2)`: the groups disappear (the dashed line is the "no groups" value).
 
 > **The biomarker is still there, in the first column of every matrix! But the distances are dominated by the noise of all the other variables. This is the curse of dimensionality: in a high dimensional space the data are sparse, and every sample is far from all the others.**
 
@@ -154,14 +132,12 @@ make_dm_all <- function(nvar) {
 
 curse_all <- tibble(nvar = nvars) |>
   mutate(D = map(nvar, \(p) as.matrix(dist(make_dm_all(p)))),
-         s = map(D, summarize_d)) |>
-  dplyr::select(nvar, s) |>
-  unnest(s)
+         bw = map_dbl(D, between_within))
 
-curse_all
+curse_all |> dplyr::select(nvar, bw)
 ```
 
-Now separation goes from `r round(curse_all$separation[1], 2)` to `r round(curse_all$separation[length(nvars)], 2)`: the groups get *clearer* as the variables grow, because each variable adds a bit of signal and the noise averages out. The relative contrast still shrinks, but it stays far from 0: the distances between the groups remain clearly larger than those within.
+Now the ratio stays around `r round(curse_all$bw[length(nvars)], 1)`, far from 1, whatever the number of variables: each variable adds a bit of signal and the groups remain clearly visible.
 
 > **In metabolomics we measure thousands of features, but only a handful of them are related to our question. More variables means more noise, not more information.**
 
@@ -187,11 +163,9 @@ make_dm_bio <- function(nvar, n_bio) {
 
 bio10 <- tibble(nvar = nvars) |>
   mutate(D = map(nvar, \(p) as.matrix(dist(make_dm_bio(p, n_bio = 10)))),
-         s = map(D, summarize_d)) |>
-  dplyr::select(nvar, s) |>
-  unnest(s)
+         bw = map_dbl(D, between_within))
 
-bio10
+bio10 |> dplyr::select(nvar, bw)
 ```
 
-With 10 biomarkers the groups survive longer (separation `r round(bio10$separation[bio10$nvar == 100], 2)` with 100 variables, against `r round(curse_summary$separation[curse_summary$nvar == 100], 2)` with a single biomarker), but in the end the noise wins: separation drops to `r round(bio10$separation[length(nvars)], 2)`. More good variables delay the curse, they do not remove it.
+With 10 biomarkers the groups survive longer (between/within `r round(bio10$bw[bio10$nvar == 10], 2)` with 10 variables, against `r round(curse$bw[curse$nvar == 10], 2)` with a single biomarker), but in the end the noise wins: the ratio drops to `r round(bio10$bw[length(nvars)], 2)`. More good variables delay the curse, they do not remove it.
