@@ -423,7 +423,7 @@ include_graphics("../images/RStudio.png")
 *DDA*: Data Dependent Acquisition
 
 ```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
-include_graphics("../images/tandemMS.jpg")
+include_graphics("../images/scheme_fs_msms.pdf")
 ```
 
 
