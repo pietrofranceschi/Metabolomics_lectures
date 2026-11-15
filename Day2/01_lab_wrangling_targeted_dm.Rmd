@@ -405,6 +405,8 @@ critical_1
 
 ## Multivariate Visualization - PCA
 
+> **Principal Component Analysis** (what it does, scores, loadings and how to read them) is the topic of the focus presentation [Multivariate visualization: PCA](05_pca.pdf)
+
 The previous univariate journey should have been already pointing out some interesting aspects of the dataset.
 
 The subsequent step is to look to visualize the multivariate structure of the data to spot larger scale patterns.
