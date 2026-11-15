@@ -145,7 +145,7 @@ b|a
 ## LC-MS For Dummies
 
 ```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
-include_graphics("../images/LCMS.jpg")
+include_graphics("../images/scheme_lcms_dummies.pdf")
 ```
 
 ## Analytical Variability in LC-MS: Mass
