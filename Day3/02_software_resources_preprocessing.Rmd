@@ -26,7 +26,7 @@ library(webshot)
 Many of the steps we have been discussing today are common to almost all software solutions available for the analysis of metabolomics data:
 
 1. Commercial suites
-2. Open source solutions which can be run locally (e.g. `xcms`, `MZmine`, `MS-DIAL`)
+2. Open source solutions which can be run locally (e.g. `xcms`, `mzmine`, `MS-DIAL`)
 3. Freely available web services
 
 
@@ -66,8 +66,8 @@ Open source platform for creating data science workflows; it also runs OpenMS to
 
 ## Human Friendly Open Solutions
 
-### MZmine 3
-Open-source software for mass-spectrometry data processing, with the main focus on LC-MS data
+### mzmine 4
+Mass-spectrometry data processing for LC-MS, GC-MS, ion mobility and MS imaging; free for academic use, licensed for commercial use
 
 \weblink{https://mzio.io/mzmine/}{mzio.io/mzmine}
 
