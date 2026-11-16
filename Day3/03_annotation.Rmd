@@ -62,10 +62,10 @@ include_graphics("../images/scheme_fs_msms.pdf")
 ## Databases of Standards
 
 * Buy a chemical standard, analyze it with your instrument (~~MS, MS-MS, retention time~~)
-* [PubChem](https://pubchem.ncbi.nlm.nih.gov/)
-* [MassBank](https://massbank.eu/MassBank/)
-* [Human Metabolome Database](https://hmdb.ca/)
-* [METLIN](https://metlin.scripps.edu/)
+* PubChem \weblink{https://pubchem.ncbi.nlm.nih.gov/}{pubchem.ncbi.nlm.nih.gov}
+* MassBank \weblink{https://massbank.eu/MassBank/}{massbank.eu}
+* Human Metabolome Database \weblink{https://hmdb.ca/}{hmdb.ca}
+* METLIN \weblink{https://metlin.scripps.edu/}{metlin.scripps.edu}
 * ...
 
 
