@@ -69,9 +69,9 @@ Open source platform for creating data science workflows; it also runs OpenMS to
 ### MZmine 3
 Open-source software for mass-spectrometry data processing, with the main focus on LC-MS data
 
-\weblink{https://mzmine.github.io/}{mzmine.github.io}
+\weblink{https://mzio.io/mzmine/}{mzio.io/mzmine}
 
 ### MS-DIAL
 Universal program for untargeted metabolomics: multiple instruments (GC/MS, GC/MS/MS, LC/MS, LC/MS/MS) and MS vendors (Agilent, Bruker, LECO, Sciex, Shimadzu, Thermo, Waters)
 
-\weblink{https://prime.psc.riken.jp/compms/msdial/main.html}{prime.psc.riken.jp/compms/msdial}
+\weblink{https://systemsomicslab.github.io/compms/msdial/main.html}{systemsomicslab.github.io/compms/msdial}
