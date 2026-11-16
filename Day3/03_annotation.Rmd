@@ -65,7 +65,7 @@ include_graphics("../images/scheme_fs_msms.pdf")
 * [PubChem](https://pubchem.ncbi.nlm.nih.gov/)
 * [MassBank](https://massbank.eu/MassBank/)
 * [Human Metabolome Database](https://hmdb.ca/)
-* [Meltin](https://metlin.scripps.edu/landing_page.php?pgcontent=mainPage)
+* [METLIN](https://metlin.scripps.edu/)
 * ...
 
 
