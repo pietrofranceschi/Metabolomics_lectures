@@ -52,7 +52,7 @@ plot_grid(p1, p2)
 -   Demo & DIY
 -   Peak Picking in `xcms`
 -   Demo & DIY
--   Retention time correction and features definition
+-   Retention time correction, features definition and quality
 -   Demo & DIY
 
 ## The data matrix
@@ -395,6 +395,67 @@ Depending on their origin, missing values can be
 
 -   missing at random
 -   missing not at random
+
+
+## Filling missing peaks
+
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.52\\textheight"}
+include_graphics("../images/scheme_peak_filling.pdf")
+```
+
+`fillChromPeaks()` goes back to the raw data and integrates the signal in the *m/z*--rt region of the feature
+
+::: fragment
+\alert{A missed peak is recovered, but an absent compound becomes a small noise value}
+:::
+
+## Feature quality: QC variability
+
+```{r, fig.align='center', out.width="\\linewidth", out.height="0.52\\textheight", fig.width=9, fig.height=3.6}
+set.seed(123)
+n_inj <- 40
+qc_inj <- seq(4, n_inj, by = 6)
+sim <- tibble(inj = 1:n_inj, class = if_else(inj %in% qc_inj, "QC", "Sample")) |>
+  mutate(group = if_else(class == "QC", "QC", sample(c("red", "white"), n(), replace = TRUE)))
+qc_sd <- c(good = 0.05, bad = 0.4)
+sim <- bind_rows(
+  sim |> mutate(feature = "Reliable feature", qc_cv = qc_sd["good"]),
+  sim |> mutate(feature = "Unreliable feature", qc_cv = qc_sd["bad"])
+) |>
+  mutate(intensity = if_else(class == "QC",
+                             100 * exp(rnorm(n(), 0, qc_cv)),
+                             if_else(group == "red", 150, 60) * exp(rnorm(n(), 0, 0.15))))
+rsd <- sim |>
+  group_by(feature, class) |>
+  summarise(rsd = 100 * sd(intensity) / mean(intensity), .groups = "drop") |>
+  pivot_wider(names_from = class, values_from = rsd) |>
+  mutate(lab = sprintf("RSD QC %.0f%%  |  RSD samples %.0f%%", QC, Sample))
+ggplot(sim, aes(inj, intensity)) +
+  geom_point(aes(colour = group, size = class)) +
+  geom_text(data = rsd, aes(label = lab), x = 1, y = Inf, hjust = 0, vjust = 1.5, size = 4.2) +
+  facet_wrap(~feature) +
+  scale_colour_manual(values = c(QC = "orange", red = "#8B3A3A", white = "steelblue")) +
+  scale_size_manual(values = c(QC = 3, Sample = 1.8), guide = "none") +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.25))) +
+  labs(x = "injection order", y = "intensity", colour = NULL) +
+  theme_light(base_size = 14) +
+  theme(strip.text = element_text(size = 13))
+```
+
+-   QCs see only the *analytical* variability: RSD in QCs $\ll$ RSD in samples
+-   `featureSummary()`: drop features with RSD in QCs larger than in samples (or above a threshold)
+
+## Feature quality: caveats
+
+::: incremental
+-   Markers of a group (e.g. a variety) can be diluted in the pooled QC
+-   Group specific QCs help ... but the number of injections explodes
+-   The number of missing peaks (before filling) is also an index of quality
+:::
+
+::: {.box-key .fragment}
+**Key message:** filling and filtering act on the data matrix, but the final check is always on the raw data
+:::
 
 
 ## Hands-on: let's switch to RStudio
