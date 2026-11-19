@@ -128,10 +128,10 @@ The question to be addressed, now is: do we have fragmentation spectra of the io
 The list of precursor ions can be directly accessed with
 
 ```{r}
-std_MS_MS %>%
-  spectra() %>%
-  precursorMz() %>%
-  .[1:10]
+std_MS_MS |>
+  spectra() |>
+  precursorMz() |>
+  head(10)
 
 ```
 
@@ -140,9 +140,9 @@ But two handy methods can be used to filter the list of precursors
 
 
 ```{r}
-focus_MS_MS <- std_MS_MS %>%
-  spectra() %>%
-  filterPrecursorMzValues(577.1352, ppm = 10) %>%
+focus_MS_MS <- std_MS_MS |>
+  spectra() |>
+  filterPrecursorMzValues(577.1352, ppm = 10) |>
   filterRt(rt = c(224,280))
 
 

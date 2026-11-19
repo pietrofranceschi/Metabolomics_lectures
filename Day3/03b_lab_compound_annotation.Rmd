@@ -215,9 +215,9 @@ Finally, let's compare the MSMS pattern of gallic acid observed in the analytica
 
 ```{r}
 # get the MSMS of the standard:
-ga_MSMS <- std_MSMS %>%
-  spectra() %>%
-  filterPrecursorMzValues(MSMS_match_tb[MSMS_match_tb$target_name == "Gallic acid","mz"], ppm = 10) %>%
+ga_MSMS <- std_MSMS |>
+  spectra() |>
+  filterPrecursorMzValues(MSMS_match_tb[MSMS_match_tb$target_name == "Gallic acid","mz"], ppm = 10) |>
   filterRt(MSMS_match_tb[MSMS_match_tb$target_name == "Gallic acid","rtime"] + 5 * c(-1, 1))
 
 
@@ -227,9 +227,9 @@ MSMS_data <- readMsExperiment(spectraFiles = sampleData(raw_data_filled)$filepat
   filterMsLevel(2)   ## only fragmentation
 
 
-ga_MSMS_data <- MSMS_data %>%
-  spectra() %>%
-  filterPrecursorMzValues(169.0142, ppm = 10) %>%
+ga_MSMS_data <- MSMS_data |>
+  spectra() |>
+  filterPrecursorMzValues(169.0142, ppm = 10) |>
   filterRt(92.5 + 5 * c(-1, 1))
 ga_MSMS_data
 ```
