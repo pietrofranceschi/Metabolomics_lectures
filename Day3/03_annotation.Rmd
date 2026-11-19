@@ -49,15 +49,38 @@ In the case of MS based experiments, the process of annotation requires the inte
 5. Chemoinformatics and predictive models
 
 
-## Fragmentation Experiments
+# A first order approach: fragmentation spectra
+
+## Why fragmentation spectra
+
+::: incremental
+- A mass spectrometer measures *m/z*: many compounds share the same mass (and the same formula)
+- Fragmentation patterns are sensitive to the chemical structure
+- **The more we know about the structure of our ions, the better it is**
+:::
+
+## MS/MS and DDA
+
+*DDA*: Data Dependent Acquisition
 
 ```{r out.width="\\linewidth", out.height="0.55\\textheight", fig.align="center"}
 include_graphics("../images/scheme_fs_msms.pdf")
 ```
 
-* Fragmentation patterns are sensitive to the chemical structure
-* MS/MS can be matched with databases of standards
+* MS/MS spectra can be compared with the ones of chemical standards and with databases
 
+## Fragmentation spectra in `xcms`
+
+* `xcms` allows also to handle fragmentation experiments
+* `xcms` ecosystem is growing towards databases of spectra
+* As we already discussed, do not be too optimistic with complex MS experiments
+* Sometimes the ion you are interested in was not fragmented (plan a specific run!)
+
+## Hands-on: let's switch to RStudio
+
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/RStudio.png")
+```
 
 ## Databases of Standards
 
@@ -67,6 +90,25 @@ include_graphics("../images/scheme_fs_msms.pdf")
 * Human Metabolome Database \weblink{https://hmdb.ca/}{hmdb.ca}
 * METLIN \weblink{https://metlin.scripps.edu/}{metlin.scripps.edu}
 * ...
+
+## Annotation with in-house standards
+
+::: incremental
+- Inject the standards with the same analytical pipeline used for the samples
+- Build a library: *m/z* of the expected ion (e.g. [M-H]^-^), retention time, MS/MS spectrum
+- Match the features of the study on *m/z* and retention time ...
+- ... and confirm the match with the MS/MS spectrum
+:::
+
+::: {.box-key .fragment}
+**Key message:** *m/z*, retention time and MS/MS of an authentic standard measured in the same lab give the highest level of confidence
+:::
+
+## Hands-on: let's switch to RStudio
+
+```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
+include_graphics("../images/RStudio.png")
+```
 
 
 # In silico annotation

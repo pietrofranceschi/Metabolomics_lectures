@@ -54,8 +54,6 @@ plot_grid(p1, p2)
 -   Demo & DIY
 -   Retention time correction and features definition
 -   Demo & DIY
--   Dealing with Fragmentation experiments
--   Demo & DIY
 
 ## The data matrix
 
@@ -398,41 +396,6 @@ Depending on their origin, missing values can be
 -   missing at random
 -   missing not at random
 
-
-## Hands-on: let's switch to RStudio
-
-```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
-include_graphics("../images/RStudio.png")
-```
-
-
-# Fragmentation Data
-
-## Annotation and MS
-
-::: incremental
-- At the end of the journey we would like to work on *metabolites* or *pathways* and not on features
-- We know that **annotation** is the most challenging step of all the business
-- The more we know about the structure of our ions the better it is
-- Database of standards, web resources, chemoinformatics, ...
-- **Fragmentation patterns are extremely useful**
-:::
-
-## MS/MS and DDA
-
-*DDA*: Data Dependent Acquisition
-
-```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.7\\textheight"}
-include_graphics("../images/scheme_fs_msms.pdf")
-```
-
-
-## Notes
-
-* `xcms` allows also to handle fragmentation experiments
-* `xcms` ecosystem is growing towards databases of spectra
-* As we already discussed, do not be too optimistic with complex MS experiments
-* Sometimes the ion you are interested was not fragmented (plan a specific run!)
 
 ## Hands-on: let's switch to RStudio
 
