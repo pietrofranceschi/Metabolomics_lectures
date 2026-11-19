@@ -14,6 +14,7 @@ library(MetaboCoreUtils)
 library(xcms)
 library(MsExperiment)
 library(MetaboAnnotation)
+library(Spectra)
 library(RColorBrewer)
 library(plotly)
 ```
@@ -77,16 +78,14 @@ cwp <- CentWaveParam(peakwidth = c(5, 30),    ## expected range of chromatograph
                      noise = 5000)
 register(SerialParam()) ## Setting xcms in serial mode
 std_cw <- findChromPeaks(std_raw, param = cwp)
+
+std_pks <- chromPeaks(std_cw)
+std_pks[1:20,]
+
 ```
 
 In total `r nrow(chromPeaks(std_cw))` chromatographic peaks have been identified. This is even more than would be expected since the sample represents a mixture of 8 pure standards.... Do you have any idea that could explain the reason(s) why a number of peaks much greater than the number of compounds contained in this sample has been detected?
 
-Below we display some of the detected chromatographic peaks:
-
-```{r}
-std_pks <- chromPeaks(std_cw)
-head(std_pks)
-```
 
 We next annotate these chromatographic peaks using only their m/z values.
 For doing this we are going to use a series of functions included in the [`MetaboAnnotation`](https://bioconductor.org/packages/release/bioc/html/MetaboAnnotation.html).
@@ -162,7 +161,7 @@ MSMS_match_tb <- MSMS_match_tb[!is.na(MSMS_match_tb$target_name),]
 MSMS_match_tb
 ```
 
-We can see that in this sample it was recorded the MSMS of 5 of the included analytical standards. Let's keep this information because later it will be useful to compare these MSMS with the ones collected in the wine samples in case these compounds are found in them (in order to confirm their annotation with a higher confidence).
+We can see that in this injection MS/MS spectra were recorded for only `r length(unique(MSMS_match_tb$target_name))` of the `r nrow(stds_tb)` analytical standards (`r paste(unique(MSMS_match_tb$target_name), collapse = ", ")`). In DDA the instrument fragments only the most intense ions of each full scan, so the other standards, even when they give a chromatographic peak, were never selected for fragmentation. Let's keep this information because later it will be useful to compare these MSMS with the ones collected in the wine samples in case these compounds are found in them (in order to confirm their annotation with a higher confidence).
 
 
 ## Annotation of study samples
@@ -253,9 +252,41 @@ ggplotly(ggplot() +
 ```
 
 
-##
+## How similar are the two spectra?
 
+Looking at the mirror plot is useful, but we would like to have a number. The most common measure of similarity between two MS/MS spectra is the *normalized dot product*: the peaks of the two spectra are matched on their m/z values and their intensities are compared. It goes from 0 (nothing in common) to 1 (identical spectra). `compareSpectra()` calculates it for all the pairs of spectra:
 
+```{r}
+compareSpectra(ga_MSMS_data, ga_MSMS, ppm = 10, tolerance = 0.005)
+```
+
+Mmm ... the base peak (m/z 125.02, gallic acid after the loss of CO~2~) is the same, but the similarity is really low! Let's look at the quality of the spectra. Two simple measures are:
+
+* the **number of peaks**
+* the **spectral entropy**: the Shannon entropy of the relative intensities of the peaks. It is 0 for a spectrum with a single peak and it grows when the signal is spread on many peaks of similar intensity ... as it happens with noise
+
+```{r}
+spectra_quality <- \(x) tibble::tibble(
+  file = basename(dataOrigin(x)),
+  rt = rtime(x),
+  n_peaks = lengths(x),
+  base_peak = vapply(intensity(x), max, numeric(1)),
+  entropy = entropy(x, normalized = FALSE)
+)
+
+spectra_quality(ga_MSMS)
+spectra_quality(ga_MSMS_data)
+```
+
+More than 100 peaks for a small molecule like gallic acid? The spectra are centroided (the base peak at m/z 125.02 is a single point), but if we zoom on the low m/z region of the spectrum of the standard we see something strange: a band of tens of centroids, a few mDa apart, with irregular intensities
+
+```{r}
+peaksData(ga_MSMS)[[1]] |>
+  as.data.frame() |>
+  subset(mz < 52)
+```
+
+These bands are noise: they increase the entropy of the spectra and, since they fall at different m/z in every spectrum, they make the spectra less similar to each other.
 
 ### DIY
 
