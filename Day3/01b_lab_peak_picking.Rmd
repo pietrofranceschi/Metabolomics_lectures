@@ -325,6 +325,8 @@ tics <- chromatogram(raw_data,
                      include = "none")     ## this argument is required to avoid
                                            ## including all the chromatograms of the picked peaks
 ```
+
+
 ```{r}
 bpi <- chromatogram(raw_data,
                      aggregationFun = "max", ## "sum" for "TIC" / "max" for "BPC"
