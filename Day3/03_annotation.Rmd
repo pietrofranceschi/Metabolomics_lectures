@@ -28,17 +28,19 @@ library(knitr)
 
 1. Unknown metabolites
 2. Poor standardization of chromatography (in particular LC)
-3. Bioinformatic infrastructures (_databases,workflows, ..._)
+3. Bioinformatic infrastructures (_databases, workflows, ..._)
 
 
 ## Annotation Levels
 
-```{r out.width="\\linewidth", out.height="0.8\\textheight", fig.align="center"}
+```{r out.width="\\linewidth", out.height="0.68\\textheight", fig.align="center"}
 include_graphics("../images/annotation_levels.png")
 ```
 
+\footnotesize Metabolomics Standards Initiative: Sumner L.W. et al. (2007) *Proposed minimum reporting standards for chemical analysis*. Metabolomics 3, 211--221
 
-## The tools for the trade
+
+## The tools of the trade
 
 In the case of MS based experiments, the process of annotation requires the interpretation of the ionization pattern of each molecule and the additional information which can be derived from chromatography and fragmentation experiments
 
@@ -61,18 +63,17 @@ In the case of MS based experiments, the process of annotation requires the inte
 
 ## MS/MS and DDA
 
-*DDA*: Data Dependent Acquisition
-
-```{r out.width="\\linewidth", out.height="0.55\\textheight", fig.align="center"}
+```{r out.width="\\linewidth", out.height="0.5\\textheight", fig.align="center"}
 include_graphics("../images/scheme_fs_msms.pdf")
 ```
 
+* *DDA* (Data Dependent Acquisition): in each cycle the instrument selects the most intense ions of the full scan and fragments them
 * MS/MS spectra can be compared with the ones of chemical standards and with databases
 
 ## Fragmentation spectra in `xcms`
 
-* `xcms` allows also to handle fragmentation experiments
-* `xcms` ecosystem is growing towards databases of spectra
+* `xcms` can also handle fragmentation experiments
+* The `xcms` ecosystem (`Spectra`, `MetaboAnnotation`, ...) is growing towards spectral databases and annotation
 * As we already discussed, do not be too optimistic with complex MS experiments
 * Sometimes the ion you are interested in was not fragmented (plan a specific run!)
 
@@ -82,14 +83,18 @@ include_graphics("../images/scheme_fs_msms.pdf")
 include_graphics("../images/RStudio.png")
 ```
 
-## Databases of Standards
+## Databases
 
-* Buy a chemical standard, analyze it with your instrument (~~MS, MS-MS, retention time~~)
-* PubChem \weblink{https://pubchem.ncbi.nlm.nih.gov/}{pubchem.ncbi.nlm.nih.gov}
+### In-house
+Buy a chemical standard and analyze it with your instrument (~~MS, MS/MS, retention time~~)
+
+### Spectral libraries (MS/MS of standards)
 * MassBank \weblink{https://massbank.eu/MassBank/}{massbank.eu}
-* Human Metabolome Database \weblink{https://hmdb.ca/}{hmdb.ca}
 * METLIN \weblink{https://metlin.scripps.edu/}{metlin.scripps.edu}
-* ...
+* Human Metabolome Database \weblink{https://hmdb.ca/}{hmdb.ca}
+
+### Compound databases (structures, used by in silico tools)
+* PubChem \weblink{https://pubchem.ncbi.nlm.nih.gov/}{pubchem.ncbi.nlm.nih.gov}
 
 ## Annotation with in-house standards
 
@@ -101,7 +106,7 @@ include_graphics("../images/RStudio.png")
 :::
 
 ::: {.box-key .fragment}
-**Key message:** *m/z*, retention time and MS/MS of an authentic standard measured in the same lab give the highest level of confidence
+**Key message:** *m/z*, retention time and MS/MS of an authentic standard measured in the same lab give the highest level of confidence (level 1, "identified")
 :::
 
 ## Comparing spectra: similarity
