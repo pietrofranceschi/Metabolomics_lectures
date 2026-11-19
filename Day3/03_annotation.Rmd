@@ -104,6 +104,28 @@ include_graphics("../images/RStudio.png")
 **Key message:** *m/z*, retention time and MS/MS of an authentic standard measured in the same lab give the highest level of confidence
 :::
 
+## Comparing spectra: similarity
+
+```{r out.width="\\linewidth", out.height="0.55\\textheight", fig.align="center"}
+include_graphics("../images/scheme_spectral_similarity.pdf")
+```
+
+* The peaks of the two spectra are matched on their *m/z* and the intensities are compared (*normalized dot product*)
+* The score goes from 0 (nothing in common) to 1 (identical spectra)
+
+## Spectral entropy: the quality of a spectrum
+
+```{r out.width="\\linewidth", out.height="0.5\\textheight", fig.align="center"}
+include_graphics("../images/scheme_spectral_entropy.pdf")
+```
+
+* Shannon entropy of the relative intensities of the peaks: $S = -\sum_i p_i \ln p_i$
+* 0 for a single peak, it grows when the intensity is spread over many peaks ... as it happens with noise
+
+::: fragment
+\alert{Noise increases the entropy and decreases the similarity: always look at the spectra!}
+:::
+
 ## Hands-on: let's switch to RStudio
 
 ```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
