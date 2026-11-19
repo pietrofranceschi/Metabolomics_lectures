@@ -1,0 +1,402 @@
+---
+title: "Biomarker Discovery in Untargeted Data: Wines"
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(xcms)
+library(MsExperiment)
+library(effsize)
+library(plotly)
+set.seed(123)
+```
+
+## Introduction
+
+In the KOMP practical (Day 2) we looked for the metabolites showing a difference between male and female mice. Here we apply the same strategy to the **untargeted** wine dataset we processed on Day 3:
+
+1. organize the data matrix in a tidy way and nest it, one row for each feature
+2. run a test on each feature, *on the fly*, with `map()`
+3. look at the distribution of the p-values and correct them for multiplicity
+4. rank the features by **effect size**, not by p-value
+5. go back to the data!
+
+We will address two questions:
+
+* which features are different between **red and white** wines? (two groups: Wilcoxon test and Cohen's d)
+* which features are different among the **varieties**? (more than two groups: ANOVA)
+
+## The data
+
+The output of the preprocessing was saved at the end of the Day 3 practical on retention time correction and feature definition
+
+```{r}
+load("../Day3/processed_wines_data.RData")
+```
+
+`DM` is the data matrix (features in rows, samples in columns), `feat` contains the definition of the features (m/z, retention time, ...) and the `raw_data_filled` object holds the description of the samples
+
+```{r}
+samples <- sampleData(raw_data_filled) |>
+  as_tibble() |>
+  select(fname, inj_ord, color, variety, bottle)
+
+samples |>
+  count(color, variety)
+```
+
+We have `r sum(samples$variety != "QC")` wines (`r sum(samples$color == "red")` red and `r sum(samples$color == "wht")` white) of `r n_distinct(samples$variety[samples$variety != "QC"])` varieties, and `r sum(samples$variety == "QC")` QCs. Note that several varieties are represented by a single bottle.
+
+We put the data matrix in long format and we add the sample description
+
+```{r}
+DM_long <- DM |>
+  as_tibble(rownames = "feature") |>
+  pivot_longer(-feature, names_to = "fname", values_to = "into") |>
+  mutate(fname = tools::file_path_sans_ext(fname)) |>
+  left_join(samples, by = "fname")
+
+DM_long
+```
+
+## Feature quality
+
+`r nrow(DM)` features ... are all of them reliable? As we discussed on Day 3, the QCs see only the analytical variability, so a feature which is more variable in the QCs than in the samples does not carry any useful information. We keep only the features with a relative standard deviation (RSD) lower in the QCs than in the samples
+
+```{r}
+rsd <- \(x) sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
+
+feat_quality <- DM_long |>
+  mutate(class = if_else(variety == "QC", "QC", "sample")) |>
+  group_by(feature, class) |>
+  summarise(rsd = rsd(into), .groups = "drop") |>
+  pivot_wider(names_from = class, values_from = rsd)
+
+good_features <- feat_quality |>
+  filter(QC < sample) |>
+  pull(feature)
+```
+
+```{r}
+feat_quality |>
+  ggplot(aes(x = sample, y = QC)) +
+  geom_point(col = "steelblue", alpha = 0.6) +
+  geom_abline(slope = 1, intercept = 0, lty = 2, col = "#8B3A3A") +
+  labs(x = "RSD samples", y = "RSD QCs") +
+  theme_light()
+```
+
+`r length(good_features)` features out of `r nrow(DM)` pass the filter: in this dataset the analytical variability is small compared with the differences among the wines, so only a few features are removed. When the filter removes more, it also means fewer tests and fewer false positives.
+
+## The nested data frame
+
+As in the KOMP practical, we nest the data: one row for each feature, and all the measurements of that feature in a small tibble in the `data` column. The QCs are not needed anymore.
+
+```{r}
+DM_nest <- DM_long |>
+  filter(variety != "QC", feature %in% good_features) |>
+  nest(data = -feature)
+
+DM_nest
+
+DM_nest$data[[1]]
+```
+
+### Missing values and log transformation
+
+The nested structure is handy also to process each feature separately. We impute the missing values with the same strategy used for the KOMP data (a random number between 0 and the minimum value measured for that feature) and we log transform the intensities, which in MS are typically right skewed
+
+```{r}
+impute_min <- \(v) {
+  nas <- is.na(v)
+  v[nas] <- runif(sum(nas), 0, min(v, na.rm = TRUE))
+  v
+}
+
+DM_nest <- DM_nest |>
+  mutate(data = map(data, \(d) d |> mutate(log_into = log10(impute_min(into)))))
+```
+
+## Red vs white
+
+### Testing
+
+We run a Wilcoxon test on each feature. Being non-parametric, it does not make assumptions on the distribution of the intensities (and it gives the same result with or without the log transformation).
+
+```{r}
+DM_nest <- DM_nest |>
+  mutate(wilcoxon = map(data, \(d) wilcox.test(log_into ~ color, data = d, exact = FALSE)),
+         p_color = map_dbl(wilcoxon, \(t) t$p.value))
+```
+
+Before looking at single features, we look at the distribution of the p-values. What would it be if there were no difference between red and white wines? We can simulate it by scrambling the intensities of each feature, destroying their association with the color
+
+```{r}
+DM_nest <- DM_nest |>
+  mutate(p_perm = map_dbl(data, \(d) {
+    d |>
+      mutate(log_into = sample(log_into)) |>
+      wilcox.test(log_into ~ color, data = _, exact = FALSE) |>
+      pluck("p.value")
+  }))
+```
+
+```{r fig.height=3.5, fig.width=8}
+DM_nest |>
+  select(feature, observed = p_color, permuted = p_perm) |>
+  pivot_longer(-feature, names_to = "data", values_to = "p") |>
+  ggplot(aes(x = p)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = "steelblue", col = "white") +
+  facet_wrap(~data) +
+  labs(x = "p-value") +
+  theme_light()
+```
+
+A clear enrichment of small p-values: red and white wines are different (no surprise!). With permuted data the distribution is flat, as expected when there is no effect.
+
+We correct the p-values for multiplicity (Benjamini-Hochberg) and we calculate the effect size: Cohen's d on the log intensities, the difference between the two means divided by the pooled standard deviation. Positive values mean higher intensity in red wines.
+
+```{r}
+DM_nest <- DM_nest |>
+  mutate(p_color_bh = p.adjust(p_color, method = "BH"),
+         cohen = map(data, \(d) cohen.d(log_into ~ factor(color, levels = c("red", "wht")), data = d)),
+         d = map_dbl(cohen, \(x) x$estimate))
+```
+
+### The markers
+
+We add the description of the features and we keep the ones significant at the 1% level (after correction), sorted by effect size
+
+```{r}
+feat_info <- feat |>
+  as_tibble(rownames = "feature") |>
+  select(feature, mzmed, rtmed) |>
+  mutate(label = sprintf("%s (m/z %.4f, rt %.0f s)", feature, mzmed, rtmed))
+
+color_markers <- DM_nest |>
+  filter(p_color_bh < 0.01) |>
+  left_join(feat_info, by = "feature") |>
+  arrange(desc(abs(d)))
+
+color_markers |>
+  select(feature, mzmed, rtmed, p_color_bh, d)
+```
+
+`r nrow(color_markers)` features out of `r nrow(DM_nest)` are significant: `r sum(color_markers$d > 0)` higher in red wines and `r sum(color_markers$d < 0)` higher in white wines.
+
+The volcano plot shows effect size and significance of all the features together. Move the mouse over the points to see which feature they are
+
+```{r fig.height=5, fig.width=8}
+volcano <- DM_nest |>
+  left_join(feat_info, by = "feature") |>
+  mutate(marker = case_when(p_color_bh >= 0.01 ~ "not significant",
+                            d > 0 ~ "higher in red",
+                            TRUE ~ "higher in white")) |>
+  ggplot(aes(x = d, y = -log10(p_color), col = marker, text = label)) +
+  geom_vline(xintercept = 0, lty = 2, col = "gray50") +
+  geom_point(alpha = 0.7) +
+  scale_color_manual(values = c(`higher in red` = "#8B3A3A", `higher in white` = "orange",
+                                `not significant` = "gray70"), name = NULL) +
+  labs(x = "Cohen's d (log intensity)", y = "-log10(p-value)") +
+  theme_light()
+
+ggplotly(volcano, tooltip = "text")
+```
+
+Look at the top of the volcano: `r sum(DM_nest$p_color == min(DM_nest$p_color))` features have exactly the same p-value (`r format(signif(min(DM_nest$p_color), 2), scientific = FALSE)`). This is the smallest p-value a Wilcoxon test can give with `r sum(samples$color == "red")` samples per group, and it is reached by all the features where the red and the white wines do not overlap at all. These features are equally "significant", but their effect sizes go from `r round(min(abs(DM_nest$d[DM_nest$p_color == min(DM_nest$p_color)])), 1)` to `r round(max(abs(DM_nest$d[DM_nest$p_color == min(DM_nest$p_color)])), 1)`: the p-value cannot be used to rank the markers, the effect size can.
+
+The effect sizes of the 10 features with the largest effect in each direction
+
+```{r fig.height=6, fig.width=8}
+color_markers |>
+  mutate(direction = if_else(d > 0, "higher in red", "higher in white")) |>
+  slice_max(abs(d), n = 10, by = direction) |>
+  mutate(label = fct_reorder(label, d)) |>
+  ggplot(aes(x = d, y = label, col = direction)) +
+  geom_vline(xintercept = 0, lty = 2) +
+  geom_segment(aes(x = 0, xend = d, yend = label)) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c(`higher in red` = "#8B3A3A", `higher in white` = "orange"), name = NULL) +
+  labs(x = "Cohen's d (log intensity)", y = NULL) +
+  theme_light()
+```
+
+Values of d larger than 10 are suspicious ... let's check how many missing values these features had before imputation
+
+```{r}
+color_markers |>
+  slice_head(n = 5) |>
+  mutate(na_red = map_int(data, \(d) sum(is.na(d$into[d$color == "red"]))),
+         na_white = map_int(data, \(d) sum(is.na(d$into[d$color == "wht"])))) |>
+  select(feature, d, na_red, na_white)
+```
+
+These features are measured in (almost) all the red wines and missing in (almost) all the white ones: most likely compounds which are not present in white wines (think of the anthocyanins, which give the color to red wines). The difference is real, but the value of d depends on the numbers we used to impute the missing values: a presence/absence marker has, in practice, an "infinite" effect size.
+
+### Back to the data
+
+```{r}
+plot_feature <- \(ft, group = color) {
+  DM_nest |>
+    filter(feature == ft) |>
+    unnest(data) |>
+    ggplot(aes(x = {{ group }}, y = log_into, col = color)) +
+    geom_boxplot(outlier.shape = NA, col = "gray50") +
+    geom_jitter(width = 0.15, size = 2) +
+    scale_color_manual(values = c(red = "#8B3A3A", wht = "orange")) +
+    labs(x = NULL, y = "log10 intensity", title = feat_info$label[feat_info$feature == ft]) +
+    theme_light()
+}
+
+plot_feature(color_markers$feature[1])
+```
+
+And, as we learned on Day 3, the final check is on the raw data:
+
+```{r}
+ft_chr <- featureChromatograms(raw_data_filled,
+                               features = color_markers$feature[1],
+                               expandRt = 15)
+sample_colors <- c(red = "#8B3A3A80", wht = "#FFA50080", X = "#80808080")[sampleData(raw_data_filled)$color]
+plot(ft_chr, col = sample_colors,
+     peakBg = sample_colors[chromPeaks(ft_chr)[, "sample"]])
+```
+
+## Differences among varieties
+
+With more than two groups the Wilcoxon test is not anymore an option: we use an **ANOVA**, which tests the null hypothesis that all the group means are equal.
+
+An ANOVA needs replicates within each group to estimate the variability: varieties represented by a single bottle do not contribute to that, so we keep only the varieties with at least two bottles
+
+```{r}
+varieties_ok <- samples |>
+  filter(variety != "QC") |>
+  count(variety) |>
+  filter(n >= 2) |>
+  pull(variety)
+
+samples |>
+  filter(variety %in% varieties_ok) |>
+  count(color, variety)
+```
+
+We fit the ANOVA on each feature, and we extract the p-value and an effect size: $\eta^2$, the fraction of the total variance explained by the variety
+
+```{r}
+anova_variety <- \(d) aov(log_into ~ variety, data = d |> filter(variety %in% varieties_ok))
+
+DM_nest <- DM_nest |>
+  mutate(anova = map(data, anova_variety),
+         anova_table = map(anova, \(m) summary(m)[[1]]),
+         p_variety = map_dbl(anova_table, \(t) t[["Pr(>F)"]][1]),
+         eta2 = map_dbl(anova_table, \(t) t[["Sum Sq"]][1] / sum(t[["Sum Sq"]])))
+```
+
+```{r fig.height=3.5, fig.width=5}
+DM_nest |>
+  ggplot(aes(x = p_variety)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = "steelblue", col = "white") +
+  labs(x = "p-value (ANOVA, variety)") +
+  theme_light()
+```
+
+```{r}
+variety_markers <- DM_nest |>
+  mutate(p_variety_bh = p.adjust(p_variety, method = "BH")) |>
+  filter(p_variety_bh < 0.01) |>
+  left_join(feat_info, by = "feature") |>
+  arrange(desc(eta2))
+
+variety_markers |>
+  select(feature, mzmed, rtmed, p_variety_bh, eta2)
+```
+
+`r nrow(variety_markers)` features are significant.
+
+Also here a volcano plot helps, with $\eta^2$ as effect size. Since $\eta^2$ is a fraction of variance it goes from 0 (the variety explains nothing) to 1 (the variety explains all the variability of the feature), and the volcano has only one side
+
+```{r fig.height=5, fig.width=8}
+volcano_variety <- DM_nest |>
+  left_join(feat_info, by = "feature") |>
+  mutate(marker = if_else(feature %in% variety_markers$feature, "variety marker", "not significant")) |>
+  ggplot(aes(x = eta2, y = -log10(p_variety), col = marker, text = label)) +
+  geom_point(alpha = 0.7) +
+  scale_color_manual(values = c(`variety marker` = "steelblue", `not significant` = "gray70"), name = NULL) +
+  labs(x = expression(eta^2), y = "-log10(p-value)") +
+  theme_light()
+
+ggplotly(volcano_variety, tooltip = "text")
+```
+
+All the points lie on a single curve! The reason is in the way the ANOVA works: the F statistic can be written as a function of $\eta^2$
+
+$$F = \frac{\eta^2}{1 - \eta^2} \cdot \frac{N - k}{k - 1}$$
+
+where $N$ is the number of samples and $k$ the number of groups. Since $N$ and $k$ are the same for all the features (here `r sum(samples$variety %in% varieties_ok)` wines of `r length(varieties_ok)` varieties), the p-value is a function of $\eta^2$ alone and the volcano plot does not add any information: ranking the features by p-value or by $\eta^2$ gives exactly the same order. The same would happen in the red vs white volcano with a t-test ($t = d \sqrt{n/2}$ with $n$ samples per group): our first volcano is not a curve only because the Wilcoxon test works on the ranks.
+
+Let's look at the feature with the largest $\eta^2$ (the plot shows all the varieties, but only the ones with at least two bottles were used in the ANOVA)
+
+```{r fig.height=4, fig.width=8}
+plot_feature(variety_markers$feature[1], group = variety)
+```
+
+The ANOVA tells us that *at least one* variety is different, not which one. To know that we need a post-hoc test, for example Tukey's Honest Significant Differences, which compares all the pairs of varieties correcting for multiplicity
+
+```{r}
+DM_nest |>
+  filter(feature == variety_markers$feature[1]) |>
+  pull(anova) |>
+  pluck(1) |>
+  TukeyHSD()
+```
+
+### Variety or color?
+
+Look again at the plot: is the variety really important, or is it the color? In our design each variety is either red or white (variety is *nested* in color), so every red/white marker will also show up as a "variety" marker.
+
+```{r}
+variety_markers |>
+  mutate(also_color_marker = feature %in% color_markers$feature) |>
+  count(also_color_marker)
+```
+
+## Something for you
+
+1. How would you find the features which are different among the varieties *of the same color*? Hint: fit the model `log_into ~ color + variety`: since each variety belongs to a single color, the variety term tests the differences among varieties after the color has been accounted for.
+2. Which of the features showing a difference between red and white wines could be annotated with the in-house database of standards of the Day 3 annotation practical?
+3. Try a different imputation strategy: how many markers change?
+
+## A possible solution
+
+The nested model: the second row of the ANOVA table is the variety within color
+
+```{r}
+anova_nested <- \(d) aov(log_into ~ color + variety, data = d |> filter(variety %in% varieties_ok))
+
+nested_markers <- DM_nest |>
+  mutate(anova_table = map(data, \(d) summary(anova_nested(d))[[1]]),
+         p_within = map_dbl(anova_table, \(t) t[["Pr(>F)"]][2]),
+         eta2_within = map_dbl(anova_table, \(t) t[["Sum Sq"]][2] / sum(t[["Sum Sq"]]))) |>
+  mutate(p_within_bh = p.adjust(p_within, method = "BH")) |>
+  filter(p_within_bh < 0.01) |>
+  left_join(feat_info, by = "feature") |>
+  arrange(desc(eta2_within))
+
+nested_markers |>
+  select(feature, mzmed, rtmed, p_within_bh, eta2_within)
+```
+
+```{r fig.height=4, fig.width=8}
+plot_feature(nested_markers$feature[1], group = variety)
+```
+
+With only two bottles for most of the varieties, remember that these results are fragile: a "variety marker" could also be a bottle (producer, vintage, ...) effect!
