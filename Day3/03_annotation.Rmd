@@ -34,7 +34,7 @@ library(knitr)
 ## Annotation Levels
 
 ```{r out.width="\\linewidth", out.height="0.68\\textheight", fig.align="center"}
-include_graphics("../images/annotation_levels.png")
+include_graphics("../images/scheme_annotation_levels.pdf")
 ```
 
 \footnotesize Metabolomics Standards Initiative: Sumner L.W. et al. (2007) *Proposed minimum reporting standards for chemical analysis*. Metabolomics 3, 211--221
@@ -49,6 +49,15 @@ In the case of MS based experiments, the process of annotation requires the inte
 3. Fragmentation experiments
 4. Molecular Networks
 5. Chemoinformatics and predictive models
+
+## One compound, many features
+
+```{r out.width="\\linewidth", out.height="0.5\\textheight", fig.align="center"}
+include_graphics("../images/scheme_one_compound_many_ions.pdf")
+```
+
+* Isotopes, adducts ([M+Cl]^-^, [M+HCOO]^-^, [2M-H]^-^, ...) and in-source fragments: each of them becomes a feature
+* They co-elute and their intensities are correlated across the samples: tools like `CAMERA` use this to group them
 
 
 # A first order approach: fragmentation spectra
@@ -108,6 +117,15 @@ Buy a chemical standard and analyze it with your instrument (~~MS, MS/MS, retent
 ::: {.box-key .fragment}
 **Key message:** *m/z*, retention time and MS/MS of an authentic standard measured in the same lab give the highest level of confidence (level 1, "identified")
 :::
+
+## Isomers: when m/z and MS/MS are not enough
+
+```{r out.width="\\linewidth", out.height="0.5\\textheight", fig.align="center"}
+include_graphics("../images/scheme_isomers.pdf")
+```
+
+* Procyanidins B1, B2 and B3 in the wine standards: only the retention time tells them apart
+* ... and sometimes not even that: quercitrin-3-rhamnoside and kaempferol-3-glucoside (C~21~H~20~O~11~) elute less than 3 s apart
 
 ## Comparing spectra: similarity
 
