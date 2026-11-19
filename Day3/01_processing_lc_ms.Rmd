@@ -347,7 +347,7 @@ include_graphics("../images/scheme_mz_binning.pdf")
 ## Grouping - Correspondence
 
 ```{r, echo=FALSE, fig.align='center', out.width="\\linewidth", out.height="0.8\\textheight"}
-include_graphics("../images/grouping.pdf")
+include_graphics("../images/scheme_peak_density.pdf")
 ```
 
 ## Grouping - Correspondence
