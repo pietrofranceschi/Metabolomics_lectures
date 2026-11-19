@@ -1,15 +1,17 @@
 ---
 title: "Fragmentation Spectra"
-author: "Pietro Franceschi<br>pietro.franceschi@fmach.it"
-date: "`r Sys.Date()`"
-output: html_document
+author: "Pietro Franceschi | pietro.franceschi@fmach.it"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 library(MsExperiment)
 library(xcms)
 library(tidyverse)
@@ -18,104 +20,112 @@ library(plotly)
 
 ## Introduction
 
-The objective of this demo is to show how `xcms` can be used to read the results of fragmentation experiments and using of them to perform annotation.
+The objective of this demo is to show how `xcms` can be used to read the results of fragmentation experiments and how to use them to perform annotation.
 
-Annotation is the process of going back from features to compounds and it can be considered one (or may be the bigger) challenge in metabolomics. In real life world, annotation is an effort which integrate a lot of different expertise ranging from chemistry, informatics, chemoinformatics,....
+Annotation is the process of going back from features to compounds and it can be considered one of the challenges (maybe the biggest) in metabolomics. In the real world, annotation is an effort which integrates many different expertises, ranging from chemistry to informatics and chemoinformatics ...
 
-Annotation in MS is particularly challenging due to the fact that a mass spectrometer is basically a tool able to measure only mass to charge ratios ... I mean can you imagine how difficult would be to distinguish people on the bases only of their weight?
+Annotation in MS is particularly challenging because a mass spectrometer is basically a tool able to measure only mass to charge ratios ... can you imagine how difficult it would be to distinguish people only on the basis of their weight?
 
 Fragmentation experiments, often called MS/MS, are an essential tool for this task. They can be used either to deduce information on the chemical characteristics of unknown compounds, or to confirm the annotation when authentic chemical standards are available.
 
-In this second case, the typical workflow is to inject the standards with the same analytical pipeline used for the samples, and then use m/z, rt and MS/MS to confirm the presence of a given compound inside my samples.
+In this second case, the typical workflow is to inject the standards with the same analytical pipeline used for the samples, and then use m/z, rt and MS/MS to confirm the presence of a given compound in the samples.
 
-The importance of having reliable and efficient databases of chemical standards cannot be overlooked and the community is putting a lot of effort on that in terms of data organization, standardization and development of specific software libraries.
+The importance of reliable and efficient databases of chemical standards cannot be overlooked, and the community is putting a lot of effort on that in terms of data organization, standardization and development of specific software libraries.
 
 ## Reading MS/MS
 
-Let's suppose that having a library of standards in our lab, we injected them with the same chromatography used for the wines.
-Among the other compounds, our library contains 3 types of procyanidins B1, B2, B3. They are rather large polyphenols widely present in many matrices of plant origin.
+Let's suppose that we have a library of standards in our lab, and that we injected them with the same chromatography used for the wines.
+Among other compounds, our library contains three procyanidins: B1, B2 and B3. They are rather large polyphenols, widely present in many matrices of plant origin.
 
-Suppose that our analytical facility told us that they were analyses (with other compounds) in three injections:
+Our analytical facility told us that they were analysed (together with other compounds) in three injections:
 
-- B3: y015_mix02_2_NEG_DDA.mzML
-- B2: y016_mix03_2_NEG_DDA.mzML
-- B1: y017_mix04_2_NEG_DDA.mzML
+- B3: x015_mix02_2_NEG_DDA.mzML
+- B2: x016_mix03_2_NEG_DDA.mzML
+- B1: x017_mix04_2_NEG_DDA.mzML
 
-We also know that in negative ion mode all these three molecules, will mainly yield the [M-H]- ion in negative ion mode MS (m/z 577.1352).
+We also know that in negative ion mode all three molecules mainly yield the [M-H]^-^ ion (m/z 577.1352).
 
-Our task now is to confirm (or not) the presence of the three of them in the wine samples. Let's start with B1 ...
+Our task is to confirm (or not) the presence of the three of them in the wine samples.
+
+```{r}
+std_files <- list.files("../data/wines/", pattern = "mix", full.names = TRUE)
+
+standards <- tibble(compound = c("B3", "B2", "B1"),
+                    file = basename(std_files))
+standards
+
+std_colors <- c(B3 = "steelblue", B2 = "orange", B1 = "#8B3A3A")
+```
 
 
 ## Identify the retention time
 
-First of all we have to identify the retention time of the standard. This could be done manually, or automatically. The manual way is to look for peaks in the extracted ion trace of the (577.1352) ion and identify the position of the peak.
+First of all we have to identify the retention time of each standard. This could be done manually or automatically. The manual way is to look for peaks in the extracted ion trace of the m/z 577.1352 ion and identify the position of the peak.
 
 The automatic way is to do peak picking ... but this will be part of your assignment ;-)
 
 
 ```{r}
-std_files <- list.files("../data/wines/", pattern = "mix", full.names = TRUE)
-
-
 std_raw <- readMsExperiment(spectraFiles = std_files) |>
   filterMsLevel(1)   ## only full scan
-
 ```
 
-
-Since we know what we are looking for let's get the extracted ion trace
-
+Since we know what we are looking for, let's get the extracted ion traces and put them in a tibble
 
 ```{r}
-proc_chrom <- chromatogram(std_raw, mz = 577.1352 + 0.02*c(-1, 1))
+proc_chrom <- chromatogram(std_raw, mz = 577.1352 + 0.02 * c(-1, 1))
 
-plot(proc_chrom, col = seq(3)+1)
+chrom_df <- map(seq_along(std_files), \(k) {
+  tibble(compound = standards$compound[k],
+         rt = rtime(proc_chrom[1, k]),
+         intensity = intensity(proc_chrom[1, k]))
+}) |>
+  list_rbind()
 ```
 
-So three large peaks are visible in the three files, just to have an idea and spot the right retention time let's look to the three profiles in interactive mode:
-
-```{r}
-ggplotly(ggplot() +
-  geom_line(aes(x = rtime(proc_chrom[1,1]), intensity(proc_chrom[1,1])), col = "red") +
-  geom_line(aes(x = rtime(proc_chrom[1,2]), intensity(proc_chrom[1,2])), col = "green") +
-  geom_line(aes(x = rtime(proc_chrom[1,3]), intensity(proc_chrom[1,3])), col = "blue") +
-  theme_bw())
-```
-
-So the tentative peak position turns out to be
-
-B3: 242
-B2: 267
-B1: 234
-
-Let's find the spectrum on the top of the blue trace:
-
-```{r}
-blue_id <- which(rtime(std_raw) == 233.9871)
-
-```
-
-We extract the spectra from the MsExperiment object
-
-```{r}
-std_raw_spectra <- spectra(std_raw)
-```
-
-Let's plot the spectrum
+The plot is interactive, so we can zoom in to spot the right retention time
 
 ```{r}
 ggplotly(
-  ggplot() +
-    geom_segment(aes(x = mz(std_raw_spectra[blue_id])[[1]],
-                     xend = mz(std_raw_spectra[blue_id])[[1]],
-                     y = 0,
-                     yend = intensity(std_raw_spectra[blue_id])[[1]])) +
-    theme_bw()
+  chrom_df |>
+    ggplot(aes(x = rt, y = intensity, col = compound)) +
+    geom_line() +
+    scale_color_manual(values = std_colors) +
+    labs(x = "retention time (s)") +
+    theme_light()
 )
 ```
 
+Each injection shows a large peak between 200 and 300 s. In the B3 injection there is also a peak at the beginning of the chromatogram: the extracted ion trace is not specific, and other compounds of the mix can give a signal at the same m/z.
 
-So the full scan does not give a clear fingerprint of the fragmentation spectrum, to understand that we have to query MS2 spectra:
+The tentative position of the peaks is the top of the trace between 200 and 300 s
+
+```{r}
+apex <- chrom_df |>
+  filter(between(rt, 200, 300)) |>
+  slice_max(intensity, n = 1, by = compound)
+
+apex
+```
+
+so B3 elutes at `r round(apex$rt[apex$compound == "B3"])` s, B2 at `r round(apex$rt[apex$compound == "B2"])` s and B1 at `r round(apex$rt[apex$compound == "B1"])` s.
+
+Let's look at the full scan spectrum at the top of the B1 peak (the third injection):
+
+```{r}
+b1_full_scan <- spectra(std_raw[3]) |>
+  filterRt(apex$rt[apex$compound == "B1"] + 0.01 * c(-1, 1))
+
+ggplotly(
+  tibble(mz = mz(b1_full_scan)[[1]], intensity = intensity(b1_full_scan)[[1]]) |>
+    ggplot(aes(x = mz, xend = mz, y = 0, yend = intensity)) +
+    geom_segment() +
+    labs(x = "m/z") +
+    theme_light()
+)
+```
+
+The full scan spectrum contains the [M-H]^-^ ion of B1, its isotopes and the ions of everything else eluting at the same time ... but it does not tell us anything about the structure of the molecule. To get that we have to look at the MS2 (fragmentation) spectra:
 
 ```{r}
 std_MS_MS <- readMsExperiment(spectraFiles = std_files) |>
@@ -123,7 +133,7 @@ std_MS_MS <- readMsExperiment(spectraFiles = std_files) |>
 ```
 
 
-The question to be addressed, now is: do we have fragmentation spectra of the ion around 577?
+The question to be addressed now is: do we have fragmentation spectra of the ion at m/z 577?
 
 The list of precursor ions can be directly accessed with
 
@@ -132,55 +142,163 @@ std_MS_MS |>
   spectra() |>
   precursorMz() |>
   head(10)
-
 ```
 
 
-But two handy methods can be used to filter the list of precursors
-
+But two handy methods can be used to filter the spectra on the precursor m/z and on the retention time
 
 ```{r}
 focus_MS_MS <- std_MS_MS |>
   spectra() |>
   filterPrecursorMzValues(577.1352, ppm = 10) |>
-  filterRt(rt = c(224,280))
-
+  filterRt(rt = c(224, 280))
 
 focus_MS_MS
 ```
 
-So here we have four spectra compatible with the rules ...Let's look to their retention times
+Let's see where they come from
 
 ```{r}
-rtime(focus_MS_MS)
+focus_info <- tibble(file = basename(dataOrigin(focus_MS_MS)),
+                     rt = rtime(focus_MS_MS),
+                     precursor_mz = precursorMz(focus_MS_MS)) |>
+  left_join(standards, by = "file")
+
+focus_info
 ```
 
-The first two are OK (File1 and File2), for the third file we have two fragmentation. This is not unreasonable since the blue peak is large, the ion at m/z 577 was, most likely fragmented in two consecutive scans. To understand which is the good one one should rely on DBs or interpretation of mass spectra.
+We have `r nrow(focus_info)` spectra compatible with our rules: one for B3, one for B2 and `r sum(focus_info$compound == "B1")` for B1. This is not unreasonable: the B1 peak is the largest one, and in DDA the ion at m/z 577 was selected for fragmentation in two different cycles. They are two spectra of the same compound.
+
+Let's now make a nice plot of the MS/MS spectra, with the intensities relative to the most intense fragment:
+
+```{r fig.height=7, fig.width=8}
+msms_df <- focus_info |>
+  mutate(spectrum = sprintf("%s (rt %.0f s)", compound, rt),
+         peaks = map(as.list(peaksData(focus_MS_MS)), as_tibble)) |>
+  unnest(peaks) |>
+  mutate(rel_intensity = intensity / max(intensity), .by = spectrum)
+
+msms_df |>
+  ggplot(aes(x = mz, xend = mz, y = 0, yend = rel_intensity, col = compound)) +
+  geom_segment() +
+  facet_wrap(~spectrum, ncol = 1) +
+  scale_color_manual(values = std_colors) +
+  labs(x = "m/z", y = "relative intensity") +
+  theme_light()
+```
+
+So, as expected, the three procyanidins give substantially the same fragmentation spectrum: they are isomers, with the same atoms and very similar structures. What makes the difference here is the retention time!
 
 
-Let's now make a nice plot with the MS/MS spectra:
+## DIY
+
+Try to check if these compounds are visible in our wine samples. Hints:
+
+1. check the extracted ion trace of the m/z 577 ion
+2. check if this ion was fragmented
+
+
+## A possible solution
+
+We read the wine samples (QCs and blanks are not needed)
 
 ```{r}
+wine_files <- list.files("../data/wines/", pattern = "_(red|wht)_", full.names = TRUE)
 
-mz_focusMSMS <- mz(focus_MS_MS)
-i_focus_MSMS <- intensity(focus_MS_MS)
-
-
-plot(mz_focusMSMS[[1]],
-     i_focus_MSMS[[1]]/max(i_focus_MSMS[[1]]),
-     type = "h",
-     xlab = "mz", col = "red",
-     ylab = "normalized Intensity")
-points(mz_focusMSMS[[2]]+2, i_focus_MSMS[[2]]/max(i_focus_MSMS[[2]]), col = "green", type = "h")
-points(mz_focusMSMS[[4]]-2, i_focus_MSMS[[4]]/max(i_focus_MSMS[[4]]), col = "blue", type = "h")
+wines <- readMsExperiment(spectraFiles = wine_files)
 ```
 
-So, as expected the three procyanidins are giving substantially the same fragmentation spectrum and are eluting at three different retention times.
+### 1. The extracted ion trace
 
+```{r}
+wine_chrom <- chromatogram(wines |> filterMsLevel(1),
+                           mz = 577.1352 + 0.02 * c(-1, 1),
+                           rt = c(200, 300))
 
-### DIY
+wine_chrom_df <- map(seq_along(wine_files), \(k) {
+  tibble(file = basename(wine_files[k]),
+         rt = rtime(wine_chrom[1, k]),
+         intensity = intensity(wine_chrom[1, k]))
+}) |>
+  list_rbind() |>
+  mutate(color = if_else(str_detect(file, "_red_"), "red", "white"))
+```
 
-Try to check if these compounds are visible inside one of our wine samples. Hints,
+We plot the traces of all the wines, with the retention times of the three standards as dashed lines:
 
-(1) check the extracted ion trace of the 577 ion
-(2) check if this ion was fragmented
+```{r fig.height=6, fig.width=8}
+wine_chrom_df |>
+  ggplot(aes(x = rt, y = intensity, group = file)) +
+  geom_vline(data = apex, aes(xintercept = rt, col = compound), lty = 2, linewidth = 1) +
+  geom_line(alpha = 0.7) +
+  facet_wrap(~color, ncol = 1, scales = "free_y") +
+  scale_color_manual(values = std_colors, name = "standard") +
+  labs(x = "retention time (s)") +
+  theme_light()
+```
+
+```{r}
+wine_apex <- wine_chrom_df |>
+  slice_max(intensity, n = 1, by = c(file, color), with_ties = FALSE)
+
+wine_apex |>
+  summarise(n_wines = n(),
+            median_rt = median(rt),
+            median_intensity = median(intensity),
+            .by = color)
+```
+
+* The main peak of all the wines elutes at about `r round(median(wine_apex$rt))` s, the retention time of B1
+* It is much more intense in red wines (`r round(median(wine_apex$intensity[wine_apex$color == "red"]) / median(wine_apex$intensity[wine_apex$color == "white"]))` times, comparing the medians): procyanidins come from the skins and the seeds of the grapes, and red wines are macerated with them
+* A second peak elutes at the retention time of B2, again much higher in red wines, and a small one at the retention time of B3 is visible in the red wines
+
+### 2. Was the ion fragmented?
+
+We look for MS/MS spectra with precursor m/z 577.1352 in the same retention time window, and we assign each of them to the standard with the closest retention time:
+
+```{r}
+wine_MS_MS <- wines |>
+  filterMsLevel(2) |>
+  spectra() |>
+  filterPrecursorMzValues(577.1352, ppm = 10) |>
+  filterRt(rt = c(200, 300))
+
+wine_msms_info <- tibble(file = basename(dataOrigin(wine_MS_MS)),
+                         rt = rtime(wine_MS_MS),
+                         precursor_intensity = precursorIntensity(wine_MS_MS)) |>
+  mutate(color = if_else(str_detect(file, "_red_"), "red", "white"),
+         closest_standard = map_chr(rt, \(r) apex$compound[which.min(abs(r - apex$rt))]),
+         delta_rt = map2_dbl(rt, closest_standard, \(r, cpd) r - apex$rt[apex$compound == cpd]))
+
+wine_msms_info |>
+  count(closest_standard, color)
+```
+
+`r length(wine_MS_MS)` MS/MS spectra of the m/z 577 ion were recorded in `r n_distinct(wine_msms_info$file)` wines. Let's compare the most intense one close to the B1 standard with the spectrum of the standard in a mirror plot:
+
+```{r fig.height=5, fig.width=8}
+best_wine <- wine_msms_info |>
+  mutate(id = row_number()) |>
+  filter(closest_standard == "B1") |>
+  slice_max(precursor_intensity, n = 1)
+
+mirror_df <- bind_rows(
+  as_tibble(peaksData(wine_MS_MS)[[best_wine$id]]) |>
+    mutate(spectrum = paste("wine:", best_wine$file)),
+  as_tibble(peaksData(focus_MS_MS)[[which(focus_info$compound == "B1")[1]]]) |>
+    mutate(spectrum = "standard B1")
+) |>
+  mutate(rel_intensity = intensity / max(intensity), .by = spectrum) |>
+  mutate(rel_intensity = if_else(spectrum == "standard B1", -rel_intensity, rel_intensity))
+
+mirror_df |>
+  ggplot(aes(x = mz, xend = mz, y = 0, yend = rel_intensity, col = spectrum)) +
+  geom_segment() +
+  geom_hline(yintercept = 0, col = "gray50") +
+  scale_color_manual(values = c("gray30", "#8B3A3A"), name = NULL) +
+  labs(x = "m/z", y = "relative intensity") +
+  theme_light() +
+  theme(legend.position = "bottom")
+```
+
+The same m/z, the same retention time (`r round(best_wine$rt, 1)` s in the wine, `r round(apex$rt[apex$compound == "B1"], 1)` s for the standard) and a similar fragmentation pattern: B1 is in our wines!
